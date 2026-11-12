@@ -1,0 +1,2 @@
+-- VYAPARA Phase 2: Initial SQLite Database Migration
+-- Date: 2026-11-12
