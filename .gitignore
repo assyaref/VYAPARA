@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnp
+dist/
+build/
+
+# Electron
+*.flags
+electron/
+
+# Environment variables
+.env*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Database
+*.sqlite*
+*.sqlite3*
+
+# Vite/React temp files
+.tmp
+temp/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# npm and pnpm
+.pnpmfile.cjs
+
+# Electron Builder
+electron-builder.json
+electron-builder.jsonc
+
+# Typescript
+*.tsbuildinfo
+*.tsbuildinfo
+
+# Package lock
+package-lock.json
+
+# PowerShell
+*.pdb
+
+# Miscelaneous
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
