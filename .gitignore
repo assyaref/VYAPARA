@@ -6,7 +6,7 @@ build/
 
 # Electron
 *.flags
-electron/
+/electron/
 
 # Environment variables
 .env*

@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-type UserRole = 'admin' | 'user' | 'viewer';
+type UserRole = 'admin' | 'cashier' | 'viewer';
 
 interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  permissions: string[];
+  mustChangePassword: boolean;
   loginAt: string;
 }
 
@@ -18,6 +20,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   checkSession: () => Promise<void>;
+  refreshSession: () => Promise<boolean>;
 }
 
 const useAuth = create<AuthState>()(
@@ -28,25 +31,36 @@ const useAuth = create<AuthState>()(
       isLoading: true,
 
       login: async (email: string, password: string) => {
-        // TODO: Implement actual authentication against SQLite database
-        // For now, mock login for admin account
-        if (email === 'admin@vyapara.com' && password === 'admin123') {
-          set({
-            user: {
-              id: '1',
-              name: 'Administrator',
-              email: 'admin@vyapara.com',
-              role: 'admin' as UserRole,
-              loginAt: new Date().toISOString(),
-            },
-            isAuthenticated: true,
-          });
-          return true;
+        // Send login request to main process via IPC
+        const result = await (window as any).vyapara.authLogin(email, password);
+
+        if (!result.success || !result.user) {
+          return false;
         }
-        return false;
+
+        set({
+          user: {
+            id: result.user.id,
+            name: result.user.name,
+            email: result.user.email,
+            role: result.user.role,
+            permissions: result.user.permissions,
+            mustChangePassword: result.user.mustChangePassword,
+            loginAt: new Date().toISOString(),
+          },
+          isAuthenticated: true,
+          isLoading: false,
+        });
+
+        return true;
       },
 
       logout: () => {
+        // Notify main process to revoke session
+        const state = useAuth.getState?.();
+        if (state?.user?.id) {
+          (window as any).vyapara.authLogout?.(state.user.id);
+        }
         set({
           user: null,
           isAuthenticated: false,
@@ -54,10 +68,52 @@ const useAuth = create<AuthState>()(
       },
 
       checkSession: async () => {
-        // TODO: Check session validity from SQLite
+        // Check session validity from main process
+        const result = await (window as any).vyapara.authSession?.();
+        if (result?.success && result.user) {
+          set({
+            user: {
+              id: result.user.id,
+              name: result.user.name,
+              email: result.user.email,
+              role: result.user.role,
+              permissions: result.user.permissions,
+              mustChangePassword: result.user.mustChangePassword,
+              loginAt: new Date().toISOString(),
+            },
+            isAuthenticated: true,
+          });
+        } else {
+          set({
+            user: null,
+            isAuthenticated: false,
+          });
+        }
         set({ isLoading: false });
       },
+
+      refreshSession: async () => {
+        const state = useAuth.getState?.();
+        if (!state?.user?.id) return false;
+        const result = await (window as any).vyapara.authLogin(state.user.email, '');
+        if (result.success && result.user) {
+          set({
+            user: {
+              id: result.user.id,
+              name: result.user.name,
+              email: result.user.email,
+              role: result.user.role,
+              permissions: result.user.permissions,
+              mustChangePassword: result.user.mustChangePassword,
+              loginAt: new Date().toISOString(),
+            },
+          });
+          return true;
+        }
+        return false;
+      },
     }),
+
     {
       name: 'vyapara-auth',
       storage: createJSONStorage(() => localStorage),
