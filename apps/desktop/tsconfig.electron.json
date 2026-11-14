@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "electron/**/*.ts"
+  ],
+  "exclude": [
+    "electron/**/*.test.ts",
+    "electron/**/*.spec.ts",
+    "node_modules",
+    "dist"
+  ]
+}

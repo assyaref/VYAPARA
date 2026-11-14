@@ -1,0 +1,13 @@
+{
+  "name": "vyapara-shared",
+  "private": true,
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --build",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

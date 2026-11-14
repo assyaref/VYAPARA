@@ -1,0 +1,44 @@
+{
+  "name": "vyapara-desktop-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "electron-vite dev",
+    "electron:build": "electron-vite build",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "jsbarcode": "^3.11.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@fontsource/inter": "^5.2.2",
+    "@neondatabase/serverless": "^1.2.0",
+    "@playwright/test": "^1.65.0",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/node": "^22.13.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^1.2.0",
+    "autoprefixer": "^10.4.16",
+    "better-sqlite3": "^13.1.1",
+    "drizzle-kit": "^0.31.11",
+    "drizzle-orm": "^0.45.4",
+    "eslint": "^9.21.2",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^6.1.0",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.24.1",
+    "vite": "^8.3.8",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^5.1.0"
+  }
+}

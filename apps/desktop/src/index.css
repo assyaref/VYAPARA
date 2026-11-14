@@ -1,0 +1,16 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom properties for VYAPARA brand */
+:root {
+  --vyapara-navy: #0D47A1;
+  --vyapara-blue: #1976D2;
+  --vyapara-orange: #FF8F00;
+  --vyapara-light-blue: #E3F2FD;
+  --vyapara-surface: #F5F7FA;
+  --vyapara-text: #172033;
+  --vyapara-secondary: #64748B;
+  --vyapara-border: #E2E8F0;
+}

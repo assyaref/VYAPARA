@@ -1,0 +1,1835 @@
+import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
+import * as path from 'path';
+import * as os from 'os';
+import { z } from 'zod';
+import * as fs from 'fs';
+import { openAppDatabase } from './db/open';
+import {
+  CustomerCreateSchema,
+  CustomerIdSchema,
+  CustomerQuerySchema,
+  CustomerPaymentSchema,
+  CustomerTransactionsQuerySchema,
+  CustomerUpdateSchema,
+  ExpenseCreateSchema,
+  IncomeCreateSchema,
+  IncomeExpenseQuerySchema,
+  PermissionsGetAllSchema,
+  PurchaseOrderCreateSchema,
+  PurchaseOrderIdSchema,
+  PurchaseOrderQuerySchema,
+  PurchaseReturnCreateSchema,
+  PurchaseReturnQuerySchema,
+  ReceiveGoodsSchema,
+  ReportQuerySchema,
+  BestSellingQuerySchema,
+  CashDrawerCloseSchema,
+  CashDrawerOpenSchema,
+  CashDrawerQuerySchema,
+  CashMovementsQuerySchema,
+  CashierPerformanceQuerySchema,
+  RoleCreateSchema,
+  RoleIdSchema,
+  RoleQuerySchema,
+  RolePermissionsSchema,
+  RoleUpdateSchema,
+  SettingsListSchema,
+  SettingsUpsertSchema,
+  SupplierCreateSchema,
+  SupplierIdSchema,
+  SupplierInvoiceCreateSchema,
+  SupplierInvoiceIdSchema,
+  SupplierInvoicePaySchema,
+  SupplierInvoiceQuerySchema,
+  SupplierQuerySchema,
+  SupplierTransactionsQuerySchema,
+  SupplierUpdateSchema,
+  UserCreateSchema,
+  UserIdSchema,
+  UserQuerySchema,
+  UserUpdateSchema,
+} from 'vyapara-shared';
+
+const AppInfoSchema = z.object({
+  name: z.string(),
+  version: z.string(),
+  platform: z.string(),
+});
+
+const EnvironmentStatusSchema = z.object({
+  online: z.boolean(),
+});
+
+type AppInfo = z.infer<typeof AppInfoSchema>;
+type EnvironmentStatus = z.infer<typeof EnvironmentStatusSchema>;
+
+const APP_ID = 'id.vyapara.desktop';
+const APP_NAME = 'VYAPARA';
+const VERSION = app.getVersion() || '1.0.0';
+
+let appDb: ReturnType<typeof openAppDatabase> | null = null;
+let activeToken: string | null = null;
+let tokenLoaded = false;
+
+function getDb(): ReturnType<typeof openAppDatabase> {
+  if (!appDb) {
+    const dir = path.join(app.getPath('userData'), 'database');
+    fs.mkdirSync(dir, { recursive: true });
+    appDb = openAppDatabase(path.join(dir, 'vyapara.db'));
+  }
+  return appDb;
+}
+
+function tokenFile(): string {
+  return path.join(app.getPath('userData'), 'session.token');
+}
+
+function loadToken(): string | null {
+  if (!tokenLoaded) {
+    tokenLoaded = true;
+    try {
+      activeToken = fs.readFileSync(tokenFile(), 'utf8').trim() || null;
+    } catch {
+      activeToken = null;
+    }
+  }
+  return activeToken;
+}
+
+function setActiveToken(token: string | null): void {
+  tokenLoaded = true;
+  activeToken = token;
+  try {
+    if (token) {
+      fs.writeFileSync(tokenFile(), token, { mode: 0o600 });
+    } else {
+      fs.rmSync(tokenFile(), { force: true });
+    }
+  } catch (error) {
+    console.error('Failed to persist session token', error);
+  }
+}
+
+function publicUser(user: {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  permissions: string[];
+  mustChangePassword: boolean;
+}) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    permissions: user.permissions,
+    mustChangePassword: user.mustChangePassword,
+  };
+}
+
+let mainWindow: BrowserWindow | null;
+
+let gotLock = app.requestSingleInstanceLock();
+
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
+}
+
+const isOnline = () => {
+  return Object.keys(os.networkInterfaces()).length > 0;
+};
+
+function createWindow() {
+  const isDev = process.env.NODE_ENV !== 'production';
+
+  const preloadPath = path.join(__dirname, '..', 'preload', 'preload.js');
+
+  mainWindow = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    minWidth: 1366,
+    minHeight: 768,
+    title: APP_NAME,
+    icon: path.join(__dirname, '..', '..', '..', 'assets', 'brand', 'vyapara-icon.ico'),
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+      webSecurity: true,
+      preload: preloadPath,
+    },
+  });
+
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:1420').catch((err) => {
+      console.error('Failed to load dev server:', err);
+    });
+  } else {
+    const possiblePaths = [
+      path.join(__dirname, '..', 'dist', 'index.html'),
+      path.join(__dirname, '..', '..', 'dist', 'index.html'),
+      path.join(__dirname, '..', '..', '..', 'dist', 'index.html'),
+      path.join(app.getAppPath(), 'dist', 'index.html'),
+      path.join(app.getAppPath(), '..', 'dist', 'index.html'),
+    ];
+
+    let indexPath = '';
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        indexPath = p;
+        break;
+      }
+    }
+
+    if (indexPath) {
+      mainWindow.loadFile(indexPath).catch((err) => {
+        console.error('Failed to load app:', err);
+      });
+    } else {
+      console.error('Could not find index.html in any of the expected paths');
+      console.error('Checked paths:', possiblePaths);
+    }
+  }
+
+  const isDevMenu = isDev
+    ? [
+        {
+          label: 'File',
+          submenu: [
+            { role: 'reload' as const },
+            { role: 'toggleDevTools' as const },
+            { type: 'separator' as const },
+            { role: 'quit' as const },
+          ],
+        },
+      ]
+    : [];
+
+  const menu = Menu.buildFromTemplate(isDevMenu);
+  Menu.setApplicationMenu(menu);
+
+  ipcMain.handle('app:getInfo', async (): Promise<AppInfo> => {
+    return {
+      name: APP_NAME,
+      version: VERSION,
+      platform: process.platform,
+    };
+  });
+
+  ipcMain.handle('app:getEnvironmentStatus', async (): Promise<EnvironmentStatus> => {
+    return {
+      online: isOnline(),
+    };
+  });
+
+  ipcMain.handle('auth:needsSetup', async () => {
+    try {
+      const { needsSetup } = await import('./services/auth');
+      return { ok: true, success: true, data: { needsSetup: needsSetup(getDb()) } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('auth:setup', async (_event: any, input: { name: string; email: string; password: string }) => {
+    try {
+      const { setupAdmin } = await import('./services/auth');
+      const result = setupAdmin(getDb(), input);
+      setActiveToken(result.token);
+      return { ok: true, success: true, data: { token: result.token, user: publicUser(result.user) } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('auth:login', async (_event: any, input: { email: string; password: string }) => {
+    try {
+      const { login } = await import('./services/auth');
+      const result = login(getDb(), input);
+      setActiveToken(result.token);
+      return { ok: true, success: true, data: { token: result.token, user: publicUser(result.user) } };
+    } catch (error: any) {
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('auth:session', async () => {
+    try {
+      const { readSession } = await import('./services/auth');
+      const token = loadToken();
+      if (!token) {
+        return { ok: false, success: false, error: { code: 'UNAUTHENTICATED', message: 'Sesi tidak ditemukan' } };
+      }
+      const user = readSession(getDb(), token);
+      if (!user) {
+        setActiveToken(null);
+        return { ok: false, success: false, error: { code: 'UNAUTHENTICATED', message: 'Sesi tidak berlaku' } };
+      }
+      return { ok: true, success: true, data: { token, user: publicUser(user) } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('auth:logout', async (_event: any, input: { token?: string } | undefined) => {
+    try {
+      const { logout } = await import('./services/auth');
+      const token = input?.token || loadToken();
+      if (token) {
+        logout(getDb(), token);
+      }
+      setActiveToken(null);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      setActiveToken(null);
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('auth:changePassword', async (_event: any, input: { token: string; currentPassword: string; nextPassword: string }) => {
+    try {
+      const { changePassword } = await import('./services/auth');
+      const result = changePassword(getDb(), input.token, input.currentPassword, input.nextPassword);
+      setActiveToken(result.token);
+      return { ok: true, success: true, data: { token: result.token, user: publicUser(result.user) } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('product:getAll', async (event: any, input: { token: string; search?: string; categoryId?: string; includeInactive?: boolean }) => {
+    try {
+      const { listProducts } = await import('./services/products');
+      const appDb = getDb();
+      const result = listProducts(appDb, input, true);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('product:create', async (event: any, input: { token: string; name: string; description?: string; categoryId?: string; unitId?: string; barcode?: string; sku?: string; price: number; cost?: number; stock: number }) => {
+    try {
+      const { createProduct } = await import('./services/products');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'product:write');
+      const result = createProduct(appDb, { ...input, cost: input.cost ?? 0, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('product:update', async (event: any, input: { token: string; id: string; name?: string; description?: string; categoryId?: string; unitId?: string; barcode?: string; sku?: string; price?: number; cost?: number; stock?: number; isActive?: boolean }) => {
+    try {
+      const { updateProduct } = await import('./services/products');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'product:write');
+      const result = updateProduct(appDb, { ...input, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('product:deactivate', async (event: any, input: { token: string; id: string }) => {
+    try {
+      const { deactivateProduct } = await import('./services/products');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'product:write');
+      const result = deactivateProduct(appDb, input.id, user.id);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('category:getAll', async (event: any) => {
+    try {
+      const { listCategories } = await import('./services/products');
+      const appDb = getDb();
+      const result = listCategories(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('unit:getAll', async (event: any) => {
+    try {
+      const { listUnits } = await import('./services/products');
+      const appDb = getDb();
+      const result = listUnits(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('transaction:create', async (_event: any, input: { token: string; items: any; discountAmount: number; payments: any; customerId?: string; notes?: string; idempotencyKey?: string }) => {
+    try {
+      const { createTransaction } = await import('./services/transactions');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'transaction:write');
+      const result = createTransaction(appDb, user.id, { ...input, idempotencyKey: input.idempotencyKey ?? crypto.randomUUID() });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('transaction:getAll', async (event: any, input: { token: string; limit?: number }) => {
+    try {
+      const { listTransactions } = await import('./services/transactions');
+      const appDb = getDb();
+      const result = listTransactions(appDb, input.limit || 200);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('transaction:summary', async (event: any, input: { token: string; items: any; discountAmount: number; taxRateBps: number; payments: any }) => {
+    try {
+      const { listTransactions } = await import('./services/transactions');
+      const appDb = getDb();
+      const result = listTransactions(appDb, 1);
+      return { ok: true, success: true, data: { subtotal: 0, discountAmount: 0, taxAmount: 0, total: 0 } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('database:backup', async (event: any, input: { backupPath: string }) => {
+    try {
+      const { backupDatabase } = await import('./services/backup');
+      const appDb = getDb();
+      const result = await backupDatabase(appDb, input.backupPath);
+      return { ok: true, success: true, data: { path: result } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('database:restore', async (event: any, input: { backupPath: string }) => {
+    try {
+      const { restoreDatabase } = await import('./services/backup');
+      const appDb = getDb();
+      await restoreDatabase(appDb, input.backupPath);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('settings:get', async (event: any, input: { token: string }) => {
+    try {
+      const { getSettings } = await import('./services/settings');
+      const appDb = getDb();
+      const result = getSettings(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('settings:update', async (event: any, input: { token: string; taxRateBps: number; storeName: string; receiptFooter: string }) => {
+    try {
+      const { updateSettings } = await import('./services/settings');
+      const appDb = getDb();
+      const result = updateSettings(appDb, input);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:getMovements', async (event: any, input: { token: string; productId?: string; movementType?: string; startDate?: string; endDate?: string; limit?: number }) => {
+    try {
+      const { listStockMovements } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:read');
+      const result = listStockMovements(appDb, { productId: input.productId, movementType: input.movementType, startDate: input.startDate, endDate: input.endDate, limit: input.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:createAdjustment', async (event: any, input: { token: string; productId: string; adjustmentType: 'increase' | 'decrease'; quantity: number; reason?: string; referenceNumber?: string; notes?: string }) => {
+    try {
+      const { createStockAdjustment } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:adjust');
+      const result = createStockAdjustment(appDb, { ...input, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:approveAdjustment', async (event: any, input: { token: string; adjustmentId: string; approved: boolean; notes?: string }) => {
+    try {
+      const { approveStockAdjustment } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:approve');
+      const result = approveStockAdjustment(appDb, { ...input, approverId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:getAdjustments', async (event: any, input: { token: string; status?: string; productId?: string; limit?: number }) => {
+    try {
+      const { listStockAdjustments } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:read');
+      const result = listStockAdjustments(appDb, { status: input.status, productId: input.productId, limit: input.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:createOpname', async (event: any, input: { token: string; location?: string; notes?: string }) => {
+    try {
+      const { createStockOpname } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:opname');
+      const result = createStockOpname(appDb, { ...input, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:addOpnameItem', async (event: any, input: { token: string; opnameId: string; productId: string; physicalStock: number; notes?: string }) => {
+    try {
+      const { addOpnameItem } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:opname');
+      const result = addOpnameItem(appDb, input);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:listOpnameItems', async (event: any, input: { token: string; opnameId: string }) => {
+    try {
+      const { listOpnameItems } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:read');
+      const result = listOpnameItems(appDb, input.opnameId);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:completeOpname', async (event: any, input: { token: string; opnameId: string }) => {
+    try {
+      const { completeStockOpname } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:opname');
+      const result = completeStockOpname(appDb, { ...input, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:getOpnames', async (event: any, input: { token: string; status?: string; limit?: number }) => {
+    try {
+      const { listStockOpnames } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:read');
+      const result = listStockOpnames(appDb, { status: input.status, limit: input.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:getLowStockAlerts', async (event: any, input: { token: string }) => {
+    try {
+      const { getLowStockAlerts } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:read');
+      const result = getLowStockAlerts(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:getValuation', async (event: any, input: { token: string }) => {
+    try {
+      const { getInventoryValuation } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:read');
+      const result = getInventoryValuation(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('inventory:upsertSettings', async (event: any, input: { token: string; productId: string; minimumStock?: number; maximumStock?: number; reorderPoint?: number; isLowStockAlertEnabled?: boolean }) => {
+    try {
+      const { upsertProductInventorySettings } = await import('./services/inventory');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'inventory:write');
+      const result = upsertProductInventorySettings(appDb, input);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('supplier:create', async (event: any, input: unknown) => {
+    try {
+      const parsed = SupplierCreateSchema.parse(input);
+      const { createSupplier } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:write');
+      const result = createSupplier(appDb, { ...parsed, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('supplier:getAll', async (event: any, input: unknown) => {
+    try {
+      const parsed = SupplierQuerySchema.parse(input);
+      const { listSuppliers } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:read');
+      const result = listSuppliers(appDb, { status: parsed.status, search: parsed.search, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('supplier:update', async (event: any, input: unknown) => {
+    try {
+      const parsed = SupplierUpdateSchema.parse(input);
+      const { updateSupplier } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:write');
+      const { token: _, ...supplierInput } = parsed;
+      const cleanInput: { id: string; name?: string; contactPerson?: string; phone?: string; email?: string; address?: string; city?: string; postalCode?: string; country?: string; taxId?: string; notes?: string } = {
+        id: supplierInput.id,
+        name: supplierInput.name,
+        contactPerson: supplierInput.contactPerson ?? undefined,
+        phone: supplierInput.phone ?? undefined,
+        email: supplierInput.email ?? undefined,
+        address: supplierInput.address ?? undefined,
+        city: supplierInput.city ?? undefined,
+        postalCode: supplierInput.postalCode ?? undefined,
+        country: supplierInput.country ?? undefined,
+        taxId: supplierInput.taxId ?? undefined,
+        notes: supplierInput.notes ?? undefined,
+      };
+      const result = updateSupplier(appDb, cleanInput);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('supplier:deactivate', async (event: any, input: unknown) => {
+    try {
+      const parsed = SupplierIdSchema.parse(input);
+      const { deactivateSupplier } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:delete');
+      deactivateSupplier(appDb, parsed.id);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('supplier:getTransactions', async (event: any, input: unknown) => {
+    try {
+      const parsed = SupplierTransactionsQuerySchema.parse(input);
+      const { listSupplierTransactions } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:transactions');
+      const result = listSupplierTransactions(appDb, { supplierId: parsed.supplierId, transactionType: parsed.transactionType, startDate: parsed.startDate, endDate: parsed.endDate, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('supplier:invoiceCreate', async (_event: any, input: unknown) => {
+    try {
+      const parsed = SupplierInvoiceCreateSchema.parse(input);
+      const { createSupplierInvoice } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:transactions');
+      const result = createSupplierInvoice(appDb, { ...parsed, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  ipcMain.handle('supplier:invoiceGetAll', async (_event: any, input: unknown) => {
+    try {
+      const parsed = SupplierInvoiceQuerySchema.parse(input);
+      const { listSupplierInvoices } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:read');
+      const result = listSupplierInvoices(appDb, parsed);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  ipcMain.handle('supplier:invoiceGet', async (_event: any, input: unknown) => {
+    try {
+      const parsed = SupplierInvoiceIdSchema.parse(input);
+      const { getSupplierInvoice } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:read');
+      const result = getSupplierInvoice(appDb, parsed.id);
+      if (!result) {
+        return { ok: false, success: false, error: { code: 'NOT_FOUND', message: 'Invoice tidak ditemukan' } };
+      }
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  ipcMain.handle('supplier:invoicePay', async (_event: any, input: unknown) => {
+    try {
+      const parsed = SupplierInvoicePaySchema.parse(input);
+      const { paySupplierInvoice } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'supplier:transactions');
+      const result = paySupplierInvoice(appDb, { ...parsed, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  ipcMain.handle('supplier:getPayables', async (_event: any, input: { token: string }) => {
+    try {
+      const { getPayablesSummary } = await import('./services/supplier');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'supplier:read');
+      return { ok: true, success: true, data: getPayablesSummary(appDb) };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  // ===== Procurement =====
+
+  ipcMain.handle('procurement:createPurchaseOrder', async (event: any, input: unknown) => {
+    try {
+      const parsed = PurchaseOrderCreateSchema.parse(input);
+      const { createPurchaseOrder } = await import('./services/procurement');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'procurement:write');
+      const result = createPurchaseOrder(appDb, { ...parsed, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('procurement:getPurchaseOrders', async (event: any, input: unknown) => {
+    try {
+      const parsed = PurchaseOrderQuerySchema.parse(input);
+      const { listPurchaseOrders } = await import('./services/procurement');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'procurement:read');
+      const result = listPurchaseOrders(appDb, { status: parsed.status, supplierId: parsed.supplierId, startDate: parsed.startDate, endDate: parsed.endDate, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('procurement:getPurchaseOrder', async (event: any, input: unknown) => {
+    try {
+      const parsed = PurchaseOrderIdSchema.parse(input);
+      const { getPurchaseOrder } = await import('./services/procurement');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'procurement:read');
+      const result = getPurchaseOrder(appDb, parsed.id);
+      if (!result) {
+        return { ok: false, success: false, error: { code: 'NOT_FOUND', message: 'Purchase order tidak ditemukan' } };
+      }
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('procurement:cancelPurchaseOrder', async (event: any, input: unknown) => {
+    try {
+      const parsed = PurchaseOrderIdSchema.parse(input);
+      const { cancelPurchaseOrder } = await import('./services/procurement');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'procurement:write');
+      const result = cancelPurchaseOrder(appDb, parsed.id);
+      if (!result) {
+        return { ok: false, success: false, error: { code: 'NOT_FOUND', message: 'Purchase order tidak ditemukan' } };
+      }
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('procurement:receiveGoods', async (event: any, input: unknown) => {
+    try {
+      const parsed = ReceiveGoodsSchema.parse(input);
+      const { receiveGoods } = await import('./services/procurement');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'procurement:write');
+      const result = receiveGoods(appDb, { ...parsed, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('procurement:getReceiving', async (event: any, input: { token: string; purchaseOrderId?: string; limit?: number }) => {
+    try {
+      const { listGoodsReceiving } = await import('./services/procurement');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'procurement:read');
+      const result = listGoodsReceiving(appDb, { purchaseOrderId: input.purchaseOrderId, limit: input.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('procurement:createPurchaseReturn', async (event: any, input: unknown) => {
+    try {
+      const parsed = PurchaseReturnCreateSchema.parse(input);
+      const { createPurchaseReturn } = await import('./services/procurement');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'procurement:write');
+      const result = createPurchaseReturn(appDb, { ...parsed, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('procurement:getPurchaseReturns', async (event: any, input: unknown) => {
+    try {
+      const parsed = PurchaseReturnQuerySchema.parse(input);
+      const { listPurchaseReturns } = await import('./services/procurement');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'procurement:read');
+      const result = listPurchaseReturns(appDb, { purchaseOrderId: parsed.purchaseOrderId, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  // ===== Finance =====
+
+  ipcMain.handle('finance:openCashDrawer', async (event: any, input: unknown) => {
+    try {
+      const parsed = CashDrawerOpenSchema.parse(input);
+      const { openCashDrawer } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:write');
+      const result = openCashDrawer(appDb, { userId: user.id, openingBalance: parsed.openingBalance, notes: parsed.notes });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('finance:closeCashDrawer', async (event: any, input: unknown) => {
+    try {
+      const parsed = CashDrawerCloseSchema.parse(input);
+      const { closeCashDrawer } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:write');
+      const result = closeCashDrawer(appDb, { cashDrawerId: parsed.cashDrawerId, closingBalance: parsed.closingBalance, notes: parsed.notes, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('finance:getCashDrawers', async (event: any, input: unknown) => {
+    try {
+      const parsed = CashDrawerQuerySchema.parse(input);
+      const { listCashDrawers } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:read');
+      const result = listCashDrawers(appDb, { status: parsed.status, userId: parsed.userId, startDate: parsed.startDate, endDate: parsed.endDate, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('finance:recordIncome', async (event: any, input: unknown) => {
+    try {
+      const parsed = IncomeCreateSchema.parse(input);
+      const { recordIncome } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:write');
+      const result = recordIncome(appDb, { ...parsed, createdBy: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('finance:recordExpense', async (event: any, input: unknown) => {
+    try {
+      const parsed = ExpenseCreateSchema.parse(input);
+      const { recordExpense } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:write');
+      const result = recordExpense(appDb, { ...parsed, createdBy: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('finance:getCashMovements', async (event: any, input: unknown) => {
+    try {
+      const parsed = CashMovementsQuerySchema.parse(input);
+      const { listCashMovements } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:read');
+      const result = listCashMovements(appDb, { cashDrawerId: parsed.cashDrawerId, movementType: parsed.movementType, startDate: parsed.startDate, endDate: parsed.endDate, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('finance:getIncomeExpense', async (event: any, input: unknown) => {
+    try {
+      const parsed = IncomeExpenseQuerySchema.parse(input);
+      const { listIncomeRecords, listExpenseRecords } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:read');
+      const income = listIncomeRecords(appDb, { startDate: parsed.startDate, endDate: parsed.endDate, limit: 1000 });
+      const expense = listExpenseRecords(appDb, { startDate: parsed.startDate, endDate: parsed.endDate, limit: 1000 });
+      return { ok: true, success: true, data: { income, expense } };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('finance:getProfitAndLoss', async (event: any, input: unknown) => {
+    try {
+      const parsed = IncomeExpenseQuerySchema.parse(input);
+      const { getProfitAndLoss } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:read');
+      const result = getProfitAndLoss(appDb, { startDate: parsed.startDate, endDate: parsed.endDate });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('finance:getCashFlow', async (event: any, input: unknown) => {
+    try {
+      const parsed = IncomeExpenseQuerySchema.parse(input);
+      const { getCashFlow } = await import('./services/finance');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'finance:read');
+      const result = getCashFlow(appDb, { startDate: parsed.startDate, endDate: parsed.endDate });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  // ===== Customer =====
+
+  ipcMain.handle('customer:create', async (event: any, input: unknown) => {
+    try {
+      const parsed = CustomerCreateSchema.parse(input);
+      const { createCustomer } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:write');
+      const result = createCustomer(appDb, { ...parsed, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('customer:getAll', async (event: any, input: unknown) => {
+    try {
+      const parsed = CustomerQuerySchema.parse(input);
+      const { listCustomers } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:read');
+      const result = listCustomers(appDb, { status: parsed.status, search: parsed.search, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('customer:getCustomer', async (event: any, input: unknown) => {
+    try {
+      const parsed = CustomerIdSchema.parse(input);
+      const { getCustomer, getCustomerReceivables } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:read');
+      const result = getCustomer(appDb, parsed.id);
+      if (!result) {
+        return { ok: false, success: false, error: { code: 'NOT_FOUND', message: 'Pelanggan tidak ditemukan' } };
+      }
+      const receivables = getCustomerReceivables(appDb, parsed.id);
+      return { ok: true, success: true, data: { ...result, receivables } };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('customer:update', async (event: any, input: unknown) => {
+    try {
+      const parsed = CustomerUpdateSchema.parse(input);
+      const { updateCustomer } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:write');
+      const result = updateCustomer(appDb, parsed);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('customer:deactivate', async (event: any, input: unknown) => {
+    try {
+      const parsed = CustomerIdSchema.parse(input);
+      const { deactivateCustomer } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:write');
+      deactivateCustomer(appDb, parsed.id);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('customer:getTransactions', async (event: any, input: unknown) => {
+    try {
+      const parsed = CustomerTransactionsQuerySchema.parse(input);
+      const { listCustomerTransactions } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:read');
+      const result = listCustomerTransactions(appDb, { customerId: parsed.customerId, transactionType: parsed.transactionType, startDate: parsed.startDate, endDate: parsed.endDate, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('customer:getReceivables', async (event: any, input: unknown) => {
+    try {
+      const parsed = CustomerIdSchema.parse(input);
+      const { getCustomerReceivables } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:read');
+      const result = getCustomerReceivables(appDb, parsed.id);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('customer:payCredit', async (_event: any, input: unknown) => {
+    try {
+      const parsed = CustomerPaymentSchema.parse(input);
+      const { payCustomerCredit } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:write');
+      const result = payCustomerCredit(appDb, { ...parsed, userId: user.id });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  ipcMain.handle('customer:getStats', async (_event: any, input: unknown) => {
+    try {
+      const parsed = CustomerIdSchema.parse(input);
+      const { getCustomerStats } = await import('./services/customer');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'customer:read');
+      return { ok: true, success: true, data: getCustomerStats(appDb, parsed.id) };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  // ===== Reports =====
+
+  ipcMain.handle('report:sales', async (event: any, input: unknown) => {
+    try {
+      const parsed = ReportQuerySchema.parse(input);
+      const { getSalesReport } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getSalesReport(appDb, parsed.startDate ? new Date(parsed.startDate).toISOString() : undefined, parsed.endDate ? new Date(parsed.endDate + 86399999).toISOString() : undefined, 'day');
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('report:bestSelling', async (event: any, input: unknown) => {
+    try {
+      const parsed = BestSellingQuerySchema.parse(input);
+      const { getBestSellingProducts } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getBestSellingProducts(appDb, parsed.startDate ? new Date(parsed.startDate).toISOString() : undefined, parsed.endDate ? new Date(parsed.endDate + 86399999).toISOString() : undefined, parsed.limit);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('report:slowMoving', async (event: any, input: unknown) => {
+    try {
+      const parsed = ReportQuerySchema.parse(input);
+      const { getSlowMovingProducts } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getSlowMovingProducts(appDb, 90);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('report:grossProfit', async (event: any, input: unknown) => {
+    try {
+      const parsed = ReportQuerySchema.parse(input);
+      const { getGrossProfit } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getGrossProfit(appDb, parsed.startDate ? new Date(parsed.startDate).toISOString() : undefined, parsed.endDate ? new Date(parsed.endDate + 86399999).toISOString() : undefined);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('report:inventoryValuation', async (event: any, input: unknown) => {
+    try {
+      const parsed = ReportQuerySchema.parse(input);
+      const { getInventoryValuation } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getInventoryValuation(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('report:purchase', async (event: any, input: unknown) => {
+    try {
+      const parsed = ReportQuerySchema.parse(input);
+      const { getPurchaseReport } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getPurchaseReport(appDb, parsed.startDate ? new Date(parsed.startDate).toISOString() : undefined, parsed.endDate ? new Date(parsed.endDate + 86399999).toISOString() : undefined);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('report:expense', async (event: any, input: unknown) => {
+    try {
+      const parsed = ReportQuerySchema.parse(input);
+      const { getExpenseReport } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getExpenseReport(appDb, parsed.startDate ? new Date(parsed.startDate).toISOString() : undefined, parsed.endDate ? new Date(parsed.endDate + 86399999).toISOString() : undefined);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('report:cashierPerformance', async (event: any, input: unknown) => {
+    try {
+      const parsed = CashierPerformanceQuerySchema.parse(input);
+      const { getCashierPerformance } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getCashierPerformance(appDb, parsed.startDate ? new Date(parsed.startDate).toISOString() : undefined, parsed.endDate ? new Date(parsed.endDate + 86399999).toISOString() : undefined);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('report:transaction', async (event: any, input: unknown) => {
+    try {
+      const parsed = ReportQuerySchema.parse(input);
+      const { getTransactionReport } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      const result = getTransactionReport(appDb, parsed.startDate ? new Date(parsed.startDate).toISOString() : undefined, parsed.endDate ? new Date(parsed.endDate + 86399999).toISOString() : undefined, parsed.limit);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  // ===== Settings & Administration =====
+
+  ipcMain.handle('settings:list', async (event: any, input: unknown) => {
+    try {
+      const parsed = SettingsListSchema.parse(input);
+      const { listSettings } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:read');
+      const result = listSettings(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('settings:upsert', async (event: any, input: unknown) => {
+    try {
+      const parsed = SettingsUpsertSchema.parse(input);
+      const { upsertSetting } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = upsertSetting(appDb, { key: parsed.key, value: parsed.value });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('users:getAll', async (event: any, input: unknown) => {
+    try {
+      const parsed = UserQuerySchema.parse(input);
+      const { listUsers } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = listUsers(appDb, { roleId: parsed.roleId, search: parsed.search, limit: parsed.limit });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('users:create', async (event: any, input: unknown) => {
+    try {
+      const parsed = UserCreateSchema.parse(input);
+      const { createUser } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = createUser(appDb, parsed);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('users:update', async (event: any, input: unknown) => {
+    try {
+      const parsed = UserUpdateSchema.parse(input);
+      const { updateUser } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = updateUser(appDb, parsed);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('users:deactivate', async (event: any, input: unknown) => {
+    try {
+      const parsed = UserIdSchema.parse(input);
+      const { deactivateUser } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      deactivateUser(appDb, parsed.id);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('roles:getAll', async (event: any, input: unknown) => {
+    try {
+      const parsed = RoleQuerySchema.parse(input);
+      const { listRoles } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = listRoles(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('roles:create', async (event: any, input: unknown) => {
+    try {
+      const parsed = RoleCreateSchema.parse(input);
+      const { createRole } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = createRole(appDb, parsed);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('roles:update', async (event: any, input: unknown) => {
+    try {
+      const parsed = RoleUpdateSchema.parse(input);
+      const { updateRole } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = updateRole(appDb, parsed);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('roles:deactivate', async (event: any, input: unknown) => {
+    try {
+      const parsed = RoleIdSchema.parse(input);
+      const { deactivateRole } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      deactivateRole(appDb, parsed.id);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  ipcMain.handle('roles:getPermissions', async (_event: any, input: unknown) => {
+    try {
+      const parsed = RoleIdSchema.parse(input);
+      const { listRolePermissions } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:read');
+      return { ok: true, success: true, data: listRolePermissions(appDb, parsed.id) };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  ipcMain.handle('roles:setPermissions', async (_event: any, input: unknown) => {
+    try {
+      const parsed = RolePermissionsSchema.parse(input);
+      const { setRolePermissions } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = setRolePermissions(appDb, { roleId: parsed.roleId, permissions: parsed.permissions });
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
+  ipcMain.handle('permissions:getAll', async (event: any, input: unknown) => {
+    try {
+      const parsed = PermissionsGetAllSchema.parse(input);
+      const { listPermissions } = await import('./services/admin');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'settings:write');
+      const result = listPermissions(appDb);
+      return { ok: true, success: true, data: result };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      const code = error.code || 'INTERNAL';
+      const message = error.message || 'Terjadi kesalahan';
+      return { ok: false, success: false, error: { code, message } };
+    }
+  });
+
+  mainWindow.webContents.on('will-navigate', (_event, url) => {
+    if (!url.startsWith('http://localhost') && !url.startsWith('https://')) {
+      _event.preventDefault();
+    }
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https:')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+}
+
+app.whenReady().then(() => {
+  getDb();
+  createWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});

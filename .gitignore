@@ -1,28 +1,46 @@
 # Dependencies
 node_modules/
 .pnp
+
+# Build outputs
 dist/
 build/
-
-# Electron
-*.flags
-/electron/
+out/
+release/
+apps/desktop/out/
+apps/desktop/dist/
 
 # Environment variables
 .env*
 !.env.example
 
-# Logs
+# Logs and generated reports/artifacts
 *.log
 logs/
+build-*.txt
+test-*.txt
+test-output*.txt
+typecheck-*.txt
+vitest*.txt
+*-fail*.txt
+schemas-fail*.txt
+customer-test.txt
+install-electron-vite.txt
+npm-ls*.txt
+graphify-update.txt
+final-*.txt
+baseline-*.txt
 
-# Database
+# Database / local runtime data
 *.sqlite*
 *.sqlite3*
+*.db
+.vyapara-test-identity/
 
 # Vite/React temp files
 .tmp
 temp/
+.tmp_*
 
 # Editor directories and files
 .vscode/
@@ -35,22 +53,36 @@ temp/
 .pnpmfile.cjs
 
 # Electron Builder
+*.flags
 electron-builder.json
 electron-builder.jsonc
 
-# Typescript
+# TypeScript
 *.tsbuildinfo
-*.tsbuildinfo
 
-# Package lock
-package-lock.json
+# Local tool/runtime directories and backups
+.opencode/
+.continue/
+.gitignore.backup
+.claude/settings.json.graphify-bak
 
-# PowerShell
-*.pdb
+# Scratch/debug scripts and outputs
+debug_migration.cjs
+debug_sql.js
+run_*.ps1
 
-# Miscelaneous
+# Graphify: track curated knowledge artifacts, ignore caches/state/signatures/pending
+!graphify-out/
+graphify-out/cache/
+graphify-out/**/.graphify_*
+graphify-out/**/*.pending.json
+graphify-out/**/*.sig
+graphify-out/.cloud-cta-shown
+
+# Miscellaneous
 .DS_Store
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+*.pdb
