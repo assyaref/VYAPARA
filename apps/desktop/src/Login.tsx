@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import useAuth from './authStore';
-import logo from './assets/logo.png';
+import logo from './assets/logo-primary.png';
 import './index.css';
 
 const REMEMBER_FLAG = 'vyapara-remember';

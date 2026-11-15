@@ -67,9 +67,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/Login.tsx": {
-    "mtime": 1794744402.4187214,
-    "seen": 1794745701.316836,
-    "ast_hash": "d9ace271b6d01b2fede0ce4b4f1c1c59",
+    "mtime": 1794747174.4553087,
+    "seen": 1794748558.0690422,
+    "ast_hash": "c5af710b247216991adaf42ed549ce76",
     "semantic_hash": ""
   },
   "apps/desktop/src/NextDashboard.tsx": {
@@ -1381,9 +1381,51 @@
     "semantic_hash": ""
   },
   "evidence/e2e-dashboard.png": {
-    "mtime": 1794745662.4942408,
-    "seen": 1794745701.3320763,
+    "mtime": 1794748192.951238,
+    "seen": 1794748558.1014068,
     "ast_hash": "7242da2aa71f5aab5c26e9f96fab7851",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/debug-count.test.ts": {
+    "mtime": 1794746916.594919,
+    "seen": 1794748558.0659297,
+    "ast_hash": "d992d8efded99267a98bfacdd68647f2",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/stress-4.5.test.ts": {
+    "mtime": 1794748011.6318867,
+    "seen": 1794748558.0666363,
+    "ast_hash": "970dad9426fbfafce8bcf583fcc388f4",
+    "semantic_hash": ""
+  },
+  "evidence/shot-app.ps1": {
+    "mtime": 1794748335.3103633,
+    "seen": 1794748558.0769684,
+    "ast_hash": "d3c013bbe6ce755e989b7cee1cc6c2a7",
+    "semantic_hash": ""
+  },
+  "PHASE_4_5_OFFLINE_STRESS_TEST_REPORT.md": {
+    "mtime": 1794748518.1329322,
+    "seen": 1794748558.0830572,
+    "ast_hash": "6a617b8208246bdb9f28f217f4b0a387",
+    "semantic_hash": ""
+  },
+  "POST_4_4_ARCHITECTURE_RUNTIME_INVESTIGATION.md": {
+    "mtime": 1794745786.619974,
+    "seen": 1794748558.0830615,
+    "ast_hash": "8e24867cdd7d7b74f6b131247d84a788",
+    "semantic_hash": ""
+  },
+  "apps/desktop/src/assets/logo-primary.png": {
+    "mtime": 1794747167.7488742,
+    "seen": 1794748558.1011648,
+    "ast_hash": "d95084c0e74d7fc7a4908bbb13537de3",
+    "semantic_hash": ""
+  },
+  "evidence/login-primary-logo.png": {
+    "mtime": 1794748460.8791778,
+    "seen": 1794748558.101411,
+    "ast_hash": "bc943f39651a6d059866c0483bc577c3",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {
