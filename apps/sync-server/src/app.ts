@@ -1,0 +1,123 @@
+﻿import type { IncomingMessage, ServerResponse } from 'node:http';
+import { URL } from 'node:url';
+import {
+  deviceRegisterRequestSchema,
+  deviceRegisterResponseSchema,
+  deviceRevokeRequestSchema,
+  deviceTokenRenewRequestSchema,
+  deviceTokenRenewResponseSchema,
+  syncDownloadQuerySchema,
+  syncUploadRequestSchema,
+  syncUploadResponseSchema,
+  SYNC_LIMITS,
+} from 'vyapara-shared';
+import type { SyncServerDb } from './db/open.js';
+import { HttpError, readJsonBody, requireBearerDeviceAuth, sendError, sendOk } from './middleware/http.js';
+import { authenticateBearerToken, registerDevice, renewDeviceToken, revokeDevice } from './services/devices.js';
+import { downloadEvents, ingestEventsBatch } from './services/sync.js';
+
+export type SyncServerConfig = {
+  enrollmentSecret: string;
+  tokenTtlHours?: number;
+  adminToken?: string;
+};
+
+export async function handleRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+  db: SyncServerDb,
+  cfg: SyncServerConfig,
+): Promise<void> {
+  try {
+    const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+    const method = req.method ?? 'GET';
+
+    if (method === 'POST' && url.pathname === '/v1/sync/devices/register') {
+      const body = deviceRegisterRequestSchema.parse(await readJsonBody(req));
+      const data = registerDevice(db, body, { expectedEnrollmentSecret: cfg.enrollmentSecret, tokenTtlHours: cfg.tokenTtlHours });
+      sendOk(res, deviceRegisterResponseSchema.parse(data), 201);
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/v1/sync/devices/token/renew') {
+      const body = deviceTokenRenewRequestSchema.parse(await readJsonBody(req));
+      // Authorization/identity derived from token itself (trusted server-side), not client-supplied deviceId.
+      const data = renewDeviceToken(db, body.deviceToken, cfg.tokenTtlHours, body.deviceId);
+      sendOk(res, deviceTokenRenewResponseSchema.parse(data));
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/v1/sync/devices/revoke') {
+      const body = deviceRevokeRequestSchema.parse(await readJsonBody(req));
+      const authz = req.headers.authorization;
+      if (!authz?.startsWith('Bearer ')) throw new HttpError(401, 'AUTH_REQUIRED', 'Missing bearer token');
+      const token = authz.slice('Bearer '.length).trim();
+      if (!(cfg.adminToken && token === cfg.adminToken)) {
+        const auth = authenticateBearerToken(db, token);
+        if (!auth.ok) throw new HttpError(auth.status, auth.code, auth.message);
+        if (auth.device.deviceId !== body.deviceId) {
+          throw new HttpError(403, 'FORBIDDEN', 'Device token not authorized to revoke target device');
+        }
+      }
+      revokeDevice(db, body.deviceId, body.reason);
+      sendOk(res, { deviceId: body.deviceId, status: 'revoked' as const });
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/v1/sync/events/upload') {
+      const token = requireBearerDeviceAuth(req);
+      const authResult = authenticateBearerToken(db, token);
+      if (!authResult.ok) throw new HttpError(authResult.status, authResult.code, authResult.message);
+      const body = syncUploadRequestSchema.parse(await readJsonBody(req));
+      // Request/device scope derived from authenticated server-side identity only.
+      if (body.deviceId !== authResult.device.deviceId) {
+        throw new HttpError(403, 'DEVICE_MISMATCH', 'Upload deviceId does not match authenticated device');
+      }
+      if (body.events.length > SYNC_LIMITS.maxEventsPerBatch) {
+        throw new HttpError(400, 'BATCH_TOO_LARGE', 'Too many events in batch');
+      }
+      const results = ingestEventsBatch(db, authResult.device, body.events);
+      const summary = {
+        deviceId: authResult.device.deviceId,
+        results,
+        acceptedCount: results.filter((r) => r.status === 'accepted').length,
+        duplicateCount: results.filter((r) => r.status === 'duplicate').length,
+        rejectedCount: results.filter((r) => r.status === 'rejected').length,
+        conflictCount: results.filter((r) => r.status === 'conflict').length,
+      };
+      sendOk(res, syncUploadResponseSchema.parse(summary));
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/v1/sync/events/download') {
+      const token = requireBearerDeviceAuth(req);
+      const authResult = authenticateBearerToken(db, token);
+      if (!authResult.ok) throw new HttpError(authResult.status, authResult.code, authResult.message);
+      const q = syncDownloadQuerySchema.parse({
+        deviceId: url.searchParams.get('deviceId') ?? undefined,
+        cursor: url.searchParams.get('cursor') ?? undefined,
+        limit: url.searchParams.get('limit') ?? undefined,
+      });
+      // Client-provided deviceId is a non-authoritative hint; reject if it attempts to target another device.
+      if (q.deviceId && q.deviceId !== authResult.device.deviceId) {
+        throw new HttpError(403, 'FORBIDDEN', 'Requested device scope is not authorized');
+      }
+      const data = downloadEvents(db, authResult.device, { cursor: q.cursor, limit: q.limit });
+      sendOk(res, data);
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/v1/sync/health') {
+      sendOk(res, { status: 'ok', time: new Date().toISOString() });
+      return;
+    }
+
+    throw new HttpError(404, 'NOT_FOUND', 'Route not found');
+  } catch (err) {
+    if (err instanceof Error && err.message === 'INVALID_CURSOR') {
+      sendError(res, new HttpError(400, 'INVALID_CURSOR', 'Invalid download cursor'));
+      return;
+    }
+    sendError(res, err);
+  }
+}

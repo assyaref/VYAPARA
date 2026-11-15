@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+﻿import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
 
 const desktopSrc = fileURLToPath(new URL('./apps/desktop/src', import.meta.url));
@@ -9,6 +9,7 @@ export default defineConfig({
     include: [
       'apps/desktop/**/*.{test,spec}.?(c|m)[jt]s?(x)',
       'packages/shared/**/*.{test,spec}.?(c|m)[jt]s?(x)',
+      'apps/sync-server/**/*.{test,spec}.?(c|m)[jt]s?(x)',
     ],
     exclude: [
       '**/node_modules/**',

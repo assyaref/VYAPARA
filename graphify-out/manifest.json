@@ -205,9 +205,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/main.ts": {
-    "mtime": 1794682035.676186,
-    "seen": 1794682795.6130462,
-    "ast_hash": "b8f29f24589d326884fdb178e75cad25",
+    "mtime": 1794684327.4948976,
+    "seen": 1794685075.5697567,
+    "ast_hash": "72ee7e904507c3b68b108cd91c679584",
     "semantic_hash": ""
   },
   "apps/desktop/electron/preload/preload.ts": {
@@ -319,9 +319,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/reports.test.ts": {
-    "mtime": 1794682205.9362733,
-    "seen": 1794682795.6144452,
-    "ast_hash": "1751d190a1b0bbb1dbdbac27f0a3e858",
+    "mtime": 1794684336.0152364,
+    "seen": 1794685075.5720093,
+    "ast_hash": "bd9b839b89a5c100d555bab34747c7f0",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/reports.ts": {
@@ -391,9 +391,9 @@
     "semantic_hash": ""
   },
   "packages/shared/src/index.ts": {
-    "mtime": 1794663190.8289473,
-    "seen": 1794663711.5032516,
-    "ast_hash": "b2ac38875a1c1da4913270f1779c6cef",
+    "mtime": 1794684592.753735,
+    "seen": 1794685075.5808413,
+    "ast_hash": "38e5b8f72ff51920dde2156cedb53917",
     "semantic_hash": ""
   },
   "packages/shared/src/pos.test.ts": {
@@ -421,9 +421,9 @@
     "semantic_hash": ""
   },
   "vitest.config.ts": {
-    "mtime": 1794676049.5753045,
-    "seen": 1794680625.3432536,
-    "ast_hash": "7ee33abc42c56b4b3ce3bfca95c5463c",
+    "mtime": 1794684973.9061344,
+    "seen": 1794685075.5815825,
+    "ast_hash": "d07f49a4509ff2908671111cc032c234",
     "semantic_hash": ""
   },
   "ARCHITECTURE.md": {
@@ -568,30 +568,6 @@
     "mtime": 1794483412.9709985,
     "seen": 1794663711.50369,
     "ast_hash": "f9b79f7c80c92a3fa3e2b4a725e213a5",
-    "semantic_hash": ""
-  },
-  "schemas-fail.txt": {
-    "mtime": 1794631506.4279466,
-    "seen": 1794663711.5036922,
-    "ast_hash": "030f2c09ef8dc8e74023bd02ee08629c",
-    "semantic_hash": ""
-  },
-  "schemas-fail2.txt": {
-    "mtime": 1794631515.5777295,
-    "seen": 1794663711.5036943,
-    "ast_hash": "01594dcd767269ac3622f21984a8a0c7",
-    "semantic_hash": ""
-  },
-  "vitest-final.txt": {
-    "mtime": 1794631540.6535058,
-    "seen": 1794663711.503697,
-    "ast_hash": "a278c537a86972f7224c16093a78e230",
-    "semantic_hash": ""
-  },
-  "vitest-output.txt": {
-    "mtime": 1794631492.5872293,
-    "seen": 1794663711.5036995,
-    "ast_hash": "b63ccfa591bac5923c5dad7e371e8c64",
     "semantic_hash": ""
   },
   "Design Reference/Infografis UI Manajemen Bisnis VYAPARA.png": {
@@ -810,24 +786,6 @@
     "ast_hash": "187321fb273945da3fad89811a746763",
     "semantic_hash": ""
   },
-  ".continue/mcpServers/new-mcp-server.yaml": {
-    "mtime": 1794676028.7696557,
-    "seen": 1794680625.3360162,
-    "ast_hash": "11b23315a0ca3e285787d5c40c6030ea",
-    "semantic_hash": ""
-  },
-  ".vyapara-test-identity/device-identity.json": {
-    "mtime": 1794675853.4293454,
-    "seen": 1794680625.3360202,
-    "ast_hash": "034d3b39536cc46eee937a4f51e4c63d",
-    "semantic_hash": ""
-  },
-  "apps/desktop/.vyapara-test-identity/device-identity.json": {
-    "mtime": 1794674938.2849836,
-    "seen": 1794680625.3361647,
-    "ast_hash": "b053516c6045418b25ddb6ac3d084af1",
-    "semantic_hash": ""
-  },
   "apps/desktop/electron.config.ts": {
     "mtime": 1794677492.5474045,
     "seen": 1794680625.3364322,
@@ -835,9 +793,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/customer.test.ts": {
-    "mtime": 1794682537.2711923,
-    "seen": 1794682795.613645,
-    "ast_hash": "ac8320af6220fc56d3fcb07d3eaa1354",
+    "mtime": 1794684328.839311,
+    "seen": 1794685075.5703819,
+    "ast_hash": "6d79e77a05fa5f4ae71bc73e91f19038",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/device-identity.test.ts": {
@@ -871,9 +829,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/sales-returns.ts": {
-    "mtime": 1794674968.3069732,
-    "seen": 1794680625.3381143,
-    "ast_hash": "88fafa78a948bc06ca31c0bbab828d6f",
+    "mtime": 1794684329.8794105,
+    "seen": 1794685075.572147,
+    "ast_hash": "f7898bee9f2cc2bf6997a07d45f389f0",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/scratch/check_transactions.test.ts": {
@@ -972,12 +930,6 @@
     "ast_hash": "d8450df90973ad9136131e7f52f21794",
     "semantic_hash": ""
   },
-  "apps/desktop/out/preload/preload.mjs": {
-    "mtime": 1794683317.0819025,
-    "seen": 1794683319.4307,
-    "ast_hash": "d9e9772145ab8708fe00adcecb812899",
-    "semantic_hash": ""
-  },
   "apps/desktop/src/main.tsx": {
     "mtime": 1794676897.7895367,
     "seen": 1794680625.3420684,
@@ -990,70 +942,10 @@
     "ast_hash": "d103f1a559b6bfd0a05857fc99ea28cc",
     "semantic_hash": ""
   },
-  "debug_migration.cjs": {
-    "mtime": 1794668609.050115,
-    "seen": 1794680625.3424675,
-    "ast_hash": "d5217b866ead350a2a2f71ab3df7f6eb",
-    "semantic_hash": ""
-  },
-  "debug_sql.js": {
-    "mtime": 1794668085.7012484,
-    "seen": 1794680625.3424697,
-    "ast_hash": "15486457a5c2bc1f5796743a2f65316f",
-    "semantic_hash": ""
-  },
-  "run_all_tests.ps1": {
-    "mtime": 1794667479.8059895,
-    "seen": 1794680625.343246,
-    "ast_hash": "99e68cf20d8cdb74ed8c81abe281e462",
-    "semantic_hash": ""
-  },
-  "run_test.ps1": {
-    "mtime": 1794667453.2118132,
-    "seen": 1794680625.3432484,
-    "ast_hash": "e0742d1b0aeb9f30f574ccd4cb988237",
-    "semantic_hash": ""
-  },
   "FINAL_ACCEPTANCE_REPORT.md": {
     "mtime": 1794673960.033951,
     "seen": 1794680625.3441288,
     "ast_hash": "12850169de4c7998679e486c3bcd1925",
-    "semantic_hash": ""
-  },
-  "apps/desktop/build-electron.txt": {
-    "mtime": 1794677167.557623,
-    "seen": 1794680625.3455305,
-    "ast_hash": "cd5d8ca029d4349f683afac0bf1ad00c",
-    "semantic_hash": ""
-  },
-  "apps/desktop/build-electron2.txt": {
-    "mtime": 1794677259.8873138,
-    "seen": 1794680625.3455336,
-    "ast_hash": "cd5d8ca029d4349f683afac0bf1ad00c",
-    "semantic_hash": ""
-  },
-  "apps/desktop/build-electron3.txt": {
-    "mtime": 1794677293.937757,
-    "seen": 1794680625.3455358,
-    "ast_hash": "524f59010ea5c06b9167c601db7ce7d5",
-    "semantic_hash": ""
-  },
-  "apps/desktop/build-electron4.txt": {
-    "mtime": 1794677348.540686,
-    "seen": 1794680625.3455381,
-    "ast_hash": "1fd5ce2c4056ce312cb5a457f8a6683d",
-    "semantic_hash": ""
-  },
-  "apps/desktop/build-electron5.txt": {
-    "mtime": 1794677403.1121576,
-    "seen": 1794680625.3455403,
-    "ast_hash": "d73d84a1a5ed1468219be99f10b87b6b",
-    "semantic_hash": ""
-  },
-  "apps/desktop/build-electron6.txt": {
-    "mtime": 1794677523.7317016,
-    "seen": 1794680625.3455422,
-    "ast_hash": "a81711d2e082d436bba1194d810cc09a",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/temp_output.txt": {
@@ -1066,54 +958,6 @@
     "mtime": 1794677336.0953703,
     "seen": 1794680625.3455455,
     "ast_hash": "547ff91c137cf3553e864ef7f8ac24cd",
-    "semantic_hash": ""
-  },
-  "build-desktop.txt": {
-    "mtime": 1794676294.7908697,
-    "seen": 1794680625.345547,
-    "ast_hash": "124acf89c1c530af89254f4624066381",
-    "semantic_hash": ""
-  },
-  "build-desktop2.txt": {
-    "mtime": 1794676403.489476,
-    "seen": 1794680625.3455489,
-    "ast_hash": "9093656a259359e05f20391f4646b273",
-    "semantic_hash": ""
-  },
-  "build-desktop3.txt": {
-    "mtime": 1794676853.9805624,
-    "seen": 1794680625.3455505,
-    "ast_hash": "568e7adc737cd2e78240a966675b241a",
-    "semantic_hash": ""
-  },
-  "build-desktop4.txt": {
-    "mtime": 1794676912.809276,
-    "seen": 1794680625.3455522,
-    "ast_hash": "4ba52b2b3eb85af13499ec6d85626869",
-    "semantic_hash": ""
-  },
-  "build-desktop5.txt": {
-    "mtime": 1794676999.0392754,
-    "seen": 1794680625.3455539,
-    "ast_hash": "07f5465a8c567cb3012507d7eeb5ee98",
-    "semantic_hash": ""
-  },
-  "build-desktop6.txt": {
-    "mtime": 1794677088.0552235,
-    "seen": 1794680625.3455555,
-    "ast_hash": "95d741e231df2cf615cc48c4250a396a",
-    "semantic_hash": ""
-  },
-  "build-electron.txt": {
-    "mtime": 1794680609.8280523,
-    "seen": 1794680625.3455575,
-    "ast_hash": "1fd909148abf53c192821200b9237add",
-    "semantic_hash": ""
-  },
-  "customer-test.txt": {
-    "mtime": 1794680511.9078877,
-    "seen": 1794680625.3455591,
-    "ast_hash": "701c0f7223aa08901a242ed738e6a54c",
     "semantic_hash": ""
   },
   "docs/architecture/decisions/ADR-001-transactional-outbox.md": {
@@ -1146,88 +990,10 @@
     "ast_hash": "464e547fc834d7c8b2592c7c24c4e72d",
     "semantic_hash": ""
   },
-  "install-electron-vite.txt": {
-    "mtime": 1794677148.8230247,
-    "seen": 1794680625.3463705,
-    "ast_hash": "157bd22102692daaf89e9705d489efe8",
-    "semantic_hash": ""
-  },
-  "npm-ls.txt": {
-    "mtime": 1794676136.1770284,
-    "seen": 1794680625.3463726,
-    "ast_hash": "0905e634d5c3561f02dae9091659ee60",
-    "semantic_hash": ""
-  },
-  "npm-ls2.txt": {
-    "mtime": 1794676153.9078653,
-    "seen": 1794680625.346374,
-    "ast_hash": "989268e1c301cd10b83d6decdf1edcdc",
-    "semantic_hash": ""
-  },
-  "test-baseline.txt": {
-    "mtime": 1794680234.8395462,
-    "seen": 1794680625.3466454,
-    "ast_hash": "c266037dd8e6b244d92e4b7ea92d978c",
-    "semantic_hash": ""
-  },
-  "test-output.txt": {
-    "mtime": 1794675908.4597597,
-    "seen": 1794680625.3466475,
-    "ast_hash": "685aa02795d135e253513250eead6c3e",
-    "semantic_hash": ""
-  },
-  "test-output2.txt": {
-    "mtime": 1794676026.288045,
-    "seen": 1794680625.34665,
-    "ast_hash": "e5403475e463bff284157b8ec7e6a1a7",
-    "semantic_hash": ""
-  },
-  "test-output3.txt": {
-    "mtime": 1794676070.814441,
-    "seen": 1794680625.3466518,
-    "ast_hash": "4c8a45b72851944ee95c16c83fc3fab8",
-    "semantic_hash": ""
-  },
-  "typecheck-desktop.txt": {
-    "mtime": 1794676272.8822618,
-    "seen": 1794680625.3466542,
-    "ast_hash": "d1da3c8151765c7b86a4c4840e72aa9d",
-    "semantic_hash": ""
-  },
-  "typecheck-electron.txt": {
-    "mtime": 1794676284.6068988,
-    "seen": 1794680625.346656,
-    "ast_hash": "3a75b85aef19f6aceef3df28cca4209c",
-    "semantic_hash": ""
-  },
-  "typecheck-root.txt": {
-    "mtime": 1794676243.3040402,
-    "seen": 1794680625.3466578,
-    "ast_hash": "aa73c113db4fe527c9abd041963caa15",
-    "semantic_hash": ""
-  },
-  "typecheck-shared.txt": {
-    "mtime": 1794676262.190651,
-    "seen": 1794680625.3466594,
-    "ast_hash": "fc290f4f80994cb927d560f733d5e52f",
-    "semantic_hash": ""
-  },
   "apps/desktop/electron.vite.config.ts": {
     "mtime": 1794680800.0635798,
     "seen": 1794681012.93782,
     "ast_hash": "5a311b17aa104c633bd3d4eb1609c6dc",
-    "semantic_hash": ""
-  },
-  "apps/desktop/build-vite.txt": {
-    "mtime": 1794680728.3226147,
-    "seen": 1794680754.276785,
-    "ast_hash": "f535db1226a94e3932f8efc706427795",
-    "semantic_hash": ""
-  },
-  "build-electron2.txt": {
-    "mtime": 1794680673.832271,
-    "seen": 1794680754.2779484,
-    "ast_hash": "d15575d5757ad5f7c08905684ca149e6",
     "semantic_hash": ""
   },
   "AGENTS.md": {
@@ -1236,112 +1002,160 @@
     "ast_hash": "f36539ecc9af68f33ebd72770ce4a19e",
     "semantic_hash": ""
   },
-  "build-electron3.txt": {
-    "mtime": 1794680808.0748348,
-    "seen": 1794681012.9697142,
-    "ast_hash": "b3cfd6e61c20e4313ea5a3968f009d9d",
-    "semantic_hash": ""
-  },
-  "graphify-update.txt": {
-    "mtime": 1794681013.1849167,
-    "seen": 1794682795.6287262,
-    "ast_hash": "90e599e3333ffe275205de7d28e61c78",
-    "semantic_hash": ""
-  },
-  "test-final.txt": {
-    "mtime": 1794680960.211383,
-    "seen": 1794681012.9750662,
-    "ast_hash": "5452a6dad9360672dbc3b471b9a80c7f",
-    "semantic_hash": ""
-  },
-  "typecheck-desktop-new.txt": {
-    "mtime": 1794680822.9879768,
-    "seen": 1794681012.9758012,
-    "ast_hash": "3ddaec46ea4049450e281cab1c9a8c31",
-    "semantic_hash": ""
-  },
-  "typecheck-electron-new.txt": {
-    "mtime": 1794680827.1064625,
-    "seen": 1794681012.9762444,
-    "ast_hash": "6d101765f949f89a6b4965ab956d3bd3",
-    "semantic_hash": ""
-  },
-  "typecheck-electron-new2.txt": {
-    "mtime": 1794680864.315487,
-    "seen": 1794681012.9762506,
-    "ast_hash": "123da49cf41d3f284f6400ed9178e5ab",
-    "semantic_hash": ""
-  },
-  "typecheck-root-new.txt": {
-    "mtime": 1794680825.0226157,
-    "seen": 1794681012.9766002,
-    "ast_hash": "9132ca97f8aab407e8b55db68002b8ab",
-    "semantic_hash": ""
-  },
-  "typecheck-shared-new.txt": {
-    "mtime": 1794680833.4432716,
-    "seen": 1794681012.9770415,
-    "ast_hash": "0afa6a286514f2e9e7cbfe6d68d3eacb",
-    "semantic_hash": ""
-  },
   ".claude/CLAUDE.md": {
     "mtime": 1794681819.6638632,
     "seen": 1794682795.6230662,
     "ast_hash": "9b31786b637be3c13978bec4c2330752",
     "semantic_hash": ""
   },
-  "build-electron-final.txt": {
-    "mtime": 1794682748.7114232,
-    "seen": 1794682795.6270413,
-    "ast_hash": "247cfa78767986e81191672a3b9600e0",
+  "apps/sync-server/package.json": {
+    "mtime": 1794684544.5908096,
+    "seen": 1794685075.5802977,
+    "ast_hash": "0ac5d017c111be1bd0a212891ea52008",
     "semantic_hash": ""
   },
-  "final-build-electron.txt": {
-    "mtime": 1794683317.7694354,
-    "seen": 1794683319.4415848,
-    "ast_hash": "a8db04a0bc2c635137f1cce4280671e6",
+  "apps/sync-server/src/app.ts": {
+    "mtime": 1794685590.1199138,
+    "seen": 1794685918.020184,
+    "ast_hash": "1756e5e575883dff35a662c341f19f44",
     "semantic_hash": ""
   },
-  "final-git-status.txt": {
-    "mtime": 1794683316.150766,
-    "seen": 1794683319.4415872,
-    "ast_hash": "096ef7a0f6bc45bfb2e92466ab9cd473",
+  "apps/sync-server/src/db/open.ts": {
+    "mtime": 1794685450.237029,
+    "seen": 1794685918.0201879,
+    "ast_hash": "d7e88bf535942dc31c1a562959b00075",
     "semantic_hash": ""
   },
-  "final-test-run.txt": {
-    "mtime": 1794683305.8355277,
-    "seen": 1794683319.4415889,
-    "ast_hash": "32608615cdb7756a6fe7465f4a43352c",
+  "apps/sync-server/src/middleware/http.ts": {
+    "mtime": 1794684707.4354072,
+    "seen": 1794685075.580308,
+    "ast_hash": "ba4c6c50468f2bd7d86603994bd2c27c",
     "semantic_hash": ""
   },
-  "final-typecheck-desktop.txt": {
-    "mtime": 1794683296.9699433,
-    "seen": 1794683319.4415905,
-    "ast_hash": "3ddaec46ea4049450e281cab1c9a8c31",
+  "apps/sync-server/src/server.ts": {
+    "mtime": 1794684707.4384198,
+    "seen": 1794685075.5803099,
+    "ast_hash": "5648c72131d2c9dfa00cb9127de98ffa",
     "semantic_hash": ""
   },
-  "final-typecheck-electron.txt": {
-    "mtime": 1794683315.5790958,
-    "seen": 1794683319.4415917,
-    "ast_hash": "123da49cf41d3f284f6400ed9178e5ab",
+  "apps/sync-server/src/services/crypto.ts": {
+    "mtime": 1794684664.697859,
+    "seen": 1794685075.5803118,
+    "ast_hash": "cbac689f741aa73bb066a84f1f159f3b",
     "semantic_hash": ""
   },
-  "final-typecheck-root.txt": {
-    "mtime": 1794683293.2750154,
-    "seen": 1794683319.4415934,
-    "ast_hash": "9132ca97f8aab407e8b55db68002b8ab",
+  "apps/sync-server/src/services/devices.ts": {
+    "mtime": 1794685886.4126873,
+    "seen": 1794685918.0205748,
+    "ast_hash": "f859ef52abb9d0b77ef4f45e38361030",
     "semantic_hash": ""
   },
-  "final-typecheck-shared.txt": {
-    "mtime": 1794683294.1336682,
-    "seen": 1794683319.4415953,
-    "ast_hash": "d730631286da2d586317ab5195dea75e",
+  "apps/sync-server/src/services/sync.ts": {
+    "mtime": 1794685548.5158072,
+    "seen": 1794685918.0205772,
+    "ast_hash": "de0791e297d52f528acbbcf6d7e616b5",
     "semantic_hash": ""
   },
-  ".opencode/package-lock.json": {
-    "mtime": 1794681297.4164557,
-    "seen": 1794682795.635899,
-    "ast_hash": "c8aca779cde4e360e55665f1c8623497",
+  "apps/sync-server/test/sync-server.test.ts": {
+    "mtime": 1794685888.854864,
+    "seen": 1794685918.0205803,
+    "ast_hash": "4d44d5abb2b4373b6d5453ca718bc3cd",
+    "semantic_hash": ""
+  },
+  "apps/sync-server/tsconfig.json": {
+    "mtime": 1794685013.204259,
+    "seen": 1794685075.5803182,
+    "ast_hash": "d52109f7849d548c0dd3c0470f51808a",
+    "semantic_hash": ""
+  },
+  "apps/sync-server/vitest.config.ts": {
+    "mtime": 1794684544.5952344,
+    "seen": 1794685075.5803196,
+    "ast_hash": "f3b879e29a3f93515b90757fa8a6f974",
+    "semantic_hash": ""
+  },
+  "classify.ps1": {
+    "mtime": 1794683690.4330094,
+    "seen": 1794685075.5805812,
+    "ast_hash": "1afe362b9978b26573ad05b8c2766ce7",
+    "semantic_hash": ""
+  },
+  "packages/shared/src/sync.ts": {
+    "mtime": 1794685405.602778,
+    "seen": 1794685918.02208,
+    "ast_hash": "e583faa46d172e4bbfe8ba4a61b7eeb7",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/ADR-004-central-sync-api.md": {
+    "mtime": 1794684566.4838667,
+    "seen": 1794685075.5852072,
+    "ast_hash": "2c78d7d4a22186050b145feefd3d6a3f",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/ADR-005-sync-cursors-idempotency.md": {
+    "mtime": 1794684566.4858747,
+    "seen": 1794685075.58521,
+    "ast_hash": "8650310c451dfef42dbec4042e098e8d",
+    "semantic_hash": ""
+  },
+  "docs/architecture/sync-api-contract.md": {
+    "mtime": 1794685688.1677494,
+    "seen": 1794685918.0267735,
+    "ast_hash": "612a811d97b3f85ef24d38db188f200f",
+    "semantic_hash": ""
+  },
+  "exclude-manifest.txt": {
+    "mtime": 1794683690.8077435,
+    "seen": 1794685075.5854378,
+    "ast_hash": "de238524e257601dbca70a8ede11276f",
+    "semantic_hash": ""
+  },
+  "post-stage-status.txt": {
+    "mtime": 1794683719.8370628,
+    "seen": 1794685075.58544,
+    "ast_hash": "a76e2dde1248f17db8d1c41fc504b78b",
+    "semantic_hash": ""
+  },
+  "precommit-cached-final.txt": {
+    "mtime": 1794684002.6725962,
+    "seen": 1794685075.585442,
+    "ast_hash": "de5a390979f981fe5fd1edad6dc47e8c",
+    "semantic_hash": ""
+  },
+  "precommit-cached-status-verify.txt": {
+    "mtime": 1794683926.5535963,
+    "seen": 1794685075.5854435,
+    "ast_hash": "0bfcad7eeba90c521c037379f84be3d1",
+    "semantic_hash": ""
+  },
+  "precommit-cached-status.txt": {
+    "mtime": 1794683903.041571,
+    "seen": 1794685075.5854452,
+    "ast_hash": "0bfcad7eeba90c521c037379f84be3d1",
+    "semantic_hash": ""
+  },
+  "stage-manifest.txt": {
+    "mtime": 1794683690.8050299,
+    "seen": 1794685075.5854461,
+    "ast_hash": "bb49074dbaa30230cb5c674b9fa46f34",
+    "semantic_hash": ""
+  },
+  "staged-actual.txt": {
+    "mtime": 1794683972.526699,
+    "seen": 1794685075.5854478,
+    "ast_hash": "50b7fefdfac77490cba5b4ff16777cfe",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/ADR-006-tenant-isolation.md": {
+    "mtime": 1794685688.168803,
+    "seen": 1794685918.0266533,
+    "ast_hash": "c5016c3cdffe0fe256f027223b376e2e",
+    "semantic_hash": ""
+  },
+  "apps/sync-server/test/acceptance-4.2.test.ts": {
+    "mtime": 1794686273.7146602,
+    "seen": 1794686342.176335,
+    "ast_hash": "d5fa6c983c7e289f5262cd83c04305c6",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {
@@ -1351,8 +1165,8 @@
     "semantic_hash": ""
   },
   "package-lock.json": {
-    "mtime": 1794677146.2448273,
-    "seen": 1794680625.351801,
+    "mtime": 1794684309.09653,
+    "seen": 1794685075.5902183,
     "ast_hash": "b0740ab54b80cd47a12fc938bcd7df7d",
     "semantic_hash": ""
   }
