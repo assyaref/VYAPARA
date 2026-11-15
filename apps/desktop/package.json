@@ -2,6 +2,7 @@
   "name": "vyapara-desktop-app",
   "private": true,
   "type": "module",
+  "main": "out/main/main.js",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",

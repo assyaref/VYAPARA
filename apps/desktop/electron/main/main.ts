@@ -4,6 +4,7 @@ import * as os from 'os';
 import { z } from 'zod';
 import * as fs from 'fs';
 import { openAppDatabase } from './db/open';
+import { getSyncCoordinator, initSyncCoordinator } from './sync';
 import {
   CustomerCreateSchema,
   CustomerIdSchema,
@@ -150,7 +151,7 @@ const isOnline = () => {
 function createWindow() {
   const isDev = process.env.NODE_ENV !== 'production';
 
-  const preloadPath = path.join(__dirname, '..', 'preload', 'preload.js');
+  const preloadPath = path.join(__dirname, '..', 'preload', 'preload.mjs');
 
   mainWindow = new BrowserWindow({
     width: 1400,
@@ -158,7 +159,7 @@ function createWindow() {
     minWidth: 1366,
     minHeight: 768,
     title: APP_NAME,
-    icon: path.join(__dirname, '..', '..', '..', 'assets', 'brand', 'vyapara-icon.ico'),
+    icon: path.join(__dirname, '..', '..', 'assets', 'brand', 'vyapara-icon.png'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -1799,6 +1800,27 @@ function createWindow() {
     }
   });
 
+  ipcMain.handle('sync:getStatus', async () => {
+    try {
+      const db = getDb();
+      const coord = getSyncCoordinator() ?? initSyncCoordinator(db);
+      return { ok: true, success: true, data: coord.getStatus() };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: 'INTERNAL', message: 'Gagal membaca status sinkronisasi' } };
+    }
+  });
+
+  ipcMain.handle('sync:trigger', async () => {
+    try {
+      const db = getDb();
+      const coord = getSyncCoordinator() ?? initSyncCoordinator(db);
+      const data = await coord.trigger('manual');
+      return { ok: true, success: true, data };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: 'INTERNAL', message: 'Gagal memicu sinkronisasi' } };
+    }
+  });
+
   mainWindow.webContents.on('will-navigate', (_event, url) => {
     if (!url.startsWith('http://localhost') && !url.startsWith('https://')) {
       _event.preventDefault();
@@ -1818,7 +1840,8 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  getDb();
+  const db = getDb();
+  initSyncCoordinator(db).start();
   createWindow();
 
   app.on('activate', () => {
@@ -1826,6 +1849,10 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+});
+
+app.on('before-quit', () => {
+  void getSyncCoordinator()?.stop();
 });
 
 app.on('window-all-closed', () => {

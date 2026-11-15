@@ -1,0 +1,57 @@
+=== BASELINE 2026-11-15T17:11:24+07:00 ===
+feature/phase-4.3-sync-engine
+fed354cc0e5d425a91d5136d2b36248d4728e339
+ M apps/desktop/electron.vite.config.ts
+ M apps/desktop/electron/main/db/open.ts
+ M apps/desktop/electron/main/main.ts
+ M apps/desktop/electron/main/services/device-identity.ts
+ M apps/desktop/electron/preload/preload.ts
+ M apps/desktop/package.json
+ M apps/desktop/src/OfflineSync.tsx
+ M apps/desktop/src/vyapara.d.ts
+ M graphify-out/GRAPH_REPORT.md
+ M graphify-out/graph.html
+ M graphify-out/graph.json
+ M graphify-out/manifest.json
+ M packages/shared/src/sync.ts
+ M tsconfig.json
+?? .claude/
+?? FINAL_ACCEPTANCE_REPORT.md
+?? PHASE_4_3_SCREENSHOT.png
+?? PHASE_4_4_FINAL_WINDOWS_VERIFICATION_REPORT.md
+?? PHASE_4_4_INDEPENDENT_ACCEPTANCE_AUDIT.md
+?? PHASE_4_4_POST_REMEDIATION_RE_AUDIT.md
+?? apps/desktop/drizzle/012-sync-engine.sql
+?? apps/desktop/drizzle/013-conflict-resolution-engine.sql
+?? apps/desktop/electron/main/services/scratch/
+?? apps/desktop/electron/main/services/temp_output.txt
+?? apps/desktop/electron/main/sync/
+?? capture.ps1
+?? classify.ps1
+?? credentials.ts
+?? data/
+?? evidence/
+?? exclude-manifest.txt
+?? fix_inbound.cjs
+?? fix_outcome.cjs
+?? graphify-out/2026-11-13/
+?? graphify-out/2026-11-14/
+?? graphify-out/2026-11-15/
+?? invest-launch.ps1
+?? launch-debug.ps1
+?? launch-electron.ps1
+?? launch.bat
+?? post-stage-status.txt
+?? precommit-cached-final.txt
+?? precommit-cached-status-verify.txt
+?? precommit-cached-status.txt
+?? stage-manifest.txt
+?? staged-actual.txt
+?? test-device-registration.http
+?? typecheck-electron.ps1
+?? typecheck_result.txt
+?? typecheck_root.txt
+=== versions ===
+v24.18.0
+
+v45.3.1
