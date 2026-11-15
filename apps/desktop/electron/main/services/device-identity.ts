@@ -1,5 +1,6 @@
 ﻿import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import type { AppDatabase } from '../db/open';
 
@@ -9,8 +10,12 @@ export type DeviceIdentity = {
   updatedAt: string;
 };
 
+let inMemoryIdentityCounter = 0;
+
 function identityFilePath(dbPath: string): string {
-  const dir = dbPath === ':memory:' ? path.join(process.cwd(), '.vyapara-test-identity') : path.dirname(dbPath);
+  const dir = dbPath === ':memory:'
+    ? path.join(os.tmpdir(), '.vyapara-test-identity', String(++inMemoryIdentityCounter))
+    : path.dirname(dbPath);
   return path.join(dir, 'device-identity.json');
 }
 
