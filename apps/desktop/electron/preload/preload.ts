@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+﻿import { contextBridge, ipcRenderer } from 'electron';
 
 let sessionToken = '';
 
@@ -20,6 +20,8 @@ async function send(channel: string, input?: unknown): Promise<any> {
 const api = {
   getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
   getEnvironmentStatus: () => ipcRenderer.invoke('app:getEnvironmentStatus'),
+  syncGetStatus: () => ipcRenderer.invoke('sync:getStatus'),
+  syncTrigger: () => ipcRenderer.invoke('sync:trigger'),
 
   authNeedsSetup: () => ipcRenderer.invoke('auth:needsSetup'),
   authSetup: async (input: { name: string; email: string; password: string }) => {

@@ -24,5 +24,11 @@
     "apps/**/*.ts",
     "apps/**/*.tsx"
   ],
-  "exclude": ["node_modules", "dist", "apps/desktop/electron/main/services/scratch"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "apps/desktop/electron/main/services/scratch",
+    "apps/desktop/electron/main/sync/sync-engine.test.ts",
+    "apps/sync-server/test"
+  ]
 }
