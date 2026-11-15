@@ -37,15 +37,15 @@
     "semantic_hash": ""
   },
   "apps/desktop/package.json": {
-    "mtime": 1794621249.2466733,
-    "seen": 1794663711.4984086,
-    "ast_hash": "eb8ab03807d1f8b2dc456f63c4acaf5d",
+    "mtime": 1794738679.1139464,
+    "seen": 1794745701.3163543,
+    "ast_hash": "9f4c60558b5ab55911dc23f7baa53a68",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
-    "mtime": 1794678301.176525,
-    "seen": 1794680625.3391926,
-    "ast_hash": "f4957604b55159355f71687aaeb21ed9",
+    "mtime": 1794745354.209115,
+    "seen": 1794745701.3163571,
+    "ast_hash": "b531e1961c35e57cd5883175e3850369",
     "semantic_hash": ""
   },
   "apps/desktop/src/Barcode.tsx": {
@@ -67,10 +67,10 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/Login.tsx": {
-    "mtime": 1794561243.4453566,
-    "seen": 1794663711.4990344,
-    "ast_hash": "ff524e158a26ec429a61a03521144efe",
-    "semantic_hash": "ff524e158a26ec429a61a03521144efe"
+    "mtime": 1794744402.4187214,
+    "seen": 1794745701.316836,
+    "ast_hash": "d9ace271b6d01b2fede0ce4b4f1c1c59",
+    "semantic_hash": ""
   },
   "apps/desktop/src/NextDashboard.tsx": {
     "mtime": 1794492222.032657,
@@ -79,10 +79,10 @@
     "semantic_hash": "089fb8cf1c3548fd02246988133df640"
   },
   "apps/desktop/src/OfflineSync.tsx": {
-    "mtime": 1794492202.3765433,
-    "seen": 1794524916.5773027,
-    "ast_hash": "d908a03ca555a8c97c26d5b48fe4d564",
-    "semantic_hash": "d908a03ca555a8c97c26d5b48fe4d564"
+    "mtime": 1794705734.0317805,
+    "seen": 1794706792.6291175,
+    "ast_hash": "618c9cd34dd879777e5cb70e3db26f36",
+    "semantic_hash": ""
   },
   "apps/desktop/src/POS.tsx": {
     "mtime": 1794678301.1776938,
@@ -139,15 +139,15 @@
     "semantic_hash": "8fb7026df33e71d42336f3e1e55189a6"
   },
   "apps/desktop/src/authStore.ts": {
-    "mtime": 1794678301.1787522,
-    "seen": 1794680625.3420649,
-    "ast_hash": "21f41d9afa26f603e67379b1efd2af17",
+    "mtime": 1794744795.7090533,
+    "seen": 1794745701.3185022,
+    "ast_hash": "eb9a4460ac49d6b618ed6d8dae6c5729",
     "semantic_hash": ""
   },
   "apps/desktop/src/vyapara.d.ts": {
-    "mtime": 1794678301.1787522,
-    "seen": 1794680625.3420713,
-    "ast_hash": "8d2b740c417e6066369d64898a8b55ee",
+    "mtime": 1794745474.0294292,
+    "seen": 1794745701.3185067,
+    "ast_hash": "bdcf0ab2d392bb68a6db974b0e08250d",
     "semantic_hash": ""
   },
   "apps/desktop/tailwind.config.ts": {
@@ -163,9 +163,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/vite.config.ts": {
-    "mtime": 1794676962.7204163,
-    "seen": 1794680625.3422077,
-    "ast_hash": "d51d73daae808680375b47faf1d97a11",
+    "mtime": 1794743069.9452667,
+    "seen": 1794745701.3188603,
+    "ast_hash": "bc55e2d3e9158939d458cc30d5549907",
     "semantic_hash": ""
   },
   "apps/web/package.json": {
@@ -199,21 +199,21 @@
     "semantic_hash": ""
   },
   "tsconfig.json": {
-    "mtime": 1794678472.404302,
-    "seen": 1794680625.3432508,
-    "ast_hash": "dfbe90f6080e5c27f00e49cc9ffc6ddb",
+    "mtime": 1794705587.787154,
+    "seen": 1794706792.637301,
+    "ast_hash": "2830d6fdbf618050f36f88182e0d2c89",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/main.ts": {
-    "mtime": 1794684327.4948976,
-    "seen": 1794685075.5697567,
-    "ast_hash": "72ee7e904507c3b68b108cd91c679584",
+    "mtime": 1794743594.8722124,
+    "seen": 1794745701.3096101,
+    "ast_hash": "3e3d24639a8e74ba8490b112de58d9f5",
     "semantic_hash": ""
   },
   "apps/desktop/electron/preload/preload.ts": {
-    "mtime": 1794662882.9009843,
-    "seen": 1794663711.4983952,
-    "ast_hash": "05e0fbda50b00c7fd5fbda935bbf8a4e",
+    "mtime": 1794704698.8277254,
+    "seen": 1794706792.6271904,
+    "ast_hash": "16fd17692d6139b3f513dfc2787ca264",
     "semantic_hash": ""
   },
   "apps/desktop/drizzle/schema.ts": {
@@ -229,9 +229,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/db/open.ts": {
-    "mtime": 1794682436.4164076,
-    "seen": 1794682795.612928,
-    "ast_hash": "c0faba205a7538cddaabb9c4ecd115b4",
+    "mtime": 1794716091.9141457,
+    "seen": 1794745701.3094847,
+    "ast_hash": "ebfac71e00cfe1a2bcf84a1f0b9da423",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/errors.ts": {
@@ -805,9 +805,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/device-identity.ts": {
-    "mtime": 1794674545.7828236,
-    "seen": 1794680625.3374345,
-    "ast_hash": "742c26755cd94235d76491691304f16d",
+    "mtime": 1794706347.3787725,
+    "seen": 1794706792.6202655,
+    "ast_hash": "597150e71e9b155516798c929c39f989",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/outbox.test.ts": {
@@ -931,9 +931,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/main.tsx": {
-    "mtime": 1794676897.7895367,
-    "seen": 1794680625.3420684,
-    "ast_hash": "25c5c6d1f3e55d09cf6dea451d1e02c3",
+    "mtime": 1794743085.169644,
+    "seen": 1794745701.3185048,
+    "ast_hash": "f3d2e151777b90c8d1209eae0e61b38a",
     "semantic_hash": ""
   },
   "apps/desktop/tsconfig.electron.json": {
@@ -943,9 +943,9 @@
     "semantic_hash": ""
   },
   "FINAL_ACCEPTANCE_REPORT.md": {
-    "mtime": 1794673960.033951,
-    "seen": 1794680625.3441288,
-    "ast_hash": "12850169de4c7998679e486c3bcd1925",
+    "mtime": 1794715643.954355,
+    "seen": 1794745701.3229847,
+    "ast_hash": "f3458463dd896604e8dd4673a4d8129f",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/temp_output.txt": {
@@ -991,9 +991,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron.vite.config.ts": {
-    "mtime": 1794680800.0635798,
-    "seen": 1794681012.93782,
-    "ast_hash": "5a311b17aa104c633bd3d4eb1609c6dc",
+    "mtime": 1794743063.5357244,
+    "seen": 1794745701.3093514,
+    "ast_hash": "a3e0b9633cf699a70c7fa6b22ce16ce8",
     "semantic_hash": ""
   },
   "AGENTS.md": {
@@ -1081,9 +1081,9 @@
     "semantic_hash": ""
   },
   "packages/shared/src/sync.ts": {
-    "mtime": 1794685405.602778,
-    "seen": 1794685918.02208,
-    "ast_hash": "e583faa46d172e4bbfe8ba4a61b7eeb7",
+    "mtime": 1794745372.7148926,
+    "seen": 1794745701.3215766,
+    "ast_hash": "f21fdf18820a0cf992cd66860320d67c",
     "semantic_hash": ""
   },
   "docs/architecture/decisions/ADR-004-central-sync-api.md": {
@@ -1156,6 +1156,234 @@
     "mtime": 1794686273.7146602,
     "seen": 1794686342.176335,
     "ast_hash": "d5fa6c983c7e289f5262cd83c04305c6",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/coordinator.ts": {
+    "mtime": 1794706512.334105,
+    "seen": 1794706792.6271498,
+    "ast_hash": "aeb4c1fc54c2c6dfd6f3d6cc712a42a1",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/credentials.test.ts": {
+    "mtime": 1794706702.3763745,
+    "seen": 1794706792.627154,
+    "ast_hash": "4125c03eccbf0ae6445f961cbce330ab",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/credentials.ts": {
+    "mtime": 1794705774.2107327,
+    "seen": 1794706792.6271596,
+    "ast_hash": "17522ee628e588c72783ef6706debd94",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/download.ts": {
+    "mtime": 1794722962.2534113,
+    "seen": 1794745701.315627,
+    "ast_hash": "047f788d0b885789537ecf4601465c84",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/inbound.ts": {
+    "mtime": 1794745145.7139313,
+    "seen": 1794745701.3156297,
+    "ast_hash": "5b07dd5fb86bb76a860d1de0698d2db1",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/index.ts": {
+    "mtime": 1794704674.4185064,
+    "seen": 1794706792.6271698,
+    "ast_hash": "f9ac9db9af96203f2729b0017e1f5d17",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/store.ts": {
+    "mtime": 1794722851.4958074,
+    "seen": 1794745701.3157523,
+    "ast_hash": "3530f360d5777b66069f3935f684dba0",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/sync-engine.test.ts": {
+    "mtime": 1794745200.5660646,
+    "seen": 1794745701.3157544,
+    "ast_hash": "e1e3c99a510e84fe7b2dbba9f41880de",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/transport.ts": {
+    "mtime": 1794715044.1212747,
+    "seen": 1794745701.3157568,
+    "ast_hash": "e3d5068bfaf0ba1863ae85e6a8d93528",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/types.ts": {
+    "mtime": 1794704402.168492,
+    "seen": 1794706792.6271834,
+    "ast_hash": "d27142eecb0abafc626cf0490e344af2",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/upload.ts": {
+    "mtime": 1794704525.2487478,
+    "seen": 1794706792.6271858,
+    "ast_hash": "3a0712f08b9da85e6e4485a6f020d316",
+    "semantic_hash": ""
+  },
+  "credentials.ts": {
+    "mtime": 1794704433.383746,
+    "seen": 1794706792.6356003,
+    "ast_hash": "ac2fbd97af87baa258986c8b82d88a47",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron.vite.config.ts.1794740266501-542182de51b71.mjs": {
+    "mtime": 1794740266.5022385,
+    "seen": 1794745701.309355,
+    "ast_hash": "c62327aa3e0c6a96d41a07fabdee2af5",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/conflict-detector.ts": {
+    "mtime": 1794722587.824063,
+    "seen": 1794745701.3152509,
+    "ast_hash": "c372ce9da139bf926e4a8c714d401368",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/conflict-resolution.test.ts": {
+    "mtime": 1794745223.5198462,
+    "seen": 1794745701.3152537,
+    "ast_hash": "6da204f86c2ae81054ebb1065ab5c035",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/conflict-resolver.ts": {
+    "mtime": 1794716137.4685204,
+    "seen": 1794745701.3152556,
+    "ast_hash": "e1b937b90c369d027b32e264475ae782",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/sync/conflict-types.ts": {
+    "mtime": 1794715841.939013,
+    "seen": 1794745701.3152573,
+    "ast_hash": "88e3961494ba3095ad481b7e0dbbd188",
+    "semantic_hash": ""
+  },
+  "apps/desktop/src/assets.d.ts": {
+    "mtime": 1794745468.819042,
+    "seen": 1794745701.3184988,
+    "ast_hash": "e874866098a7a6f720475ffe2bddf340",
+    "semantic_hash": ""
+  },
+  "capture.ps1": {
+    "mtime": 1794710940.0783255,
+    "seen": 1794745701.320509,
+    "ast_hash": "d04821bbbef407e9ab43f3f7b7999912",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-smoke.cjs": {
+    "mtime": 1794744952.5857782,
+    "seen": 1794745701.3207445,
+    "ast_hash": "bd7565ce3483eab9bbcb951ebcac0680",
+    "semantic_hash": ""
+  },
+  "evidence/list-electron.ps1": {
+    "mtime": 1794743608.3405325,
+    "seen": 1794745701.3207464,
+    "ast_hash": "0336d5b99b8a8cc9aee3b9ce0fe8fef4",
+    "semantic_hash": ""
+  },
+  "evidence/screenshot.ps1": {
+    "mtime": 1794743616.1820674,
+    "seen": 1794745701.320748,
+    "ast_hash": "d91d439824d976455f722d0efadc5fb1",
+    "semantic_hash": ""
+  },
+  "fix_inbound.cjs": {
+    "mtime": 1794723019.2313082,
+    "seen": 1794745701.3207498,
+    "ast_hash": "b5523b8c16257871aa62465e8a540d38",
+    "semantic_hash": ""
+  },
+  "fix_outcome.cjs": {
+    "mtime": 1794723053.395035,
+    "seen": 1794745701.3207517,
+    "ast_hash": "5937413b49825feda33bda22f58a0651",
+    "semantic_hash": ""
+  },
+  "invest-launch.ps1": {
+    "mtime": 1794729453.9995892,
+    "seen": 1794745701.3207533,
+    "ast_hash": "c8d8df69d56b1b7d6f88d41853d3a7f5",
+    "semantic_hash": ""
+  },
+  "launch-debug.ps1": {
+    "mtime": 1794711486.68175,
+    "seen": 1794745701.3207552,
+    "ast_hash": "b6bc70942f968d5459a12ec3971a38a6",
+    "semantic_hash": ""
+  },
+  "launch-electron.ps1": {
+    "mtime": 1794725373.3076487,
+    "seen": 1794745701.3207564,
+    "ast_hash": "e912d307d7b96dcce5cbad483f54840e",
+    "semantic_hash": ""
+  },
+  "typecheck-electron.ps1": {
+    "mtime": 1794725115.145758,
+    "seen": 1794745701.3218083,
+    "ast_hash": "11b19d574d9bb03339a3054fef8da83d",
+    "semantic_hash": ""
+  },
+  "PHASE_4_4_FINAL_WINDOWS_VERIFICATION_REPORT.md": {
+    "mtime": 1794725570.6011994,
+    "seen": 1794745701.323214,
+    "ast_hash": "9fca5d479e00bf1182fad73ddc1d1726",
+    "semantic_hash": ""
+  },
+  "PHASE_4_4_INDEPENDENT_ACCEPTANCE_AUDIT.md": {
+    "mtime": 1794721073.698669,
+    "seen": 1794745701.3232162,
+    "ast_hash": "03e6aa1660d6000ec0cfc02b15b4911d",
+    "semantic_hash": ""
+  },
+  "PHASE_4_4_POST_REMEDIATION_RE_AUDIT.md": {
+    "mtime": 1794724429.6351535,
+    "seen": 1794745701.3232176,
+    "ast_hash": "6fa26b237007ebfb3431f1b31001d69b",
+    "semantic_hash": ""
+  },
+  "evidence/baseline.txt": {
+    "mtime": 1794737485.1898932,
+    "seen": 1794745701.3263686,
+    "ast_hash": "5321a9159af354f0390fd2c502cc7b4f",
+    "semantic_hash": ""
+  },
+  "typecheck_result.txt": {
+    "mtime": 1794725089.3197148,
+    "seen": 1794745701.3273795,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": ""
+  },
+  "typecheck_root.txt": {
+    "mtime": 1794725153.2967594,
+    "seen": 1794745701.3273823,
+    "ast_hash": "990389c3ae4b030d603cb161e4143850",
+    "semantic_hash": ""
+  },
+  "PHASE_4_3_SCREENSHOT.png": {
+    "mtime": 1794711211.4519694,
+    "seen": 1794745701.3275318,
+    "ast_hash": "5cb02fe8942216bd432e7ee9a3ff5b7c",
+    "semantic_hash": ""
+  },
+  "apps/desktop/assets/brand/vyapara-icon.png": {
+    "mtime": 1794743589.0572026,
+    "seen": 1794745701.3320715,
+    "ast_hash": "f0470a819a7e835593ee4965fed71e91",
+    "semantic_hash": ""
+  },
+  "apps/desktop/src/assets/logo.png": {
+    "mtime": 1794744071.8296263,
+    "seen": 1794745701.332074,
+    "ast_hash": "12adf120af4840d60df77c7f8e28e030",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-dashboard.png": {
+    "mtime": 1794745662.4942408,
+    "seen": 1794745701.3320763,
+    "ast_hash": "7242da2aa71f5aab5c26e9f96fab7851",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

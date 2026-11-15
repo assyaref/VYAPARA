@@ -1,16 +1,16 @@
 /* src/index.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Custom properties for VYAPARA brand */
-:root {
-  --vyapara-navy: #0D47A1;
-  --vyapara-blue: #1976D2;
-  --vyapara-orange: #FF8F00;
-  --vyapara-light-blue: #E3F2FD;
-  --vyapara-surface: #F5F7FA;
-  --vyapara-text: #172033;
-  --vyapara-secondary: #64748B;
-  --vyapara-border: #E2E8F0;
+@theme {
+  --color-vyapara-navy: #0D47A1;
+  --color-vyapara-blue: #1976D2;
+  --color-vyapara-orange: #FF8F00;
+  --color-vyapara-light-blue: #E3F2FD;
+  --color-vyapara-surface: #F5F7FA;
+  --color-vyapara-text: #172033;
+  --color-vyapara-secondary: #64748B;
+  --color-vyapara-border: #E2E8F0;
+  --color-vyapara-red: #DC2626;
+  --color-vyapara-dark: #103F6E;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }

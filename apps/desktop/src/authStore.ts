@@ -33,19 +33,20 @@ const useAuth = create<AuthState>()(
       login: async (email: string, password: string) => {
         // Send login request to main process via IPC
         const result = await (window as any).vyapara.authLogin(email, password);
+        const loggedIn = result?.data?.user;
 
-        if (!result.success || !result.user) {
+        if (!result?.success || !loggedIn) {
           return false;
         }
 
         set({
           user: {
-            id: result.user.id,
-            name: result.user.name,
-            email: result.user.email,
-            role: result.user.role,
-            permissions: result.user.permissions,
-            mustChangePassword: result.user.mustChangePassword,
+            id: loggedIn.id,
+            name: loggedIn.name,
+            email: loggedIn.email,
+            role: loggedIn.role,
+            permissions: loggedIn.permissions,
+            mustChangePassword: loggedIn.mustChangePassword,
             loginAt: new Date().toISOString(),
           },
           isAuthenticated: true,
@@ -70,15 +71,16 @@ const useAuth = create<AuthState>()(
       checkSession: async () => {
         // Check session validity from main process
         const result = await (window as any).vyapara.authSession?.();
-        if (result?.success && result.user) {
+        const sessionUser = result?.data?.user;
+        if (result?.success && sessionUser) {
           set({
             user: {
-              id: result.user.id,
-              name: result.user.name,
-              email: result.user.email,
-              role: result.user.role,
-              permissions: result.user.permissions,
-              mustChangePassword: result.user.mustChangePassword,
+              id: sessionUser.id,
+              name: sessionUser.name,
+              email: sessionUser.email,
+              role: sessionUser.role,
+              permissions: sessionUser.permissions,
+              mustChangePassword: sessionUser.mustChangePassword,
               loginAt: new Date().toISOString(),
             },
             isAuthenticated: true,
@@ -96,15 +98,16 @@ const useAuth = create<AuthState>()(
         const state = useAuth.getState?.();
         if (!state?.user?.id) return false;
         const result = await (window as any).vyapara.authLogin(state.user.email, '');
-        if (result.success && result.user) {
+        const refreshed = result?.data?.user;
+        if (result?.success && refreshed) {
           set({
             user: {
-              id: result.user.id,
-              name: result.user.name,
-              email: result.user.email,
-              role: result.user.role,
-              permissions: result.user.permissions,
-              mustChangePassword: result.user.mustChangePassword,
+              id: refreshed.id,
+              name: refreshed.name,
+              email: refreshed.email,
+              role: refreshed.role,
+              permissions: refreshed.permissions,
+              mustChangePassword: refreshed.mustChangePassword,
               loginAt: new Date().toISOString(),
             },
           });
