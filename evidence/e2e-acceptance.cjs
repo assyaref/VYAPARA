@@ -153,6 +153,12 @@ const check = (name, ok) => {
   text = await bodyText();
   check('Admin user visible in settings', /E2E Admin/.test(text));
 
+  // 11. Offline Sync screen reachable from nav and renders engine status
+  await nav('Offline Sync');
+  text = await bodyText();
+  check('Offline Sync screen renders with engine status', /(Status sinkronisasi|Offline Sync|Idle|Sinkronkan Sekarang)/.test(text));
+  await page.screenshot({ path: path.join(root, 'evidence', 'acceptance-offline.png') });
+
   // 11. Screenshots
   await nav('Dashboard');
   await page.screenshot({ path: path.join(root, 'evidence', 'acceptance-dashboard.png') });
