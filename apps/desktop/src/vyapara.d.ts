@@ -117,6 +117,10 @@ interface Window {
     rolesSetPermissions: (input: unknown) => Promise<any>;
     permissionsGetAll: () => Promise<any>;
     getDeliveryOrder: (input: unknown) => Promise<any>;
+    pickBackupSavePath: (input?: unknown) => Promise<any>;
+    pickRestoreFile: (input?: unknown) => Promise<any>;
+    backupDatabase: (input: unknown) => Promise<any>;
+    restoreDatabase: (input: unknown) => Promise<any>;
     createCategory: (input: unknown) => Promise<any>;
     updateCategory: (input: unknown) => Promise<any>;
     deleteCategory: (input: unknown) => Promise<any>;

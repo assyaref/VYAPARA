@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, shell, session } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell, session, dialog } from 'electron';
 import * as path from 'path';
 import * as os from 'os';
 import { z } from 'zod';
@@ -413,6 +413,42 @@ function createWindow() {
       assertPermission(user, 'transaction:read');
       const summary = todaySummary(appDb);
       return { ok: true, success: true, data: { subtotal: summary.total, discountAmount: 0, taxAmount: 0, total: summary.total, count: summary.count } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('dialog:pickSavePath', async (_event: any, input: { token: string; defaultName?: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input?.token);
+      assertPermission(user, 'settings:write');
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        title: 'Simpan Backup Database',
+        defaultPath: input?.defaultName ?? 'vyapara-backup.vyapara-backup',
+        filters: [{ name: 'VYAPARA Backup', extensions: ['vyapara-backup'] }],
+      });
+      if (canceled || !filePath) return { ok: true, success: true, data: { path: null } };
+      return { ok: true, success: true, data: { path: filePath } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('dialog:pickRestoreFile', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input?.token);
+      assertPermission(user, 'settings:write');
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: 'Pilih File Backup untuk Restore',
+        properties: ['openFile'],
+        filters: [{ name: 'VYAPARA Backup', extensions: ['vyapara-backup', 'db', 'sqlite', 'bak'] }],
+      });
+      if (canceled || !filePaths?.[0]) return { ok: true, success: true, data: { path: null } };
+      return { ok: true, success: true, data: { path: filePaths[0] } };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
     }

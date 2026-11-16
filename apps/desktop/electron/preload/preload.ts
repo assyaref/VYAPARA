@@ -61,9 +61,9 @@ const api = {
   backupDatabase: (input: unknown) => send('database:backup', input),
   restoreDatabase: (input: unknown) => send('database:restore', input),
 
-  getSettings: () => send('settings:get'),
+  getSettings: () => send('settings:get', {}),
   updateSettings: (input: unknown) => send('settings:update', input),
-  settingsList: () => send('settings:list'),
+  settingsList: () => send('settings:list', {}),
   settingsUpsert: (input: unknown) => send('settings:upsert', input),
 
   getStockMovements: (input?: unknown) => send('inventory:getMovements', input ?? {}),
@@ -75,8 +75,8 @@ const api = {
   listOpnameItems: (input: unknown) => send('inventory:listOpnameItems', input),
   completeStockOpname: (input: unknown) => send('inventory:completeOpname', input),
   getStockOpnames: (input?: unknown) => send('inventory:getOpnames', input ?? {}),
-  getLowStockAlerts: () => send('inventory:getLowStockAlerts'),
-  getInventoryValuation: () => send('inventory:getValuation'),
+  getLowStockAlerts: () => send('inventory:getLowStockAlerts', {}),
+  getInventoryValuation: () => send('inventory:getValuation', {}),
   upsertInventorySettings: (input: unknown) => send('inventory:upsertSettings', input),
 
   createSupplier: (input: unknown) => send('supplier:create', input),
@@ -88,7 +88,7 @@ const api = {
   getSupplierInvoices: (input?: unknown) => send('supplier:invoiceGetAll', input ?? {}),
   getSupplierInvoice: (input: unknown) => send('supplier:invoiceGet', input),
   paySupplierInvoice: (input: unknown) => send('supplier:invoicePay', input),
-  getPayablesSummary: () => send('supplier:getPayables'),
+  getPayablesSummary: () => send('supplier:getPayables', {}),
 
   createPurchaseOrder: (input: unknown) => send('procurement:createPurchaseOrder', input),
   getPurchaseOrders: (input?: unknown) => send('procurement:getPurchaseOrders', input ?? {}),
@@ -140,9 +140,13 @@ const api = {
   rolesDeactivate: (input: unknown) => send('roles:deactivate', input),
   rolesGetPermissions: (input: unknown) => send('roles:getPermissions', input),
   rolesSetPermissions: (input: unknown) => send('roles:setPermissions', input),
-  permissionsGetAll: () => send('permissions:getAll'),
+  permissionsGetAll: () => send('permissions:getAll', {}),
 
   getDeliveryOrder: (input: unknown) => send('deliveryOrder:get', input),
+  pickBackupSavePath: (input?: unknown) => send('dialog:pickSavePath', input ?? {}),
+  pickRestoreFile: (input?: unknown) => send('dialog:pickRestoreFile', input ?? {}),
+  backupDatabase: (input: unknown) => send('database:backup', input),
+  restoreDatabase: (input: unknown) => send('database:restore', input),
   createCategory: (input: unknown) => send('category:create', input),
   updateCategory: (input: unknown) => send('category:update', input),
   deleteCategory: (input: unknown) => send('category:delete', input),

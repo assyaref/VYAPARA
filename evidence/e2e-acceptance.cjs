@@ -179,6 +179,19 @@ const check = (name, ok) => {
   await nav('Kasir (POS)');
   await page.screenshot({ path: path.join(root, 'evidence', 'acceptance-pos.png') });
 
+  // 12. Backup & Restore via IPC — real round trip on the temp profile (last, safest moment)
+  const backupPath = path.join(os.tmpdir(), `vyapara-e2e-backup-${Date.now()}.vyapara-backup`);
+  const backupRes = await page.evaluate((p) => window.vyapara.backupDatabase({ backupPath: p, token: '' }), backupPath)
+    .catch((e) => ({ ok: false, error: { message: String(e) } }));
+  check('Backup IPC succeeds', !!backupRes?.ok, JSON.stringify(backupRes?.error ?? ''));
+  check('Backup file written to disk', fs.existsSync(backupPath));
+
+  const restoreRes = await page.evaluate((p) => window.vyapara.restoreDatabase({ backupPath: p, token: '' }), backupPath)
+    .catch((e) => ({ ok: false, error: { message: String(e) } }));
+  check('Restore IPC succeeds', !!restoreRes?.ok, JSON.stringify(restoreRes?.error ?? ''));
+
+  fs.rmSync(backupPath, { force: true });
+
   const pass = results.filter((r) => r.ok).length;
   const fail = results.length - pass;
   console.log(`SUMMARY ${pass} PASS / ${fail} FAIL (${results.length} checks), pageErrors=${pageErrors.length}`);

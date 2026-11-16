@@ -14,7 +14,10 @@ const Settings: React.FC = () => {
   const canWrite = userPermissions.includes('settings:write');
   const canRead = userPermissions.includes('settings:read');
 
-  const [tab, setTab] = useState<'settings' | 'users' | 'roles' | 'permissions'>('settings');
+  const [tab, setTab] = useState<'settings' | 'users' | 'roles' | 'permissions' | 'backup'>('settings');
+  const [backupBusy, setBackupBusy] = useState(false);
+  const [restoreBusy, setRestoreBusy] = useState(false);
+  const [backupStatus, setBackupStatus] = useState<{ type: 'ok' | 'err' | 'info'; message: string } | null>(null);
   const [settings, setSettings] = useState<Setting[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -128,6 +131,60 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleBackup = async () => {
+    setBackupBusy(true);
+    setBackupStatus(null);
+    setError(null);
+    try {
+      const pick = await vyapara.pickBackupSavePath({ token: '', defaultName: `vyapara-backup-${new Date().toISOString().slice(0, 10)}.vyapara-backup` });
+      if (!pick?.ok || !pick.data?.path) {
+        setBackupStatus({ type: 'info', message: 'Backup dibatalkan.' });
+        return;
+      }
+      const res = await vyapara.backupDatabase({ token: '', backupPath: pick.data.path });
+      if (res?.ok) {
+        setBackupStatus({ type: 'ok', message: `Backup berhasil disimpan di:\n${pick.data.path}` });
+      } else {
+        setBackupStatus({ type: 'err', message: res?.error?.message ?? 'Backup gagal' });
+      }
+    } catch (err: any) {
+      setBackupStatus({ type: 'err', message: err.message || 'Backup gagal' });
+    } finally {
+      setBackupBusy(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setRestoreBusy(true);
+    setBackupStatus(null);
+    setError(null);
+    try {
+      const pick = await vyapara.pickRestoreFile({ token: '' });
+      if (!pick?.ok || !pick.data?.path) {
+        setBackupStatus({ type: 'info', message: 'Restore dibatalkan.' });
+        return;
+      }
+      const ok = window.confirm(
+        `Anda yakin ingin mengganti seluruh database dengan file backup ini?\n\n${pick.data.path}\n\nData saat ini akan digantikan. Cadangan otomatis disimpan dengan nama .pre-restore di lokasi asli sebelum diganti.`,
+      );
+      if (!ok) {
+        setBackupStatus({ type: 'info', message: 'Restore dibatalkan.' });
+        return;
+      }
+      const res = await vyapara.restoreDatabase({ token: '', backupPath: pick.data.path });
+      if (res?.ok) {
+        setBackupStatus({ type: 'ok', message: 'Restore berhasil. Aplikasi akan dimuat ulang.' });
+        window.setTimeout(() => window.location.reload(), 1500);
+      } else {
+        setBackupStatus({ type: 'err', message: res?.error?.message ?? 'Restore gagal' });
+      }
+    } catch (err: any) {
+      setBackupStatus({ type: 'err', message: err.message || 'Restore gagal' });
+    } finally {
+      setRestoreBusy(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-vyapara-surface text-vyapara-text font-inter">
       <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -153,6 +210,16 @@ const Settings: React.FC = () => {
           >
             Pengaturan Aplikasi
           </button>
+          {canWrite && (
+            <button
+              onClick={() => setTab('backup')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                tab === 'backup' ? 'bg-vyapara-blue text-white' : 'text-vyapara-text hover:bg-vyapara-surface'
+              }`}
+            >
+              Backup &amp; Restore
+            </button>
+          )}
           {canWrite && (
             <button
               onClick={() => setTab('users')}
@@ -248,6 +315,66 @@ const Settings: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'backup' && canWrite && (
+            <div className="max-w-2xl space-y-6">
+              <div>
+                <h3 className="text-lg font-bold text-vyapara-navy mb-2">Backup &amp; Restore Database</h3>
+                <p className="text-sm text-vyapara-secondary">Cadangkan seluruh data toko (transaksi, produk, pengguna, pengaturan) ke file <code>.vyapara-backup</code>, dan pulihkan kapan pun diperlukan.</p>
+              </div>
+
+              {backupStatus && (
+                <div className={`text-sm rounded-lg px-4 py-3 border ${
+                  backupStatus.type === 'ok' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                  backupStatus.type === 'err' ? 'bg-red-50 text-red-800 border-red-200' :
+                  'bg-slate-50 text-slate-700 border-slate-200'
+                }`}>
+                  <pre className="whitespace-pre-wrap font-sans">{backupStatus.message}</pre>
+                </div>
+              )}
+
+              <div className="bg-vyapara-surface rounded-xl border border-vyapara-border p-5 space-y-4">
+                <div>
+                  <h4 className="text-sm font-bold text-vyapara-navy">1. Buat Backup</h4>
+                  <p className="text-xs text-vyapara-secondary mt-1">Membuat salinan database terenkripsi-integrity-check. Gunakan USB atau drive eksternal untuk cadangan offline.</p>
+                  <button
+                    onClick={handleBackup}
+                    disabled={backupBusy}
+                    className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 bg-vyapara-navy text-white text-sm font-semibold rounded-lg hover:bg-vyapara-blue disabled:opacity-60 transition-colors"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5M12 15V3" />
+                    </svg>
+                    {backupBusy ? 'Sedang membuat cadangan…' : 'Buat Backup Sekarang'}
+                  </button>
+                </div>
+
+                <div className="border-t border-vyapara-border pt-4">
+                  <h4 className="text-sm font-bold text-vyapara-navy">2. Restore dari File</h4>
+                  <p className="text-xs text-vyapara-secondary mt-1"><strong className="text-vyapara-red">Perhatian:</strong> mengganti seluruh database aktif. File asli akan disimpan sebagai <code>vyapara.db.pre-restore</code> sebelum diganti. Restart otomatis setelah restore.</p>
+                  <button
+                    onClick={handleRestore}
+                    disabled={restoreBusy}
+                    className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 border border-vyapara-red text-vyapara-red text-sm font-semibold rounded-lg hover:bg-red-50 disabled:opacity-60 transition-colors"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 10a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
+                    </svg>
+                    {restoreBusy ? 'Sedang memulihkan…' : 'Restore dari File'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="text-xs text-vyapara-secondary border border-vyapara-border rounded-lg p-4 bg-white">
+                <p className="font-semibold text-vyapara-navy mb-1">Tips penyimpanan:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Simpan file <code>.vyapara-backup</code> di minimal 2 lokasi (mis. USB + cloud folder).</li>
+                  <li>Backup sebaiknya dilakukan setiap akhir shift/minggu.</li>
+                  <li>Jangan hapus file <code>.pre-restore</code> sampai yakin restore sudah benar.</li>
+                </ul>
               </div>
             </div>
           )}

@@ -67,9 +67,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/Login.tsx": {
-    "mtime": 1794747174.4553087,
-    "seen": 1794748558.0690422,
-    "ast_hash": "c5af710b247216991adaf42ed549ce76",
+    "mtime": 1794817619.9570687,
+    "seen": 1794820256.4098437,
+    "ast_hash": "ab1df75aed9f679c380b70fdb14812f0",
     "semantic_hash": ""
   },
   "apps/desktop/src/NextDashboard.tsx": {
@@ -145,9 +145,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/vyapara.d.ts": {
-    "mtime": 1794814757.4344218,
-    "seen": 1794815770.98856,
-    "ast_hash": "f900fe0ea0a04bec04f7aff8796e1668",
+    "mtime": 1794819466.7084289,
+    "seen": 1794820256.4172504,
+    "ast_hash": "facb89863d0dbcfaf0cd6f10cfe3ba53",
     "semantic_hash": ""
   },
   "apps/desktop/tailwind.config.ts": {
@@ -205,15 +205,15 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/main.ts": {
-    "mtime": 1794814683.1252203,
-    "seen": 1794815770.96035,
-    "ast_hash": "2504d81a357f62bf608d775c12311a74",
+    "mtime": 1794819443.5461054,
+    "seen": 1794820256.3954427,
+    "ast_hash": "109c1eae384f476109b29c006e0df91e",
     "semantic_hash": ""
   },
   "apps/desktop/electron/preload/preload.ts": {
-    "mtime": 1794814757.4344218,
-    "seen": 1794815770.9800167,
-    "ast_hash": "e09875f864287b7421ce7328c7be4431",
+    "mtime": 1794820012.9438632,
+    "seen": 1794820256.4074247,
+    "ast_hash": "ee646d3f8130755d4987e8bc9caaabf9",
     "semantic_hash": ""
   },
   "apps/desktop/drizzle/schema.ts": {
@@ -379,9 +379,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/Settings.tsx": {
-    "mtime": 1794620168.3221147,
-    "seen": 1794663711.5006113,
-    "ast_hash": "bf652a30edf45b2da78e02b785d2de34",
+    "mtime": 1794819575.0459735,
+    "seen": 1794820256.4130995,
+    "ast_hash": "a0c09cdd3bc46b10ffd6acab31821686",
     "semantic_hash": ""
   },
   "apps/desktop/src/Supplier.tsx": {
@@ -1429,9 +1429,9 @@
     "semantic_hash": ""
   },
   "evidence/e2e-acceptance.cjs": {
-    "mtime": 1794815415.8600383,
-    "seen": 1794815770.9990766,
-    "ast_hash": "5645d51fdbd264ea91402fc1e47e8162",
+    "mtime": 1794819769.9489744,
+    "seen": 1794820256.4220986,
+    "ast_hash": "543d7e8af55c0bac7d5612e3e2afbfde",
     "semantic_hash": ""
   },
   "PHASE_4_BUSINESS_FUNCTIONAL_ACCEPTANCE.md": {
@@ -1447,15 +1447,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794815439.4839664,
-    "seen": 1794815771.0413063,
-    "ast_hash": "42c0ca71fcb36aa190cfcd1c19ba18cb",
+    "mtime": 1794820174.947147,
+    "seen": 1794820256.456098,
+    "ast_hash": "38d612c08d99433cabaad10184d1558e",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794815440.548504,
-    "seen": 1794815771.0413144,
-    "ast_hash": "1404ae8a3c90ae11f7db06ef69e15966",
+    "mtime": 1794820175.9866056,
+    "seen": 1794820256.456106,
+    "ast_hash": "a88970be5b8e3b809405bcc0c707e974",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1471,8 +1471,8 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794815438.4219017,
-    "seen": 1794815771.041311,
+    "mtime": 1794820173.9212806,
+    "seen": 1794820256.4561024,
     "ast_hash": "5b114d304a37f248945d892b1c3d2158",
     "semantic_hash": ""
   },
@@ -1786,6 +1786,42 @@
     "mtime": 1794817083.29959,
     "seen": 1794817167.6315947,
     "ast_hash": "5c799ff7b71d09c3844a30345f1bd4ba",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-backup-shot.cjs": {
+    "mtime": 1794819887.2834115,
+    "seen": 1794820256.4221025,
+    "ast_hash": "9b9bb80afb0a6780c112eebe394de04b",
+    "semantic_hash": ""
+  },
+  "evidence/backup-restore-ui.png": {
+    "mtime": 1794820082.8666902,
+    "seen": 1794820256.4561088,
+    "ast_hash": "30e0c812e144460758ede77357285d9b",
+    "semantic_hash": ""
+  },
+  "evidence/final-menu-fix.png": {
+    "mtime": 1794818444.7183328,
+    "seen": 1794820256.4564898,
+    "ast_hash": "5b85a795b9b920c7f5aa2f1f05303a2b",
+    "semantic_hash": ""
+  },
+  "evidence/login-final-verify.png": {
+    "mtime": 1794818063.6647613,
+    "seen": 1794820256.4564948,
+    "ast_hash": "1c8eda285d56a6ac9907b4a6a4a5b017",
+    "semantic_hash": ""
+  },
+  "evidence/login-no-file.png": {
+    "mtime": 1794817797.946772,
+    "seen": 1794820256.456499,
+    "ast_hash": "1c8eda285d56a6ac9907b4a6a4a5b017",
+    "semantic_hash": ""
+  },
+  "evidence/login-no-file2.png": {
+    "mtime": 1794817931.081456,
+    "seen": 1794820256.4565027,
+    "ast_hash": "1c8eda285d56a6ac9907b4a6a4a5b017",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {
