@@ -49,6 +49,46 @@
 </ol>
 <div class="warn"><strong>Catatan:</strong> sebelumnya kategori/satuan hanya bisa memakai seed bawaan (<code>ATK</code>, <code>Kertas</code>, <code>Pcs</code>, <code>Rim</code>, <code>Pack</code>) — fitur ini menutup celah tersebut.</div>
 
+<!-- BAB 17 -->
+<h1 class="section" id="bab17">Bab 17 — Faktur Pemasok, Retur Pembelian, Opname &amp; Amankan Data</h1>
+
+<p class="lede">Bab ini melengkapi siklus pembelian (pembelian → terima → bayar/kembalikan) dan menambahkan cadangan database dari aplikasi.</p>
+
+<h2>17.1 Faktur Pemasok</h2>
+<ol>
+<li>Buka menu <strong>Faktur Pemasok</strong> (ikon berkas).</li>
+<li>Klik <strong>Faktur Baru</strong> → pilih pemasok, isi tanggal faktur &amp; jatuh tempo, pajak (opsional), lalu item-item faktur (deskripsi, qty, harga satuan). Klik <strong>+ Tambah baris</strong> untuk item tambahan → <strong>Simpan Faktur</strong>.</li>
+<li>Daftar faktur menampilkan status: <em>Belum Lunas</em> / <em>Sebagian</em> / <em>Lunas</em>. Kolom <em>Sisa</em> menunjukkan hutang yang belum dibayar.</li>
+<li>Klik <strong>Bayar</strong> pada baris faktur → isi nominal (default sisa hutang) + deskripsi (mis. “Transfer BCA 1234”) → <strong>Bayar Sekarang</strong>. Pembayaran tercatat sebagai transaksi pemasok mengurangi saldo hutang.</li>
+</ol>
+<div class="warn"><strong>Catatan:</strong> Faktur ini terpisah dari <em>Purchase Order</em>. Faktur mencatat hutang finansial; penerimaan barang dicatat lewat <strong>Pembelian → Terima Barang</strong>.</div>
+
+<h2>17.2 Retur Pembelian</h2>
+<ol>
+<li>Buka menu <strong>Retur Pembelian</strong>.</li>
+<li>Panel kiri menampilkan <strong>PO yang Sudah Diterima</strong>. Klik <strong>Retur</strong> pada PO yang ingin dikembalikan.</li>
+<li>Isi kuantitas retur per baris (tidak boleh melebihi jumlah diterima), tambahkan catatan (mis. “2 pcs rusak saat bongkar”) → <strong>Ajukan Retur</strong>.</li>
+<li>Stok otomatis berkurang sebesar retur (<code>movement return_in</code>), hutang pemasok otomatis disesuaikan, dan retur muncul di panel <em>Riwayat Retur Pembelian</em>.</li>
+</ol>
+
+<h2>17.3 Opname Stok &amp; Alarm Minimum/Maksimum</h2>
+<ol>
+<li>Buka menu <strong>Opname Stok</strong> — kartu valuasi di atas menampilkan nilai stok (HPP &amp; harga jual).</li>
+<li>Tab <strong>Opname Stok</strong> → isi lokasi (opsional) &amp; catatan → <strong>Buat Sesi Opname</strong>. Pilih produk di dropdown, isi <em>Fisik</em> (hasil hitung), klik <strong>Tambah</strong> — selisih otomatis ditampilkan (merah bila kurang, hijau bila lebih). Ulangi untuk semua produk, lalu <strong>Selesaikan Opname &amp; Terapkan Selisih</strong>.</li>
+<li>Tab <strong>Setelan Alarm Stok</strong> → pilih produk → isi <em>Stok Minimum</em> / <em>Maksimum</em> / <em>Titik Reorder</em> → centang <em>Aktifkan alarm stok menipis</em> → <strong>Simpan Setelan</strong>. Mesin opname dan alarm minimum memakai sistem yang sama sehingga daftar stok rendah di Dashboard valid.</li>
+</ol>
+<div class="warn"><strong>Perhatian:</strong> menyelesaikan opname menerapkan selisih ke stok dan tidak dapat dibatalkan. Pastikan hitungan fisik sudah final sebelum menyelesaikan sesi.</div>
+
+<h2>17.4 Backup &amp; Restore Database</h2>
+<ol>
+<li>Menu <strong>Pengaturan</strong> → tab <strong>Backup &amp; Restore</strong> (hanya untuk admin/setting:write).</li>
+<li>Klik <strong>Buat Backup Sekarang</strong> → pilih lokasi &amp; nama file <code>.vyapara-backup</code>. File tersebut adalah salinan database penuh yang lolos pemeriksaan integritas.</li>
+<li>Untuk memulihkan: klik <strong>Restore dari File</strong> → pilih file backup → konfirmasi. File asli disimpan otomatis sebagai <code>vyapara.db.pre-restore</code> sebelum diganti; aplikasi memuat ulang setelah restore berhasil.</li>
+<li><strong>Tips:</strong> simpan backup di minimal 2 lokasi (mis. USB + folder cloud). Backup dianjurkan setiap akhir shift/minggu. Jangan hapus <code>.pre-restore</code> sampai yakin hasil restore benar.</li>
+</ol>
+<div class="warn"><strong>Penting:</strong> file backup di direktori root drive (mis. <code>E:\</code>) dapat gagal bila sistem tidak memberi izin tulis (EPERM). Gunakan folder yang bisa ditulis, mis. <code>D:\Backup\</code>.</div>
+
+
 <!-- LAMPIRAN -->
 <h1 class="section" id="lampiran">Lampiran A — Glossary &amp; FAQ</h1>
 
