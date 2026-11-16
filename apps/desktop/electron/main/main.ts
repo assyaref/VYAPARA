@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell, session } from 'electron';
 import * as path from 'path';
 import * as os from 'os';
 import { z } from 'zod';
@@ -311,7 +311,10 @@ function createWindow() {
   ipcMain.handle('product:getAll', async (event: any, input: { token: string; search?: string; categoryId?: string; includeInactive?: boolean }) => {
     try {
       const { listProducts } = await import('./services/products');
+      const { requireUser, assertPermission } = await import('./services/auth');
       const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'product:read');
       const result = listProducts(appDb, input, true);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
@@ -361,10 +364,12 @@ function createWindow() {
     }
   });
 
-  ipcMain.handle('category:getAll', async (event: any) => {
+  ipcMain.handle('category:getAll', async (event: any, input: { token: string }) => {
     try {
       const { listCategories } = await import('./services/products');
+      const { requireUser } = await import('./services/auth');
       const appDb = getDb();
+      requireUser(appDb, input?.token);
       const result = listCategories(appDb);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
@@ -372,10 +377,12 @@ function createWindow() {
     }
   });
 
-  ipcMain.handle('unit:getAll', async (event: any) => {
+  ipcMain.handle('unit:getAll', async (event: any, input: { token: string }) => {
     try {
       const { listUnits } = await import('./services/products');
+      const { requireUser } = await import('./services/auth');
       const appDb = getDb();
+      requireUser(appDb, input?.token);
       const result = listUnits(appDb);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
@@ -400,8 +407,12 @@ function createWindow() {
   ipcMain.handle('transaction:getAll', async (event: any, input: { token: string; limit?: number }) => {
     try {
       const { listTransactions } = await import('./services/transactions');
+      const { requireUser, assertPermission } = await import('./services/auth');
       const appDb = getDb();
-      const result = listTransactions(appDb, input.limit || 200);
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'transaction:read');
+      const limit = Math.min(Math.max(Number(input?.limit) || 200, 1), 1000);
+      const result = listTransactions(appDb, limit);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
@@ -410,19 +421,28 @@ function createWindow() {
 
   ipcMain.handle('transaction:summary', async (event: any, input: { token: string; items: any; discountAmount: number; taxRateBps: number; payments: any }) => {
     try {
-      const { listTransactions } = await import('./services/transactions');
+      const { todaySummary } = await import('./services/transactions');
+      const { requireUser, assertPermission } = await import('./services/auth');
       const appDb = getDb();
-      const result = listTransactions(appDb, 1);
-      return { ok: true, success: true, data: { subtotal: 0, discountAmount: 0, taxAmount: 0, total: 0 } };
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'transaction:read');
+      const summary = todaySummary(appDb);
+      return { ok: true, success: true, data: { subtotal: summary.total, discountAmount: 0, taxAmount: 0, total: summary.total, count: summary.count } };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
     }
   });
 
-  ipcMain.handle('database:backup', async (event: any, input: { backupPath: string }) => {
+  ipcMain.handle('database:backup', async (event: any, input: { token: string; backupPath: string }) => {
     try {
       const { backupDatabase } = await import('./services/backup');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      if (!input || typeof input.backupPath !== 'string' || input.backupPath.trim().length < 3) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: 'Lokasi cadangan tidak valid' } };
+      }
       const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
       const result = await backupDatabase(appDb, input.backupPath);
       return { ok: true, success: true, data: { path: result } };
     } catch (error: any) {
@@ -430,10 +450,16 @@ function createWindow() {
     }
   });
 
-  ipcMain.handle('database:restore', async (event: any, input: { backupPath: string }) => {
+  ipcMain.handle('database:restore', async (event: any, input: { token: string; backupPath: string }) => {
     try {
       const { restoreDatabase } = await import('./services/backup');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      if (!input || typeof input.backupPath !== 'string' || input.backupPath.trim().length < 3) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: 'File cadangan tidak valid' } };
+      }
       const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
       await restoreDatabase(appDb, input.backupPath);
       return { ok: true, success: true };
     } catch (error: any) {
@@ -444,7 +470,10 @@ function createWindow() {
   ipcMain.handle('settings:get', async (event: any, input: { token: string }) => {
     try {
       const { getSettings } = await import('./services/settings');
+      const { requireUser, assertPermission } = await import('./services/auth');
       const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:read');
       const result = getSettings(appDb);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
@@ -455,7 +484,10 @@ function createWindow() {
   ipcMain.handle('settings:update', async (event: any, input: { token: string; taxRateBps: number; storeName: string; receiptFooter: string }) => {
     try {
       const { updateSettings } = await import('./services/settings');
+      const { requireUser, assertPermission } = await import('./services/auth');
       const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
       const result = updateSettings(appDb, input);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
@@ -1800,9 +1832,11 @@ function createWindow() {
     }
   });
 
-  ipcMain.handle('sync:getStatus', async () => {
+  ipcMain.handle('sync:getStatus', async (_event: any, input: { token: string }) => {
     try {
+      const { requireUser } = await import('./services/auth');
       const db = getDb();
+      requireUser(db, input?.token);
       const coord = getSyncCoordinator() ?? initSyncCoordinator(db);
       return { ok: true, success: true, data: coord.getStatus() };
     } catch (error: any) {
@@ -1810,9 +1844,11 @@ function createWindow() {
     }
   });
 
-  ipcMain.handle('sync:trigger', async () => {
+  ipcMain.handle('sync:trigger', async (_event: any, input: { token: string }) => {
     try {
+      const { requireUser } = await import('./services/auth');
       const db = getDb();
+      requireUser(db, input?.token);
       const coord = getSyncCoordinator() ?? initSyncCoordinator(db);
       const data = await coord.trigger('manual');
       return { ok: true, success: true, data };
@@ -1822,7 +1858,7 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('will-navigate', (_event, url) => {
-    if (!url.startsWith('http://localhost') && !url.startsWith('https://')) {
+    if (!url.startsWith('http://localhost:1420') && !url.startsWith('https://') && !url.startsWith('file://')) {
       _event.preventDefault();
     }
   });
@@ -1842,6 +1878,18 @@ function createWindow() {
 app.whenReady().then(() => {
   const db = getDb();
   initSyncCoordinator(db).start();
+  if (process.env.NODE_ENV === 'production') {
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Content-Security-Policy': [
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src 'self'",
+          ],
+        },
+      });
+    });
+  }
   createWindow();
 
   app.on('activate', () => {

@@ -205,15 +205,15 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/main.ts": {
-    "mtime": 1794743594.8722124,
-    "seen": 1794745701.3096101,
-    "ast_hash": "3e3d24639a8e74ba8490b112de58d9f5",
+    "mtime": 1794790290.6980407,
+    "seen": 1794790912.5723095,
+    "ast_hash": "f5aa47956145a8ad0e436efcb706974c",
     "semantic_hash": ""
   },
   "apps/desktop/electron/preload/preload.ts": {
-    "mtime": 1794704698.8277254,
-    "seen": 1794706792.6271904,
-    "ast_hash": "16fd17692d6139b3f513dfc2787ca264",
+    "mtime": 1794790210.5180674,
+    "seen": 1794790912.5798743,
+    "ast_hash": "6d3d337195d99532241c828733751ea8",
     "semantic_hash": ""
   },
   "apps/desktop/drizzle/schema.ts": {
@@ -1386,12 +1386,6 @@
     "ast_hash": "7242da2aa71f5aab5c26e9f96fab7851",
     "semantic_hash": ""
   },
-  "apps/desktop/electron/main/sync/debug-count.test.ts": {
-    "mtime": 1794746916.594919,
-    "seen": 1794748558.0659297,
-    "ast_hash": "d992d8efded99267a98bfacdd68647f2",
-    "semantic_hash": ""
-  },
   "apps/desktop/electron/main/sync/stress-4.5.test.ts": {
     "mtime": 1794748011.6318867,
     "seen": 1794748558.0666363,
@@ -1426,6 +1420,42 @@
     "mtime": 1794748460.8791778,
     "seen": 1794748558.101411,
     "ast_hash": "bc943f39651a6d059866c0483bc577c3",
+    "semantic_hash": ""
+  },
+  ".vitest/json/output.json": {
+    "mtime": 1794790532.6939056,
+    "seen": 1794790912.5709045,
+    "ast_hash": "d129c24b50ad2eb00a43e85efc4c2543",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-acceptance.cjs": {
+    "mtime": 1794750886.0234637,
+    "seen": 1794790912.585275,
+    "ast_hash": "a0d862e967e68b5225b30c33964f0a14",
+    "semantic_hash": ""
+  },
+  "PHASE_4_BUSINESS_FUNCTIONAL_ACCEPTANCE.md": {
+    "mtime": 1794751060.5866797,
+    "seen": 1794790912.5894728,
+    "ast_hash": "a941cd60ce387fb81e44f5e3c06bcbf1",
+    "semantic_hash": ""
+  },
+  "PHASE_5_SECURITY_AUDIT.md": {
+    "mtime": 1794790878.6820674,
+    "seen": 1794790912.5894754,
+    "ast_hash": "4329e94fa44c608d2ff60c1133da60d7",
+    "semantic_hash": ""
+  },
+  "evidence/acceptance-dashboard.png": {
+    "mtime": 1794790359.0935247,
+    "seen": 1794790912.5985398,
+    "ast_hash": "89f10e1e19536f4a32fcbd12e4008e4e",
+    "semantic_hash": ""
+  },
+  "evidence/acceptance-pos.png": {
+    "mtime": 1794790360.1770518,
+    "seen": 1794790912.5985427,
+    "ast_hash": "d2cfd9457e0a05a5740abdb11344f4fe",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

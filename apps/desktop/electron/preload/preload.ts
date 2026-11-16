@@ -20,8 +20,8 @@ async function send(channel: string, input?: unknown): Promise<any> {
 const api = {
   getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
   getEnvironmentStatus: () => ipcRenderer.invoke('app:getEnvironmentStatus'),
-  syncGetStatus: () => ipcRenderer.invoke('sync:getStatus'),
-  syncTrigger: () => ipcRenderer.invoke('sync:trigger'),
+  syncGetStatus: () => send('sync:getStatus', {}),
+  syncTrigger: () => send('sync:trigger', {}),
 
   authNeedsSetup: () => ipcRenderer.invoke('auth:needsSetup'),
   authSetup: async (input: { name: string; email: string; password: string }) => {
@@ -51,8 +51,8 @@ const api = {
   createProduct: (input: unknown) => send('product:create', input),
   updateProduct: (input: unknown) => send('product:update', input),
   deactivateProduct: (input: unknown) => send('product:deactivate', input),
-  getCategories: () => send('category:getAll'),
-  getUnits: () => send('unit:getAll'),
+  getCategories: () => send('category:getAll', {}),
+  getUnits: () => send('unit:getAll', {}),
 
   createTransaction: (input: unknown) => send('transaction:create', input),
   getTransactions: (input?: unknown) => send('transaction:getAll', input ?? {}),
