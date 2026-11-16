@@ -102,7 +102,6 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen w-full font-inter bg-gradient-to-br from-[#0D47A1] via-[#155FAD] to-[#1E88E5] relative overflow-hidden flex items-center justify-center">
       <div className="absolute -top-40 -left-40 w-[34rem] h-[34rem] rounded-full bg-[#FF8F00]/20 blur-3xl" />
       <div className="absolute -bottom-48 -right-40 w-[36rem] h-[36rem] rounded-full bg-[#0D47A1]/60 blur-3xl" />
-      <div className="absolute top-16 right-24 w-40 h-40 rounded-full border border-white/10" />
       <div className="absolute bottom-20 left-24 w-24 h-24 rounded-full border border-white/10" />
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md px-8 py-7">

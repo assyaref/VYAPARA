@@ -200,22 +200,7 @@ function createWindow() {
     }
   }
 
-  const isDevMenu = isDev
-    ? [
-        {
-          label: 'File',
-          submenu: [
-            { role: 'reload' as const },
-            { role: 'toggleDevTools' as const },
-            { type: 'separator' as const },
-            { role: 'quit' as const },
-          ],
-        },
-      ]
-    : [];
-
-  const menu = Menu.buildFromTemplate(isDevMenu);
-  Menu.setApplicationMenu(menu);
+  Menu.setApplicationMenu(null);
 
   ipcMain.handle('app:getInfo', async (): Promise<AppInfo> => {
     return {
