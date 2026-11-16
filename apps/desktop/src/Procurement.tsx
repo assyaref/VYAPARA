@@ -50,6 +50,7 @@ const Procurement: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedPo, setSelectedPo] = useState<PurchaseOrder | null>(null);
+  const [receiveQty, setReceiveQty] = useState<Record<string, string>>({});
   const [formOpen, setFormOpen] = useState(false);
   const [formData, setFormData] = useState<any>({
     supplierId: '',
@@ -128,6 +129,7 @@ const Procurement: React.FC = () => {
       });
       if (result.ok) {
         setFormOpen(false);
+        setView('list');
         setFormData({ supplierId: '', items: [{ productId: '', quantity: '', unitPrice: '' }], notes: '' });
         await loadPurchaseOrders();
       } else {
@@ -139,7 +141,18 @@ const Procurement: React.FC = () => {
   };
 
   const handleReceive = async (po: PurchaseOrder) => {
-    setSelectedPo(po);
+    setError(null);
+    let full: PurchaseOrder = po;
+    try {
+      const res = await vyapara.getPurchaseOrder({ token: '', id: po.id });
+      if (res?.ok && res.data) full = res.data;
+    } catch (err: any) {
+      setError(err?.message || 'Gagal memuat detail PO');
+    }
+    const seed: Record<string, string> = {};
+    for (const it of full.items ?? []) seed[it.id] = String(Math.max(0, it.quantityOrdered - it.quantityReceived));
+    setReceiveQty(seed);
+    setSelectedPo(full);
     setView('detail');
   };
 
@@ -148,12 +161,9 @@ const Procurement: React.FC = () => {
     if (!selectedPo) return;
     setError(null);
     try {
-      const items = formData.items
-        .filter((it: any) => it.productId && it.quantity)
-        .map((it: any) => ({
-          productId: it.productId,
-          quantity: parseInt(it.quantity, 10),
-        }));
+      const items = selectedPo.items
+        .map((it) => ({ purchaseOrderItemId: it.id, productId: it.productId, quantity: parseInt(receiveQty[it.id] ?? '0', 10) || 0 }))
+        .filter((it) => it.quantity > 0);
       if (items.length === 0) {
         setError('Minimal satu item wajib diisi');
         return;
@@ -167,6 +177,7 @@ const Procurement: React.FC = () => {
       if (result.ok) {
         setFormOpen(false);
         setFormData({ supplierId: '', items: [{ productId: '', quantity: '', unitPrice: '' }], notes: '' });
+        setReceiveQty({});
         setSelectedPo(null);
         setView('list');
         await loadPurchaseOrders();
@@ -509,7 +520,10 @@ const Procurement: React.FC = () => {
                       </label>
                       <input
                         type="number"
-                        defaultValue={item.quantityOrdered - item.quantityReceived}
+                        min={0}
+                        max={item.quantityOrdered - item.quantityReceived}
+                        value={receiveQty[item.id] ?? String(Math.max(0, item.quantityOrdered - item.quantityReceived))}
+                        onChange={(e) => setReceiveQty({ ...receiveQty, [item.id]: e.target.value })}
                         className="w-full px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none"
                         placeholder="0"
                       />

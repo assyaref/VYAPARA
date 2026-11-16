@@ -73,9 +73,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/Procurement.tsx": {
-    "mtime": 1794678301.1776938,
-    "seen": 1794680625.340828,
-    "ast_hash": "81f2700f1c5be3f30f08b0f8b386841c",
+    "mtime": 1794825270.9950426,
+    "seen": 1794825395.4115036,
+    "ast_hash": "c0e4e23fce01e479e95a067d502af24b",
     "semantic_hash": ""
   },
   "apps/desktop/src/authStore.ts": {
@@ -1387,15 +1387,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794823788.6218977,
-    "seen": 1794824330.8887143,
-    "ast_hash": "e8fe14b8a817722b6110b4e648e375ee",
+    "mtime": 1794825365.390435,
+    "seen": 1794825395.456314,
+    "ast_hash": "d896b2f351b8b07e563a5faac7c59b5d",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794823789.7114375,
-    "seen": 1794824330.8887215,
-    "ast_hash": "a305d3dd99a13a69bcf315aa0bfc1326",
+    "mtime": 1794825366.5496633,
+    "seen": 1794825395.4563236,
+    "ast_hash": "e0ea0bf05c9b7149ff6642fb99eab7ff",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1411,8 +1411,8 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794823787.5570478,
-    "seen": 1794824330.8887181,
+    "mtime": 1794825364.2673056,
+    "seen": 1794825395.4563198,
     "ast_hash": "81ed22ec03dd0349c16ab111c08e268c",
     "semantic_hash": ""
   },
@@ -1543,9 +1543,9 @@
     "semantic_hash": ""
   },
   "docs/manual/manual-full.html": {
-    "mtime": 1794815624.1224515,
-    "seen": 1794815771.0220213,
-    "ast_hash": "b06033893b6dabd3e23c5652cdbf63c9",
+    "mtime": 1794824451.2888415,
+    "seen": 1794825395.439429,
+    "ast_hash": "e1c1e01b47e1b55085d45ba00e4e0eb2",
     "semantic_hash": ""
   },
   "docs/manual/part1-head.html": {
@@ -1555,9 +1555,9 @@
     "semantic_hash": ""
   },
   "docs/manual/part2-toc.html": {
-    "mtime": 1794801529.8813045,
-    "seen": 1794801744.821028,
-    "ast_hash": "0a0012f7aad9d6ca9f2c531da17d2d1f",
+    "mtime": 1794824451.18961,
+    "seen": 1794825395.4398377,
+    "ast_hash": "2af40422b47aa30124d20096e6161aac",
     "semantic_hash": ""
   },
   "docs/manual/part3-bab2-4.html": {
@@ -1591,9 +1591,9 @@
     "semantic_hash": ""
   },
   "docs/manual/part8-bab15-end.html": {
-    "mtime": 1794815624.0664349,
-    "seen": 1794815771.0236776,
-    "ast_hash": "361ae09bfb33af719281776f535c4b78",
+    "mtime": 1794824451.19161,
+    "seen": 1794825395.4410653,
+    "ast_hash": "13087c4f3ff72f1c13c5673e150e5909",
     "semantic_hash": ""
   },
   "docs/manual/part9-bab16.html": {
@@ -1603,9 +1603,9 @@
     "semantic_hash": ""
   },
   "VYAPARA_Panduan_Penggunaan.pdf": {
-    "mtime": 1794815669.74118,
-    "seen": 1794815771.0263884,
-    "ast_hash": "ecbb09764a226f65631b0ddf4967bf28",
+    "mtime": 1794824455.9440184,
+    "seen": 1794825395.443412,
+    "ast_hash": "281a9a27233b89bab321f480dbb8b5e4",
     "semantic_hash": ""
   },
   "docs/manual/icon.png": {
@@ -1798,6 +1798,18 @@
     "mtime": 1794823369.481602,
     "seen": 1794823478.9409916,
     "ast_hash": "c5b47959098e6d4d17c74ae964b067b9",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-procurement.cjs": {
+    "mtime": 1794825226.783341,
+    "seen": 1794825395.4209454,
+    "ast_hash": "4a32b7148bdfdb954b530951826f1d77",
+    "semantic_hash": ""
+  },
+  "docs/manual/part10-bab17.html": {
+    "mtime": 1794824430.150113,
+    "seen": 1794825395.43983,
+    "ast_hash": "e8b168927074ffc7c0627251a82da9a0",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {
