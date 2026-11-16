@@ -117,6 +117,12 @@ interface Window {
     rolesSetPermissions: (input: unknown) => Promise<any>;
     permissionsGetAll: () => Promise<any>;
     getDeliveryOrder: (input: unknown) => Promise<any>;
+    createCategory: (input: unknown) => Promise<any>;
+    updateCategory: (input: unknown) => Promise<any>;
+    deleteCategory: (input: unknown) => Promise<any>;
+    createUnit: (input: unknown) => Promise<any>;
+    updateUnit: (input: unknown) => Promise<any>;
+    deleteUnit: (input: unknown) => Promise<any>;
     createSalesReturn: (input: unknown) => Promise<any>;
     listSalesReturns: (input?: unknown) => Promise<any>;
   };

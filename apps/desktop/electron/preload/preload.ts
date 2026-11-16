@@ -143,6 +143,12 @@ const api = {
   permissionsGetAll: () => send('permissions:getAll'),
 
   getDeliveryOrder: (input: unknown) => send('deliveryOrder:get', input),
+  createCategory: (input: unknown) => send('category:create', input),
+  updateCategory: (input: unknown) => send('category:update', input),
+  deleteCategory: (input: unknown) => send('category:delete', input),
+  createUnit: (input: unknown) => send('unit:create', input),
+  updateUnit: (input: unknown) => send('unit:update', input),
+  deleteUnit: (input: unknown) => send('unit:delete', input),
   createSalesReturn: (input: unknown) => send('salesReturn:create', input),
   listSalesReturns: (input?: unknown) => send('salesReturn:list', input ?? {}),
 };

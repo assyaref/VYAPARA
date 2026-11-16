@@ -654,43 +654,6 @@ pre { background: #172033; color: #E3F2FD; border-radius: 2mm; padding: 3mm 4mm;
 <tr><td><code>BUSINESS_APPLY_FAILED</code></td><td>Event dari perangkat lain gagal diterapkan (mis. produk tidak ada)</td><td>Buat produk/SKU yang sama, atau biarkan di karantina</td></tr>
 </tbody>
 </table>
-<!-- BAB 15 -->
-<h1 class="section" id="bab15">Bab 15 — Batasan &amp; Hal yang Belum Tersedia</h1>
-
-<h2>15.1 Fitur yang <strong>tidak</strong> ada di rilis ini</h2>
-<table>
-<thead><tr><th>Fitur yang diharapkan orang</th><th>Status</th><th>Solusi saat ini</th></tr></thead>
-<tbody>
-<tr><td>Kelola kategori &amp; satuan produk dari UI</td><td>❌ Belum ada</td><td>Di-seed otomatis saat install (ATK, Kertas, Pcs, Rim, Pack)</td></tr>
-<tr><td>Kelola produk (tambah/edit/hapus) dari UI</td><td>❌ Belum ada</td><td>Backend IPC ada; harus ditambahkan UI</td></tr>
-<tr><td>Stock opname / penyesuaian stok dari UI</td><td>❌ Belum ada</td><td>Backend + IPC ada; UI menyusul</td></tr>
-<tr><td>Return penjualan (retur jual) UI</td><td>❌ Belum ada</td><td>Backend service ada (sales-returns.ts)</td></tr>
-<tr><td>“Pesanan Campuran” (1 keranjang banyak layanan)</td><td>❌ Belum didukung model data</td><td>Layanan terpisah per transaksi</td></tr>
-<tr><td>Dashboard web owner / PWA</td><td>❌ Belum ada</td><td>Hanya desktop</td></tr>
-<tr><td>Printer thermal otomatis (ESC/POS)</td><td>❌ Belum terintegrasi</td><td>Print via dialog Windows (pilih printer thermal yang terpasang sebagai printer Windows)</td></tr>
-<tr><td>Export laporan CSV/Excel</td><td>❌ Belum ada</td><td>Print / screenshot</td></tr>
-<tr><td>Multi-currency</td><td>❌ Hanya Rupiah</td><td>—</td></tr>
-</tbody>
-</table>
-
-<h2>15.2 Batasan teknis</h2>
-<ul>
-<li><strong>Isolasi server:</strong> sync server berjalan per deployment; tidak ada hosted multi-tenant SaaS. Toko harus men-set up server sendiri atau menggunakan server yang disediakan vendor.</li>
-<li><strong>Installer belum ditandatangani</strong> (unsigned) → SmartScreen peringatan saat install (normal).</li>
-<li><strong>RemoteVersion</strong> — server asli sudah mengirim remoteVersion; klien lama (sebelum rilis ini) akan karantina semua event masuk sampai di-update.</li>
-<li><strong>Tidak ada auto-update.</strong> Update harus dilakukan manual (download installer baru).</li>
-<li><strong>Backup manual only</strong> — tidak ada scheduled backup otomatis di aplikasi.</li>
-</ul>
-
-<h2>15.3 Saran prioritas untuk rilis berikutnya</h2>
-<ol>
-<li>Kelola produk dari UI (CRUD + kategori) — paling banyak diminta.</li>
-<li>UI stock opname &amp; penyesuaian stok — manajemen inventaris harus di tangan kasir/admin.</li>
-<li>UI retur penjualan — pelengkap siklus POS.</li>
-<li>Auto-update.</li>
-<li>Signing sertifikat installer.</li>
-</ol>
-
 <!-- BAB 16 -->
 <h1 class="section" id="bab16">Bab 16 — Manajemen Produk, Retur &amp; Penyesuaian Stok</h1>
 
@@ -732,6 +695,15 @@ pre { background: #172033; color: #E3F2FD; border-radius: 2mm; padding: 3mm 4mm;
 <h2>16.5 Menyimpan bukti retur untuk shift</h2>
 <p>Panel <em>Riwayat Retur</em> berguna untuk mencocokkan barang yang masuk/keluar dengan faktur pembelian — buka di akhir shift dan cek jumlah retur tidak melebihi wajar.</p>
 
+
+<h2>16.6 Mengelola Kategori &amp; Satuan (Admin)</h2>
+<p>Halaman <strong>Katalog</strong> (ikon tag, hanya untuk pengguna dengan izin pengaturan) menampilkan dua tab:</p>
+<ol>
+<li><strong>Kategori</strong> — tambah/ubah nama/deskripsi/hapus kategori produk. Kategori yang masih dipakai produk tidak bisa dihapus (tahan dulu: pindahkan produk ke kategori lain, baru hapus).</li>
+<li><strong>Satuan</strong> — tambah/ubah nama/simbol/hapus satuan pengukuran (mis. Pcs, Rim, Pack). Satuan yang dipakai produk juga tidak bisa dihapus.</li>
+<li>Produk baru dapat memilih kategori &amp; satuan yang sudah dikelola di sini.</li>
+</ol>
+<div class="warn"><strong>Catatan:</strong> sebelumnya kategori/satuan hanya bisa memakai seed bawaan (<code>ATK</code>, <code>Kertas</code>, <code>Pcs</code>, <code>Rim</code>, <code>Pack</code>) — fitur ini menutup celah tersebut.</div>
 
 <!-- LAMPIRAN -->
 <h1 class="section" id="lampiran">Lampiran A — Glossary &amp; FAQ</h1>

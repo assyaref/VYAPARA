@@ -43,9 +43,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
-    "mtime": 1794801290.086498,
-    "seen": 1794801744.800173,
-    "ast_hash": "d6db7e105278f0b1affb08389c629cce",
+    "mtime": 1794814861.3374555,
+    "seen": 1794815770.9810445,
+    "ast_hash": "b3a3eae0cbb62e86ff3b7ea264e8119b",
     "semantic_hash": ""
   },
   "apps/desktop/src/Barcode.tsx": {
@@ -145,9 +145,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/vyapara.d.ts": {
-    "mtime": 1794800999.3928218,
-    "seen": 1794801744.8037744,
-    "ast_hash": "4be4ae4663cb2636a0bb1fe175ceec03",
+    "mtime": 1794814757.4344218,
+    "seen": 1794815770.98856,
+    "ast_hash": "f900fe0ea0a04bec04f7aff8796e1668",
     "semantic_hash": ""
   },
   "apps/desktop/tailwind.config.ts": {
@@ -205,15 +205,15 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/main.ts": {
-    "mtime": 1794800957.293365,
-    "seen": 1794801744.7879605,
-    "ast_hash": "36fa4f5e81141bb50d61c85250e84333",
+    "mtime": 1794814683.1252203,
+    "seen": 1794815770.96035,
+    "ast_hash": "2504d81a357f62bf608d775c12311a74",
     "semantic_hash": ""
   },
   "apps/desktop/electron/preload/preload.ts": {
-    "mtime": 1794800980.5845284,
-    "seen": 1794801744.7997174,
-    "ast_hash": "decfa7509156117149825d79ff4bc7c4",
+    "mtime": 1794814757.4344218,
+    "seen": 1794815770.9800167,
+    "ast_hash": "e09875f864287b7421ce7328c7be4431",
     "semantic_hash": ""
   },
   "apps/desktop/drizzle/schema.ts": {
@@ -1429,9 +1429,9 @@
     "semantic_hash": ""
   },
   "evidence/e2e-acceptance.cjs": {
-    "mtime": 1794801448.5576596,
-    "seen": 1794801744.8072674,
-    "ast_hash": "8cb6043f57f5e9cfe1a90b2cc33d4405",
+    "mtime": 1794815415.8600383,
+    "seen": 1794815770.9990766,
+    "ast_hash": "5645d51fdbd264ea91402fc1e47e8162",
     "semantic_hash": ""
   },
   "PHASE_4_BUSINESS_FUNCTIONAL_ACCEPTANCE.md": {
@@ -1447,15 +1447,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794801469.6335652,
-    "seen": 1794801744.8300586,
-    "ast_hash": "ae3d502719aa9956b1e37e9ff865121e",
+    "mtime": 1794815439.4839664,
+    "seen": 1794815771.0413063,
+    "ast_hash": "42c0ca71fcb36aa190cfcd1c19ba18cb",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794801470.7235155,
-    "seen": 1794801744.8300638,
-    "ast_hash": "7bde42be61bef1769a521e49c5977423",
+    "mtime": 1794815440.548504,
+    "seen": 1794815771.0413144,
+    "ast_hash": "1404ae8a3c90ae11f7db06ef69e15966",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1471,9 +1471,9 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794801468.5770657,
-    "seen": 1794801744.8300617,
-    "ast_hash": "41f53cbb498093f54bf132f89d7a0a2c",
+    "mtime": 1794815438.4219017,
+    "seen": 1794815771.041311,
+    "ast_hash": "5b114d304a37f248945d892b1c3d2158",
     "semantic_hash": ""
   },
   "evidence/perf-probe.cjs": {
@@ -1603,9 +1603,9 @@
     "semantic_hash": ""
   },
   "docs/manual/manual-full.html": {
-    "mtime": 1794801592.210327,
-    "seen": 1794801744.8210194,
-    "ast_hash": "e472a76173284c5f11d798cee2cf926e",
+    "mtime": 1794815624.1224515,
+    "seen": 1794815771.0220213,
+    "ast_hash": "b06033893b6dabd3e23c5652cdbf63c9",
     "semantic_hash": ""
   },
   "docs/manual/part1-head.html": {
@@ -1651,21 +1651,21 @@
     "semantic_hash": ""
   },
   "docs/manual/part8-bab15-end.html": {
-    "mtime": 1794801529.8822994,
-    "seen": 1794801744.8210497,
-    "ast_hash": "f3637fc53eaf57bb87e98b1c03acc512",
+    "mtime": 1794815624.0664349,
+    "seen": 1794815771.0236776,
+    "ast_hash": "361ae09bfb33af719281776f535c4b78",
     "semantic_hash": ""
   },
   "docs/manual/part9-bab16.html": {
-    "mtime": 1794801489.687509,
-    "seen": 1794801744.821052,
-    "ast_hash": "1077fa3a7d098492796b8b2f3af9875d",
+    "mtime": 1794815514.6454797,
+    "seen": 1794815771.023683,
+    "ast_hash": "74d308426b62dba465e2daf9d9910258",
     "semantic_hash": ""
   },
   "VYAPARA_Panduan_Penggunaan.pdf": {
-    "mtime": 1794801597.0695052,
-    "seen": 1794801744.8226347,
-    "ast_hash": "c3ef647af97f1dcb0516145b86a0cadf",
+    "mtime": 1794815669.74118,
+    "seen": 1794815771.0263884,
+    "ast_hash": "ecbb09764a226f65631b0ddf4967bf28",
     "semantic_hash": ""
   },
   "docs/manual/icon.png": {
@@ -1762,6 +1762,24 @@
     "mtime": 1794800290.7483287,
     "seen": 1794801744.8303611,
     "ast_hash": "d83bca9edd1072067159366cdbd6e9c3",
+    "semantic_hash": ""
+  },
+  "apps/desktop/electron/main/services/catalog.ts": {
+    "mtime": 1794814641.0183523,
+    "seen": 1794815770.9619544,
+    "ast_hash": "1441a62a1ba5f7a91777eaf8ca1f342b",
+    "semantic_hash": ""
+  },
+  "apps/desktop/src/Catalog.tsx": {
+    "mtime": 1794814802.6392593,
+    "seen": 1794815770.9813464,
+    "ast_hash": "81e661965214207b958e3345750588e3",
+    "semantic_hash": ""
+  },
+  "evidence/debug-catalog.png": {
+    "mtime": 1794815367.4887762,
+    "seen": 1794815771.0413177,
+    "ast_hash": "e9fc4b242266fee428c431afca0f3a64",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

@@ -13,6 +13,7 @@ import OfflineSync from './OfflineSync';
 import Products from './Products';
 import SalesReturns from './SalesReturns';
 import StockAdjustments from './StockAdjustments';
+import Catalog from './Catalog';
 import logo from './assets/logo.png';
 import './index.css';
 
@@ -28,7 +29,8 @@ type View =
   | 'offline'
   | 'products'
   | 'returns'
-  | 'adjustments';
+  | 'adjustments'
+  | 'catalog';
 
 const iconCls = 'w-5 h-5 shrink-0';
 const icons = {
@@ -104,6 +106,12 @@ const icons = {
       <path d="M12 11v10" />
     </svg>
   ),
+  tag: (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.6 13.4L11 3.8a2 2 0 0 0-1.4-.6H4a2 2 0 0 0-2 2v5.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l6.6-6.6a2 2 0 0 0 0-2.8z" />
+      <path d="M7 7h.01" />
+    </svg>
+  ),
   products: (
     <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -129,6 +137,7 @@ const navItems: { id: View; label: string; permission?: string; icon: React.Reac
   { id: 'products', label: 'Produk', icon: icons.products },
   { id: 'returns', label: 'Retur Penjualan', icon: icons.returns },
   { id: 'adjustments', label: 'Penyesuaian Stok', icon: icons.box },
+  { id: 'catalog', label: 'Katalog', icon: icons.tag, permission: 'settings:read' },
   { id: 'settings', label: 'Pengaturan', icon: icons.settings, permission: 'settings:read' },
 ];
 
@@ -580,6 +589,7 @@ function App() {
         {currentView === 'products' && <Products />}
         {currentView === 'returns' && <SalesReturns />}
         {currentView === 'adjustments' && <StockAdjustments />}
+        {currentView === 'catalog' && <Catalog />}
         {currentView === 'settings' && <Settings />}
         {currentView === 'supplier' && <Supplier />}
       </main>

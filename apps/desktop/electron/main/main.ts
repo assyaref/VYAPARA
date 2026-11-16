@@ -1857,6 +1857,92 @@ function createWindow() {
     }
   });
 
+  // ===== Catalog (categories & units) =====
+
+  ipcMain.handle('category:create', async (_event: any, input: { token: string; name: string; description?: string | null }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const { createCategory } = await import('./services/catalog');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      const data = createCategory(appDb, input);
+      return { ok: true, success: true, data };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('category:update', async (_event: any, input: { token: string; id: string; name?: string; description?: string | null }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const { renameCategory } = await import('./services/catalog');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      renameCategory(appDb, input);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('category:delete', async (_event: any, input: { token: string; id: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const { deleteCategory } = await import('./services/catalog');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      deleteCategory(appDb, input.id);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('unit:create', async (_event: any, input: { token: string; name: string; symbol?: string | null }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const { createUnit } = await import('./services/catalog');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      const data = createUnit(appDb, input);
+      return { ok: true, success: true, data };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('unit:update', async (_event: any, input: { token: string; id: string; name?: string; symbol?: string | null }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const { renameUnit } = await import('./services/catalog');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      renameUnit(appDb, input);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('unit:delete', async (_event: any, input: { token: string; id: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const { deleteUnit } = await import('./services/catalog');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      deleteUnit(appDb, input.id);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
   // ===== Delivery Orders =====
 
   ipcMain.handle('deliveryOrder:get', async (_event: any, input: { token: string; transactionId: string }) => {

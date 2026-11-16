@@ -153,6 +153,20 @@ const check = (name, ok) => {
   text = await bodyText();
   check('Admin user visible in settings', /E2E Admin/.test(text));
 
+  // 10c. Products page reachable
+  await nav('Produk');
+  text = await bodyText();
+  check('Products page renders with seeded catalog', /Tambah Produk/.test(text) && /Kertas HVS A4/.test(text));
+
+  // 10d. Catalog (kategori & satuan) management reachable
+  await nav('Katalog');
+  text = await bodyText();
+  check('Catalog page renders with categories', /Daftar Kategori/.test(text));
+  await page.locator('button:has-text("Satuan")').first().click();
+  await page.waitForTimeout(300);
+  text = await bodyText();
+  check('Catalog satuan tab renders', /Daftar Satuan/.test(text));
+
   // 11. Offline Sync screen reachable from nav and renders engine status
   await nav('Offline Sync');
   text = await bodyText();
