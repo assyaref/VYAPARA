@@ -1476,6 +1476,18 @@
     "ast_hash": "0a30e10df21c3c05fd02f82ff528265e",
     "semantic_hash": ""
   },
+  "evidence/perf-probe.cjs": {
+    "mtime": 1794791559.0529919,
+    "seen": 1794791660.0748827,
+    "ast_hash": "6d26d55d62c375a453a3e79ae01e2cc3",
+    "semantic_hash": ""
+  },
+  "PHASE_8_PERFORMANCE_RELIABILITY.md": {
+    "mtime": 1794791622.723933,
+    "seen": 1794791660.083706,
+    "ast_hash": "1da013fe543316dca27b1435e547ae16",
+    "semantic_hash": ""
+  },
   "apps/desktop/package-lock.json": {
     "mtime": 1794621249.4493258,
     "seen": 1794663711.5037882,
