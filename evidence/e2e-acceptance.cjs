@@ -141,7 +141,7 @@ const check = (name, ok) => {
   await nav('Laporan & Analisis');
   text = await bodyText();
   check('Reports page renders', /Laporan/.test(text));
-  for (const tab of ['Penjualan', 'Transaksi', 'Terlaris', 'Inventaris']) {
+  for (const tab of ['Penjualan Harian', 'Produk Terlaris', 'Laba Kotor', 'Nilai Inventaris']) {
     const btn = page.locator('button', { hasText: tab });
     if (await btn.count()) { await btn.click(); await page.waitForTimeout(500); }
   }

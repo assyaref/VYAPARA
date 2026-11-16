@@ -1,0 +1,56 @@
+<!-- BAB 5 -->
+<h1 class="section" id="bab5">Bab 5 — Kasir (POS): Operasi Penjualan</h1>
+<img class="img-full" src="img-pos.png" alt="Layar kasir POS">
+<p class="img-caption">Tampilan kasir: katalog kiri (pencarian + filter kategori), panel keranjang kanan (tabel item, total, metode bayar, tombol Bayar).</p>
+
+<h2>5.1 Ringkasan layar</h2>
+<table>
+<thead><tr><th>Area</th><th>Fungsi</th></tr></thead>
+<tbody>
+<tr><td>Pencarian produk (kiri atas)</td><td>Ketik nama/SKU/barcode — hasil langsung muncul. Tombol kategori (Semua, ATK, Kertas) mempersempit daftar</td></tr>
+<tr><td>Grid produk (kiri)</td><td>Ubin produk dengan ikon inisial berwarna + harga + stok saat ini. Klik ubin untuk menambah ke keranjang</td></tr>
+<tr><td>Panel “Keranjang Pesanan” (kanan)</td><td>Tabel item: Item | Qty (+/−) | Harga | Subtotal | 🗑 hapus; badge jumlah item; status “Dalam Proses”</td></tr>
+<tr><td>Total &amp; pembayaran (kanan bawah)</td><td>Subtotal, Diskon, <strong>Total</strong>; chip metode bayar; Jumlah Bayar (tunai) &amp; Kembalian; tombol <strong>Bayar (F10)</strong></td></tr>
+<tr><td>Struk (muncul setelah bayar)</td><td>Modal “Contoh Nota / Struk” berisi ringkasan + tombol <strong>Cetak Nota</strong> (struk pelanggan) &amp; <strong>Cetak DO</strong> (Surat Jalan/Delivery Order)</td></tr>
+</tbody>
+</table>
+
+<h2>5.2 Alur penjualan langkah demi langkah</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body"><strong>Cari produk.</strong> Ketik nama/SKU di kolom pencarian (autofocus saat halaman dibuka), atau klik chip kategori (Semua/ATK/Kertas) lalu klik ubin produk. Contoh: klik “Kertas HVS A4 — Rp 50.000”.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body"><strong>Atur kuantitas.</strong> Klik produk berulang kali untuk menambah 1 per klik, atau gunakan tombol <span class="kbd">+</span>/<span class="kbd">−</span> di samping qty di panel keranjang. Qty 0 otomatis menghapus baris.</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body"><strong>Pilih metode pembayaran.</strong> Klik chip: <strong>Tunai</strong> (default), <strong>QRIS</strong>, <strong>Transfer</strong>, <strong>Debit</strong>, atau <strong>Kredit</strong> (jika pelanggan kredit diaktifkan).</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-body"><strong>Isi Jumlah Bayar (khusus Tunai).</strong> Ketik nominal uang dari pelanggan, mis. 150000 untuk total 105.000. <strong>Kembalian</strong> dihitung otomatis: 45.000. Jika kurang, tombol Bayar nonaktif.</div></div>
+<div class="step"><div class="step-num">5</div><div class="step-body"><strong>Bayar.</strong> Klik <strong>Bayar (F10)</strong>. Aplikasi membuat transaksi secara atomik (stok terpotong + transaksi tercatat + event sinkron dikirim ke outbox). <kbd>F10</kbd> juga memicu checkout bila fokus di form.</div></div>
+<div class="step"><div class="step-num">6</div><div class="step-body"><strong>Struk muncul.</strong> Modal “Contoh Nota / Struk” menampilkan: nomor INV-…, kasir, waktu, daftar item, total, bayar, kembalian, dan barcode-style nomor transaksi. Klik <strong>Cetak Nota</strong> untuk cetak struk pelanggan, <strong>Cetak DO</strong> untuk cetak Delivery Order (Bab 16), <strong>Selesai</strong> untuk menutup dan melayani pelanggan berikutnya.</div></div>
+
+<img class="img-full" src="img-pos-empty.png" alt="POS kosong">
+<p class="img-caption">Layar kasir segar (keranjang kosong, checkout nonaktif). Struk sekarang memiliki dua tombol: <strong>Cetak Nota</strong> (struk pelanggan) dan <strong>Cetak DO</strong> (Delivery Order/Surat Jalan untuk pengiriman).</p>
+
+<h2>5.3 Menghapus item dari keranjang</h2>
+<ul>
+<li><strong>Qty −</strong> sampai 0 → baris hilang otomatis</li>
+<li>Tombol <strong>🗑</strong> (merah) di ujung kanan baris → langsung menghapus baris tersebut</li>
+<li>Tombol <strong>Kosongkan (N)</strong> di header → mengosongkan seluruh keranjang (hati-hati, tidak ada konfirmasi)</li>
+</ul>
+
+<h2>5.4 Metode pembayaran</h2>
+<table>
+<thead><tr><th>Metode</th><th>Kapan digunakan</th><th>Catatan</th></tr></thead>
+<tbody>
+<tr><td>Tunai</td><td>Pembayaran di tempat dengan uang tunai</td><td>Wajib isi “Jumlah Bayar”; kembalian otomatis</td></tr>
+<tr><td>QRIS</td><td>Pembayaran via QRIS/GoPay/OVO/DANA/ShopeePay</td><td>Nominal dibayar = Total; kembalian tidak relevan</td></tr>
+<tr><td>Transfer</td><td>Transfer bank (BCA/Mandiri/BRI/BNI dll)</td><td>Nominal = Total; cocok pembayaran B2B</td></tr>
+<tr><td>Debit</td><td>Kartu debit EDC</td><td>Nominal = Total</td></tr>
+<tr><td>Kredit</td><td>Pembelian atas nama pelanggan dengan tempo (piutang)</td><td>Pelanggan <strong>harus dipilih</strong> (lihat Bab 6); piutang tercatat otomatis</td></tr>
+</tbody>
+</table>
+
+<h2>5.5 Struk / Nota</h2>
+<div class="callout"><strong>Nomor INV:</strong> semua struk memakai format <code>INV-YYYYMMDD-&lt;part&gt;</code> (mis. <code>INV-20261116-D77FD1</code>). Nomor ini menjadi kunci deduplication saat sinkronisasi multi-perangkat — aman untuk cetak ulang.</div>
+<p><strong>Cetak Nota:</strong> klik → dialog print → pilih printer thermal. <strong>Cetak DO:</strong> klik <em>Cetak DO</em> (Bab 16) untuk dokumen pengiriman barang.</p>
+
+<h2>5.6 Stok terpotong otomatis</h2>
+<p>Setiap item pada transaksi mengurangi stok produk <strong>saat itu juga</strong>. Produk dengan stok 0 otomatis <strong>tidak bisa ditambahkan</strong> ke keranjang (tombol dikunci bila stok habis). Pantau stok menipis dari Dashboard → panel <strong>Stok Menipis</strong>.</p>
+
+<h2>5.7 Jika aplikasi mati di tengah checkout</h2>
+<p>Seluruh operasi checkout berjalan dalam satu transaksi database SQLite. Jika komputer mati/reboot di tengah transaksi, semua perubahan di-<strong>rollback</strong> — stok dan transaksi konsisten; tidak ada “transaksi separuh”. Outbox event yang sudah tertulis tetap aman dan disinkronkan saat aplikasi dibuka kembali.</p>

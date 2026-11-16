@@ -1,0 +1,140 @@
+<!-- BAB 15 -->
+<h1 class="section" id="bab15">Bab 15 — Batasan &amp; Hal yang Belum Tersedia</h1>
+
+<h2>15.1 Fitur yang <strong>tidak</strong> ada di rilis ini</h2>
+<table>
+<thead><tr><th>Fitur yang diharapkan orang</th><th>Status</th><th>Solusi saat ini</th></tr></thead>
+<tbody>
+<tr><td>Kelola kategori &amp; satuan produk dari UI</td><td>❌ Belum ada</td><td>Di-seed otomatis saat install (ATK, Kertas, Pcs, Rim, Pack)</td></tr>
+<tr><td>Kelola produk (tambah/edit/hapus) dari UI</td><td>❌ Belum ada</td><td>Backend IPC ada; harus ditambahkan UI</td></tr>
+<tr><td>Stock opname / penyesuaian stok dari UI</td><td>❌ Belum ada</td><td>Backend + IPC ada; UI menyusul</td></tr>
+<tr><td>Return penjualan (retur jual) UI</td><td>❌ Belum ada</td><td>Backend service ada (sales-returns.ts)</td></tr>
+<tr><td>“Pesanan Campuran” (1 keranjang banyak layanan)</td><td>❌ Belum didukung model data</td><td>Layanan terpisah per transaksi</td></tr>
+<tr><td>Dashboard web owner / PWA</td><td>❌ Belum ada</td><td>Hanya desktop</td></tr>
+<tr><td>Printer thermal otomatis (ESC/POS)</td><td>❌ Belum terintegrasi</td><td>Print via dialog Windows (pilih printer thermal yang terpasang sebagai printer Windows)</td></tr>
+<tr><td>Export laporan CSV/Excel</td><td>❌ Belum ada</td><td>Print / screenshot</td></tr>
+<tr><td>Multi-currency</td><td>❌ Hanya Rupiah</td><td>—</td></tr>
+</tbody>
+</table>
+
+<h2>15.2 Batasan teknis</h2>
+<ul>
+<li><strong>Isolasi server:</strong> sync server berjalan per deployment; tidak ada hosted multi-tenant SaaS. Toko harus men-set up server sendiri atau menggunakan server yang disediakan vendor.</li>
+<li><strong>Installer belum ditandatangani</strong> (unsigned) → SmartScreen peringatan saat install (normal).</li>
+<li><strong>RemoteVersion</strong> — server asli sudah mengirim remoteVersion; klien lama (sebelum rilis ini) akan karantina semua event masuk sampai di-update.</li>
+<li><strong>Tidak ada auto-update.</strong> Update harus dilakukan manual (download installer baru).</li>
+<li><strong>Backup manual only</strong> — tidak ada scheduled backup otomatis di aplikasi.</li>
+</ul>
+
+<h2>15.3 Saran prioritas untuk rilis berikutnya</h2>
+<ol>
+<li>Kelola produk dari UI (CRUD + kategori) — paling banyak diminta.</li>
+<li>UI stock opname &amp; penyesuaian stok — manajemen inventaris harus di tangan kasir/admin.</li>
+<li>UI retur penjualan — pelengkap siklus POS.</li>
+<li>Auto-update.</li>
+<li>Signing sertifikat installer.</li>
+</ol>
+
+<!-- BAB 16 -->
+<h1 class="section" id="bab16">Bab 16 — Manajemen Produk, Retur &amp; Penyesuaian Stok</h1>
+
+<h2>16.1 Mengelola Produk</h2>
+<ol>
+<li>Menu <strong>Produk</strong> di sidebar (ikon kotak) — seluruh katalog muncul dalam tabel.</li>
+<li>Klik <strong>+ Tambah Produk</strong> → isi <em>Nama Produk</em> (wajib), <em>SKU</em> &amp; <em>Barcode</em> (opsional), <em>Kategori</em> (pilih dari kategori yang sudah ada), <em>Satuan</em>, <em>Harga</em>, <em>HPP</em>, dan <em>Stok</em> awal → <strong>Simpan</strong>.</li>
+<li>Klik <strong>Edit</strong> pada baris produk untuk mengubah harga/stok.</li>
+<li>Klik <strong>Nonaktif</strong> untuk menyembunyikan produk dari POS (tidak terhapus, riwayat transaksi tetap ada).</li>
+</ol>
+<div class="warn"><strong>Catatan:</strong> pengisian <em>Kategori</em> dan <em>Satuan</em> hanya bisa memilih dari data yang sudah di-seed (<code>ATK</code>, <code>Kertas</code>, <code>Pcs</code>, <code>Rim</code>, <code>Pack</code>) — belum ada UI tambah kategori/satuan baru; hubungi administrator untuk menambah kategori lewat backend.</div>
+
+<h2>16.2 Mencetak Delivery Order (Surat Jalan)</h2>
+<p>Menu kasir → pilih transaksi → pada modal struk klik <strong>Cetak DO</strong> (bukan <em>Cetak Nota</em>). Dokumen <strong>Delivery Order — Surat Jalan</strong> akan tampil dan langsung membuka dialog print Windows. Isinya:</p>
+<ul>
+<li>Logo + nama toko, nomor transaksi <code>INV-…</code>, tanggal &amp; kasir</li>
+<li>Alamat pelanggan (bila transaksi memiliki pelanggan terdaftar; kosong bila walk-in)</li>
+<li>Tabel item: <em># | Produk/Layanan | Qty | Harga Satuan | Subtotal</em></li>
+<li>Total &amp; kolom tanda tangan <em>Penerima</em> dan <em>Kasir</em></li>
+</ul>
+
+<h2>16.3 Retur Penjualan</h2>
+<ol>
+<li>Menu <strong>Retur Penjualan</strong>.</li>
+<li>Panel kiri menampilkan daftar transaksi terbaru — klik tombol <strong>Retur</strong> pada baris yang ingin dikembalikan.</li>
+<li>Konfirmasi → sistem mencatat retur <code>RET-YY-NNNN</code>, mengembalikan stok ke gudang, dan mencatat pembalikan HPP untuk laporan laba rugi.</li>
+<li><strong>Riwayat Retur</strong> menampilkan seluruh retur: No. Retur, waktu, jumlah item, total HPP, status.</li>
+</ol>
+
+<h2>16.4 Penyesuaian Stok (manual)</h2>
+<ol>
+<li>Menu <strong>Penyesuaian Stok</strong>.</li>
+<li>Formulir: pilih produk, pilih arah (<strong>Tambah/Kurang</strong>), isi <em>Jumlah</em>, <em>Alasan</em> (wajib, mis. “rusak/kadaluarsa/selisih opname”), <em>No. Referensi</em> (opsional).</li>
+<li>Klik <strong>Ajukan Penyesuaian</strong> — status menjadi <em>Pending</em>.</li>
+<li>Pengguna lain dengan izin <code>inventory:approve</code> (admin) akan melihat panel <strong>Menunggu Persetujuan</strong> → <strong>Setuju</strong> (stok terupdate) atau <strong>Tolak</strong>.</li>
+</ol>
+<div class="warn"><strong>Perhatian:</strong> stok hanya berubah setelah disetujui admin — kasir tidak bisa mengubah stok sesuka hati.</div>
+
+<h2>16.5 Menyimpan bukti retur untuk shift</h2>
+<p>Panel <em>Riwayat Retur</em> berguna untuk mencocokkan barang yang masuk/keluar dengan faktur pembelian — buka di akhir shift dan cek jumlah retur tidak melebihi wajar.</p>
+
+
+<!-- LAMPIRAN -->
+<h1 class="section" id="lampiran">Lampiran A — Glossary &amp; FAQ</h1>
+
+<h2>A.1 Glossary</h2>
+<table>
+<thead><tr><th>Istilah</th><th>Arti</th></tr></thead>
+<tbody>
+<tr><td>Outbox</td><td>Tabel <code>sync_outbox</code> — antrean event yang belum dikirim ke server</td></tr>
+<tr><td>Backoff</td><td>Strategi retry dengan jeda meningkat (2s → 4s → 8s → … → max 5 menit)</td></tr>
+<tr><td>Conflict Remote Version</td><td>remoteVersion per agregat di server — digunakan untuk deteksi konflik</td></tr>
+<tr><td>Cursor</td><td>Penanda posisi unduh percakapan server — disimpan di <code>sync_state</code></td></tr>
+<tr><td>Idempotency</td><td>Menerima event yang sama berkali-kali tanpa efek tambahan (key idempotency_key/event_id)</td></tr>
+<tr><td>Inbound apply</td><td>Proses memasukkan event dari server ke database lokal</td></tr>
+<tr><td>Quarantine</td><td>Tabel untuk event yang gagal diterapkan — disimpan untuk ditinjau, tidak dihapus</td></tr>
+<tr><td>RBAC</td><td>Role-Based Access Control — izin ditentukan oleh peran pengguna</td></tr>
+<tr><td>Receipt</td><td>Bukti <code>sync_applied_events</code> — bukti bahwa event sudah/terapkan</td></tr>
+<tr><td>Tenant / Organisasi</td><td>Entitas bisnis terisolasi; 1 organisasi = 1 properti bisnis</td></tr>
+<tr><td>WAL</td><td>Write-Ahead Logging — mode SQLite untuk concurrency tinggi</td></tr>
+</tbody>
+</table>
+
+<h2>A.2 FAQ</h2>
+
+<div class="callout"><strong>Q: Boleh beberapa kasir login di komputer yang sama?</strong><br>
+A: Boleh — aplikasi multitasking. Setiap login membuat sesi terpisah. Sesi kadaluarsa 12 jam.</div>
+
+<div class="callout"><strong>Q: Apakah saya bisa buka aplikasi offline?</strong><br>
+A: Ya — 100% fitur bekerja offline kecuali sinkronisasi (yang akan otomatis saat online).</div>
+
+<div class="callout"><strong>Q: Bagaimana jika komputer saya hilang dicuri?</strong><br>
+A: Data lokal bisa dibaca siapa pun yang mencuri laptop (kecuali enkripsi disk aktif). Gunakan BitLocker. Password akun tidak bisa diambil meski pencuri membuka aplikasi (butuh email + password).</div>
+
+<div class="callout"><strong>Q: Berapa harga lisensi?</strong><br>
+A: Tanyakan kepada vendor/partner yang menyediakan aplikasi ini. Dokumen ini tidak mencantumkan model lisensi.</div>
+
+<div class="callout"><strong>Q: Apakah laporan bisa diexport?</strong><br>
+A: Belum ada tombol Export CSV/Excel. Gunakan fitur Print dan simpan sebagai PDF dari dialog print.</div>
+
+<div class="callout"><strong>Q: Apakah aplikasi bisa untuk multi-toko?</strong><br>
+A: Ya — dengan sync server. Setiap toko install aplikasi yang sama; setiap toko mendaftar sebagai perangkat organisasi yang sama; data sinkron otomatis. Tetapi <strong>dashboard owner terpusat belum tersedia</strong> — Anda harus melihat masing-masing toko di perangkat/aplikasi terpisah.</div>
+
+<div class="callout"><strong>Q: Katalog produk kosong?</strong><br>
+A: Fresh install — tidak ada produk. Produk harus dibuat lewat backend/administrator (UI belum tersedia).</div>
+
+<div class="callout"><strong>Q: Bagaimana cara lapor bug?</strong><br>
+A: Hubungi vendor. Sertakan: versi aplikasi (Pengaturan → Tentang), langkah reproduksi, dan screenshot.</div>
+
+<div class="callout"><strong>Q: Apakah data saya bisa di-pulihkan tanpa backup?</strong><br>
+A: Tidak. File <code>vyapara.db</code> satu-satunya salinan pada komputer toko — backup adalah satu-satunya jalan.</div>
+
+<div class="callout"><strong>Q: Server sinkronisasi wajib?</strong><br>
+A: Tidak. Tanpa server, transaksi tetap tercatat lokal. Hanya fitur multi-perangkat yang tidak bekerja.</div>
+
+<div class="footer-note">
+<p><strong>Dokumen ini diterbitkan 16 November 2026.</strong> Versi aplikasi: VYAPARA POS 1.0.0 (Electron 45, React 19, Tailwind v4, SQLite WAL, Drizzle ORM, better-sqlite3 13).</p>
+<p>Dokumen ditujukan untuk pengguna dengan pengetahuan dasar komputer. Jika ada ketidaksesuaian antara dokumen dan aplikasi, versi aplikasi yang berlaku.</p>
+<p>Pelaporan kesalahan dokumen: hubungi vendor/partner.</p>
+</div>
+
+</body>
+</html>

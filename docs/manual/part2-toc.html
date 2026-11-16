@@ -1,0 +1,94 @@
+<!-- TOC -->
+<nav class="toc">
+  <h2 style="border:none;color:#0D47A1">Daftar Isi</h2>
+  <a class="l2" href="#bab1">Bab 1 — Penjelasan Aplikasi: Apa itu VYAPARA?</a>
+  <a class="l2" href="#bab2">Bab 2 — Instalasi &amp; Pertama Kali Menjalankan</a>
+  <a class="l2" href="#bab3">Bab 3 — Peran Pengguna &amp; Hak Akses</a>
+  <a class="l2" href="#bab4">Bab 4 — Dashboard: Memantau Toko</a>
+  <a class="l2" href="#bab5">Bab 5 — Kasir (POS): Operasi Penjualan</a>
+  <a class="l2" href="#bab6">Bab 6 — Pelanggan &amp; Piutang</a>
+  <a class="l2" href="#bab7">Bab 7 — Pemasok &amp; Pengadaan</a>
+  <a class="l2" href="#bab8">Bab 8 — Keuangan &amp; Dompet Kas</a>
+  <a class="l2" href="#bab9">Bab 9 — Laporan &amp; Analisis</a>
+  <a class="l2" href="#bab10">Bab 10 — Offline Sync: Sinkronisasi &amp; Konflik</a>
+  <a class="l2" href="#bab11">Bab 11 — Pengaturan: Pengguna, Peran &amp; Data</a>
+  <a class="l2" href="#bab12">Bab 12 — Backup &amp; Pemulihan Data</a>
+  <a class="l2" href="#bab13">Bab 13 — Keamanan &amp; Data Sensitif</a>
+  <a class="l2" href="#bab14">Bab 14 — Troubleshooting</a>
+  <a class="l2" href="#bab15">Bab 15 — Batasan &amp; Hal yang Belum Tersedia</a>
+  <a class="l2" href="#bab16">Bab 16 — Manajemen Produk, Retur &amp; Penyesuaian Stok</a>
+  <a class="l2" href="#lampiran">Lampiran A — Glossary &amp; FAQ</a>
+</nav>
+
+<!-- BAB 1 -->
+<h1 class="section" id="bab1">Bab 1 — Penjelasan Aplikasi</h1>
+
+<h2>1.1 Apa itu VYAPARA?</h2>
+<p><strong>VYAPARA Business Management</strong> adalah aplikasi <strong>Point of Sale (POS) desktop</strong> berbasis offline-first untuk toko ATK (Alat Tulis Kantor), kertas, dan layanan percetakan/fotocopy/laminating/jilid. Aplikasi berjalan di komputer toko tanpa perlu koneksi internet, menyimpan seluruh data secara lokal, dan — ketika server tersedia — menyinkronkan data ke server terpusat untuk pemantauan multi-cabang.</p>
+
+<div class="callout"><strong>Ringkasnya:</strong> VYAPARA = mesin kasir + manajemen stok + pelanggan + pemasok + keuangan + laporan + sinkronisasi offline-first, dalam satu aplikasi desktop Windows.</div>
+
+<h2>1.2 Arsitektur yang digunakan</h2>
+<table>
+<thead><tr><th>Lapisan</th><th>Teknologi</th><th>Fungsi</th></tr></thead>
+<tbody>
+<tr><td>Desktop shell</td><td>Electron (v45)</td><td>Menjalankan app Windows native; jendela utama aplikasi</td></tr>
+<tr><td>Renderer / UI</td><td>React 19 + Tailwind CSS v4 + Zustand</td><td>Tampilan: Dashboard, POS, Keuangan, dll.</td></tr>
+<tr><td>Main process</td><td>Electron main + IPC handlers</td><td>Otak aplikasi: akses database, autentikasi, sinkronisasi — renderer tidak pernah menyentuh file langsung</td></tr>
+<tr><td>Database lokal</td><td>SQLite (better-sqlite3, WAL mode)</td><td>Penyimpanan semua data: produk, transaksi, stok, pelanggan, pemasok, keuangan</td></tr>
+<tr><td>ORM &amp; migrasi</td><td>Drizzle ORM + file migrasi SQL (14 migrasi)</td><td>Membuat tabel saat pertama dijalankan; seed peran, kategori, satuan, izin</td></tr>
+<tr><td>Sync engine</td><td>outbox → server → inbound apply; conflict detector; queue</td><td>Mengirim perubahan ke server terpusat dan menerima perubahan dari perangkat lain</td></tr>
+<tr><td>Server sinkronisasi</td><td>Node HTTP + SQLite (apps/sync-server)</td><td>Server terpusat per-organisasi (multi-tenant), validasi token &amp; idempotency</td></tr>
+</tbody>
+</table>
+
+<h3>Alur data per transaksi penjualan</h3>
+<div class="flow">
+  <span class="box">Pilih produk</span><span class="arrow">→</span>
+  <span class="box">Keranjang</span><span class="arrow">→</span>
+  <span class="box">Bayar</span><span class="arrow">→</span>
+  <span class="box">Transaksi + stok terpotong</span><span class="arrow">→</span>
+  <span class="box">Event keluar ke outbox</span><span class="arrow">→</span>
+  <span class="box">Sync engine</span><span class="arrow">→</span>
+  <span class="box">Sinkron ke server</span>
+</div>
+<p>Seluruh langkah transaksi berjalan dalam <strong>satu transaksi database</strong> — jika listrik/aplikasi mati di tengah proses, tidak ada data separuh (atomik).</p>
+
+<h2>1.3 Modul yang tersedia</h2>
+<table>
+<thead><tr><th>Modul</th><th>Kegunaan</th><th>Peran utama</th></tr></thead>
+<tbody>
+<tr><td>Dashboard</td><td>Omzet hari ini, tren penjualan 7 hari, komposisi pendapatan per kategori, stok menipis, pesanan terbaru</td><td>Pemilik / semua</td></tr>
+<tr><td>Kasir (POS)</td><td>Transaksi penjualan: cari produk, keranjang, empat metode pembayaran, cetak struk</td><td>Kasir</td></tr>
+<tr><td>Keuangan</td><td>Dompet kas (buka/tutup), catat pemasukan/pengeluaran, laporan laba rugi &amp; arus kas</td><td>Keuangan / pemilik</td></tr>
+<tr><td>Pelanggan</td><td>Daftar pelanggan, piutang (pembelian kredit), pembayaran piutang</td><td>Kasir / pemilik</td></tr>
+<tr><td>Pemasok</td><td>Daftar pemasok, faktur masuk, pembayaran faktur</td><td>Admin / keuangan</td></tr>
+<tr><td>Pembelian</td><td>Purchase order ke pemasok, penerimaan barang, retur beli</td><td>Admin</td></tr>
+<tr><td>Laporan &amp; Analisis</td><td>Laporan penjualan, laba kotor, produk terlaris/bergerak lambat, valuasi stok, kinerja kasir</td><td>Pemilik / keuangan</td></tr>
+<tr><td>Offline Sync</td><td>Status sinkronisasi perangkat, picu sinkron manual, retry/konflik</td><td>Semua</td></tr>
+<tr><td>Pengaturan</td><td>Manajemen pengguna, peran &amp; izin, pengaturan toko, backup database</td><td>Administrator</td></tr>
+</tbody>
+</table>
+
+<h2>1.4 Prinsip desain: offline-first</h2>
+<ol>
+<li><strong>Transaksi tetap berjalan tanpa internet.</strong> Penjualan, cetak struk, dan stok terpotong langsung di komputer toko.</li>
+<li><strong>Data disimpan lokal</strong> pada file database SQLite di folder data pengguna Windows.</li>
+<li><strong>Saat online</strong>, setiap perubahan (event) dikirim ke server terpusat; konflik antar perangkat dideteksi dan diklasifikasikan otomatis.</li>
+<li><strong>Tidak ada data hilang</strong> saat jaringan putus di tengah sinkronisasi — event yang gagal akan di-retry dengan backoff, tidak dihapus.</li>
+</ol>
+
+<h2>1.5 Multi-perangkat &amp; multi-organisasi</h2>
+<p>Setiap perangkat toko didaftarkan ke <strong>satu organisasi</strong> (mis. Toko Sinar ATK — Cabang Maju Jaya). Server menegakkan <strong>isolasi tenant</strong>: perangkat organisasi A tidak dapat membaca data organisasi B, meskipun keduanya terdaftar di server yang sama. Satu organisasi dapat memiliki banyak perangkat (kasir, back-office, cabang kedua) yang saling sinkron.</p>
+<div class="warn"><strong>Penting:</strong> Pemantauan multi-cabang terpusat (dashboard web owner) berada di pihak server dan belum termasuk dalam rilis desktop ini. Lihat Bab 15.</div>
+
+<h2>1.6 Peran pengguna</h2>
+<table>
+<thead><tr><th>Peran</th><th>Boleh lakukan</th><th>Tidak boleh</th></tr></thead>
+<tbody>
+<tr><td><span class="tag">ADMIN</span></td><td>Semua — kelola pengguna/peran/izin, pengaturan toko, laporan, pos, keuangan, pelanggan, pemasok, pembelian, inventory, sync, backup</td><td>—</td></tr>
+<tr><td><span class="tag" style="background:#1976D2">KASIR</span></td><td>POS, transaksi, pelanggan (baca/tulis), laporan penjualan, pengaturan (baca)</td><td>Keuangan, pengaturan (tulis), hapus pengguna, pembelian</td></tr>
+<tr><td><span class="tag" style="background:#64748B">VIEWER</span></td><td>Hanya membaca: produk, transaksi, pelanggan, pemasok, laporan, pengaturan (baca)</td><td>Semua penempatan/perubahan/penghapusan</td></tr>
+</tbody>
+</table>
+<p class="small">Izin selalu ditegakkan di sisi main process (server-side), bukan hanya disembunyikan di tampilan — kasir tidak bisa mengakses data keuangan meski mengedit URL.</p>

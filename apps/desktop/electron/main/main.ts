@@ -1857,6 +1857,99 @@ function createWindow() {
     }
   });
 
+  // ===== Delivery Orders =====
+
+  ipcMain.handle('deliveryOrder:get', async (_event: any, input: { token: string; transactionId: string }) => {
+    try {
+      const { requireUser } = await import('./services/auth');
+      const appDb = getDb();
+      requireUser(appDb, input.token);
+      const row = appDb.sqlite.prepare(
+        `SELECT t.id, t.transaction_number, t.created_at, t.notes, t.payment_method, t.customer_id AS customer_id,
+                c.name AS customer_name, c.phone AS customer_phone, c.address AS customer_address, c.city AS customer_city
+         FROM transactions t
+         LEFT JOIN customers c ON c.id = t.customer_id
+         WHERE t.id = ?`,
+      ).get(input.transactionId) as any;
+      if (!row) {
+        return { ok: false, success: false, error: { code: 'NOT_FOUND', message: 'Transaksi tidak ditemukan' } };
+      }
+      const items = appDb.sqlite.prepare(
+        `SELECT product_name, quantity, price, subtotal FROM transaction_items WHERE transaction_id = ?`,
+      ).all(input.transactionId) as any[];
+      const subtotal = items.reduce((s, i) => s + Math.round(i.subtotal), 0);
+      return {
+        ok: true,
+        success: true,
+        data: {
+          id: row.id,
+          transactionNumber: row.transaction_number,
+          createdAt: row.created_at,
+          notes: row.notes,
+          paymentMethod: row.payment_method,
+          customerName: row.customer_name || null,
+          customerPhone: row.customer_phone || null,
+          customerAddress: row.customer_address || null,
+          customerCity: row.customer_city || null,
+          items: items.map((i) => ({ productName: i.product_name, quantity: i.quantity, unitPrice: Math.round(i.price), subtotal: Math.round(i.subtotal) })),
+          subtotal,
+        },
+      };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  // ===== Sales Returns =====
+
+  ipcMain.handle('salesReturn:create', async (_event: any, input: { token: string; transactionId: string; notes?: string }) => {
+    try {
+      const { requireUser } = await import('./services/auth');
+      const { createSalesReturn } = await import('./services/sales-returns');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      const notes = typeof input.notes === 'string' ? input.notes.slice(0, 300) : undefined;
+      const ret = createSalesReturn(appDb, { transactionId: input.transactionId, notes, userId: user.id });
+      return { ok: true, success: true, data: ret };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('salesReturn:list', async (_event: any, input: { token: string; limit?: number }) => {
+    try {
+      const { requireUser } = await import('./services/auth');
+      const appDb = getDb();
+      requireUser(appDb, input.token);
+      const limit = Math.min(Math.max(Number(input?.limit) || 50, 1), 500);
+      const rows = appDb.sqlite.prepare(
+        `SELECT r.id, r.return_number, r.transaction_id, r.return_date, r.notes, r.status, r.created_at,
+                (SELECT COUNT(*) FROM sales_return_items i WHERE i.sales_return_id = r.id) AS item_count,
+                (SELECT SUM(i.subtotal) FROM sales_return_items i WHERE i.sales_return_id = r.id) AS total_cost
+         FROM sales_returns r
+         ORDER BY r.created_at DESC
+         LIMIT ?`,
+      ).all(limit) as any[];
+      return {
+        ok: true,
+        success: true,
+        data: rows.map((r) => ({
+          id: r.id,
+          returnNumber: r.return_number,
+          transactionId: r.transaction_id,
+          returnDate: r.return_date,
+          notes: r.notes,
+          status: r.status,
+          createdAt: r.created_at,
+          itemCount: r.item_count,
+          totalCost: Math.round(r.total_cost ?? 0),
+        })),
+      };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
   mainWindow.webContents.on('will-navigate', (_event, url) => {
     if (!url.startsWith('http://localhost:1420') && !url.startsWith('https://') && !url.startsWith('file://')) {
       _event.preventDefault();

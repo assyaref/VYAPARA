@@ -1,0 +1,104 @@
+<!-- BAB 10 -->
+<h1 class="section" id="bab10">Bab 10 — Offline Sync: Sinkronisasi &amp; Konflik</h1>
+<img class="img-full" src="img-offline.png" alt="Halaman Offline Sync">
+<p class="img-caption">Halaman Offline Sync — status: fase kerja (menghubungkan/mengunduh/idle), jumlah event pending/gagal, tombol “Sinkronkan Sekarang”.</p>
+
+<h2>10.1 Cara kerja sinkronisasi</h2>
+<div class="flow">
+  <span class="box">Perangkat lokal (outbox)</span><span class="arrow">→</span>
+  <span class="box">Unggah ke server</span><span class="arrow">→</span>
+  <span class="box">Server ingest (idempotent)</span><span class="arrow">→</span>
+  <span class="box">Perangkat lain unduh cursor</span>
+</div>
+<ol>
+<li>Setiap perubahan di lokal (transaksi, penerimaan barang, pembayaran) ditulis ke <strong>outbox</strong> secara atomik bersama data transaksinya.</li>
+<li>Sync coordinator berjalan di main process; setiap 30 detik (atau saat manual) ia mengambil event pending dan mengunggahnya ke server.</li>
+<li>Server menyimpan event dengan <strong>server_seq</strong> (nomor urut per organisasi) dan mengembalikan <strong>remoteVersion</strong> per agregat.</li>
+<li>Perangkat lain mengunduh event setelahnya cursor tersimpan — memastikan <strong>tidak ada duplikasi</strong> di kedua sisi (idempotent).</li>
+<li>Bila token kedaluwarsa, coordinator melakukan <strong>renew</strong> otomatis menggunakan deviceToken.</li>
+</ol>
+
+<h2>10.2 Status sinkronisasi</h2>
+<table>
+<thead><tr><th>Fase</th><th>Arti</th><th>Aksi</th></tr></thead>
+<tbody>
+<tr><td><code>idle</code></td><td>Sinkron selesai / tidak ada aktivitas</td><td>—</td></tr>
+<tr><td><code>connecting</code> / <code>uploading</code> / <code>downloading</code></td><td>Sedang berkomunikasi dengan server</td><td>Tunggu</td></tr>
+<tr><td><code>offline</code></td><td>Tidak ada jaringan / server unreachable</td><td>Transaksi lokal tetap jalan; sync akan otomatis saat online</td></tr>
+<tr><td><code>retrying</code></td><td>Terjadi error sementara (jaringan/server)</td><td>Backoff otomatis (2s → ×2 → max 5 menit)</td></tr>
+<tr><td><code>error</code></td><td>Error permanen (device tidak terdaftar/ditolak)</td><td>Hubungi administrator</td></tr>
+</tbody>
+</table>
+
+<h2>10.3 Menyelesaikan konflik</h2>
+<p>Konflik terdeteksi otomatis untuk update master data bersamaan (produk/pelanggan/supplier) dan transaksi finansial:</p>
+<table>
+<thead><tr><th>Jenis</th><th>Keputusan otomatis</th><th>Contoh</th></tr></thead>
+<tbody>
+<tr><td>Duplicate event (sama event_id)</td><td><strong>Reject</strong> — event lokal tidak dikirim ulang</td><td>Idempotency key sama</td></tr>
+<tr><td>Master data — remote lebih baru (timestamp)</td><td><strong>Auto-accept remote</strong></td><td>Produk diedit di dua perangkat</td></tr>
+<tr><td>Inventori (stok)</td><td><strong>Manual review</strong></td><td>Stok berubah di 2 perangkat bersamaan</td></tr>
+<tr><td>Finansial (pembayaran, harga)</td><td><strong>Manual review</strong></td><td>Pembayaran faktur di-entry di 2 kasir</td></tr>
+</tbody>
+</table>
+<p class="small">Konflik yang menunggu review tersimpan di <code>sync_conflicts</code> dengan status <code>DETECTED</code>/<code>CLASSIFIED</code>/<code>PENDING_RESOLUTION</code> — muncul di panel Offline Sync untuk diselesaikan operator (auto-resolve hanya menangani duplicate &amp; master-data last-write-wins).</p>
+
+<h2>10.4 RemoteVersion (mengapa konflik bisa dideteksi)</h2>
+<div class="callout"><strong>Cara kerja:</strong> server menyimpan <code>remote_version</code> monotonik per agregat (produk X di server v3 → v4 → v5…). Desktop menyimpan versi lokal; saat unduh event baru, desktop membandingkan remote_version versus versi lokal → konflik terdeteksi <em>sebelum</em> data ditimpa.</div>
+
+<h2>10.5 Jika sync terus gagal</h2>
+<ol>
+<li>Pastikan <strong>admin/enrollment secret</strong> sudah benar (SYNC_ENROLLMENT_SECRET di server).</li>
+<li>Pastikan <strong>perangkat terdaftar</strong>: cek di tabel <code>sync_devices</code> — baris ada? status <code>active</code>?</li>
+<li>Pastikan <strong>server berjalan</strong> dan bisa diakses dari jaringan toko.</li>
+<li>Tombol <strong>Sinkronkan Sekarang</strong> memicu retry manual. Event yang gagal tetap pending (tidak hilang).</li>
+</ol>
+
+<!-- BAB 11 -->
+<h1 class="section" id="bab11">Bab 11 — Pengaturan</h1>
+
+<h2>11.1 Profil Toko &amp; Pajak</h2>
+<p><strong>Pengaturan → Toko</strong> → ubah <em>Nama Toko</em>, <em>Receipt Footer</em>, dan <em>Tarif Pajak</em> (basis poin, mis. 1100 = 11%). Perubahan langsung berlaku untuk transaksi berikutnya.</p>
+
+<h2>11.2 Pengguna &amp; Peran</h2>
+<p><strong>Pengaturan → Pengguna</strong> → kelola akun pengguna (tambah/edit/nonaktif). <strong>Peran</strong> → buat/ubah peran kustom (mis. <em>Supervisor</em>) dan atur izin per modul (checkbox).</p>
+
+<h2>11.3 Pengaturan Inventaris</h2>
+<p>Setel minimum stok per produk (atau secara massal) untuk mengaktifkan peringatan <strong>Stok Menipis</strong>. Pengaturan ini juga mengendalikan <em>low-stock alerts</em> pada dashboard.</p>
+
+<h2>11.4 Backup &amp; Restore Database</h2>
+<p>Menu <strong>Pengaturan → Backup</strong> → pilih folder → <strong>Backup</strong>. File <code>.vyapara.db</code> tersalin ke folder yang dipilih dengan verifikasi integritas (<code>integrity_check</code>) sebelum selesai. <strong>Restore</strong> mengganti database aktif dengan backup yang dipilih (versi saat ini disimpan sebagai <code>.pre-restore</code> sebagai jaga-jaga).</p>
+
+<!-- BAB 12 -->
+<h1 class="section" id="bab12">Bab 12 — Backup &amp; Pemulihan Data</h1>
+
+<h2>12.1 Cara backup manual</h2>
+<ol>
+<li>Buka <strong>Pengaturan → Backup</strong>.</li>
+<li>Klik <strong>Buat cadangan</strong> → pilih lokasi penyimpanan (disarankan: drive eksternal + USB).</li>
+<li>Tunggu selesai — aplikasi memverifikasi integritas file sebelum konfirmasi.</li>
+</ol>
+
+<h2>12.2 Strategi backup rekomendasi</h2>
+<table>
+<thead><tr><th>Interval</th><th>Aksi</th><th>Catatan</th></tr></thead>
+<tbody>
+<tr><td>Harian</td><td>Backup manual (atau scheduled task Windows untuk salin folder <code>%APPDATA%\vyapara-desktop\database</code>)</td><td>Lakukan setelah tutup toko</td></tr>
+<tr><td>Mingguan</td><td>Verifikasi restore ke komputer lain (uji pulih)</td><td>Bukan hanya backup saja — pastikan bisa dipulihkan</td></tr>
+<tr><td>Sebelum update aplikasi</td><td>Backup manual</td><td>Selalu</td></tr>
+</tbody>
+</table>
+
+<h2>12.3 Apa yang terjadi bila data rusak</h2>
+<ol>
+<li>Aplikasi mendeteksi integritas saat startup (<code>PRAGMA integrity_check</code>).</li>
+<li>Bila gagal → aplikasi tidak bisa dibuka → <strong>restore dari backup terakhir</strong> lewat <em>Pengaturan → Backup → Restore</em>.</li>
+<li>Database yang lebih baru dari backup terakhir akan hilang — itulah sebabnya interval backup harian sangat disarankan.</li>
+</ol>
+
+<h2>12.4 Memindahkan ke komputer baru</h2>
+<ol>
+<li>Install aplikasi di komputer baru.</li>
+<li>Salin folder <code>%APPDATA%\vyapara-desktop\database\</code> dari komputer lama.</li>
+<li>Buka aplikasi — semua data, pengguna, pengaturan tersinkron otomatis dari file yang disalin (tidak perlu registrasi ulang perangkat).</li>
+</ol>

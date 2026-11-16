@@ -1,0 +1,94 @@
+<!-- BAB 13 -->
+<h1 class="section" id="bab13">Bab 13 — Keamanan &amp; Data Sensitif</h1>
+
+<h2>13.1 Apa yang dilindungi &amp; cara kerjanya</h2>
+<table>
+<thead><tr><th>Aset</th><th>Perlindungan</th></tr></thead>
+<tbody>
+<tr><td>Password pengguna</td><td><code>scrypt(N=65536, r=8, p=1)</code> + salt acak 16-byte per akun; verifikasi <code>timingSafeEqual</code> (tahan timing attack)</td></tr>
+<tr><td>Token sesi</td><td>Random 32 bytes; hanya <strong>SHA-256 hash</strong> yang disimpan; kedaluwarsa 12 jam; logout mencabut</td></tr>
+<tr><td>Token perangkat (sync)</td><td>SHA-256 hash di server; plaintext hanya saat registrasi; TLS di produksi</td></tr>
+<tr><td>Kredensial sync lokal</td><td>Enkripsi <code>safeStorage</code> DPAPI Windows di <code>sync-credentials.bin</code>; file <code>.sync-credentials.json</code> legacy <strong>ditolak</strong> (fail-closed)</td></tr>
+<tr><td>RBAC</td><td>Setiap handler IPC memverifikasi <code>requireUser</code> + izin modul di main process; bukan hanya sembunyikan menu</td></tr>
+<tr><td>Database lokal</td><td>File SQLite di profil pengguna; akses via process IPC saja (contextIsolation, nodeIntegration=false, sandbox=false untuk preload ESM)</td></tr>
+<tr><td>Produksi (web)</td><td>CSP: <code>default-src 'self'</code> — tidak ada script/style inline dari luar</td></tr>
+<tr><td>Navigasi</td><td><code>will-navigate</code> hanya ke localhost:1420 / HTTPS / file://; jendela baru (window.open) ditolak, link HTTPS dibuka di browser luar</td></tr>
+</tbody>
+</table>
+
+<h2>13.2 Apa yang TIDAK dilindungi (ke jujuran)</h2>
+<ul>
+<li><strong>Database lokal tidak dienkripsi.</strong> File <code>vyapara.db</code> bisa dibaca jika laptop dicuri (tanpa BitLocker). Saran: aktifkan <strong>BitLocker</strong>/device encryption; bukan fitur aplikasi.</li>
+<li><strong>Struk bisa dicetak siapa pun</strong> — tidak ada PIN per-kasir untuk print.</li>
+<li><strong>In-memory rate limit</strong> (8 gagal login → 30 detik kunci) — reset saat restart; brute-force terdistribusi tidak dicegah oleh ini.</li>
+<li><strong>Token sesi di memory renderer</strong> — jika renderer compromised (XSS di renderer), token bisa diambil. Mitigasi: contextIsolation, no nodeIntegration, CSP, input sanitization.</li>
+</ul>
+
+<h2>13.3 Praktik terbaik untuk toko</h2>
+<ul>
+<li>Ganti kata sandi admin <strong>setelah instalasi</strong> (default kosong).</li>
+<li>Buat akun kasir terpisah — jangan menggunakan akun admin untuk kasir.</li>
+<li>Kunci komputer <strong>saat kasir pergi</strong> (<kbd>Win + L</kbd>).</li>
+<li>Backup terenkripsi (atau minimal di drive yang tidak terhubung internet).</li>
+<li>Perbarui aplikasi saat ada rilis baru (termasuk security fix).</li>
+</ul>
+
+<!-- BAB 14 -->
+<h1 class="section" id="bab14">Bab 14 — Troubleshooting</h1>
+
+<h2>14.1 Aplikasi tidak terbuka / langsung menutup</h2>
+<p><strong>Gejala:</strong> klik VYAPARA, jendela tidak muncul, atau muncul sebentar lalu hilang.<br>
+<strong>Penyebab paling umum:</strong></p>
+<ol>
+<li><strong>Database korup.</strong> Hapus <em>atau rename</em> <code>vyapara.db</code> di <code>%APPDATA%\vyapara-desktop\database\</code> → buka ulang → restore dari backup.</li>
+<li><strong>Migrasi gagal.</strong> File migrasi sudah ada tetapi tidak bisa dijalankan (disk penuh / read-only). Pastikan disk bebas &amp; folder <code>vyapara-desktop</code> bisa ditulis.</li>
+<li><strong>Konflik versi DLL.</strong> Reinstall.</li>
+</ol>
+
+<h2>14.2 Layar putih / aplikasi loading terus</h2>
+<ol>
+<li>Tekan <kbd>Ctrl</kbd>+<kbd>R</kbd> untuk reload renderer.</li>
+<li>Jika tetap blank: tutup app → hapus file <code>%APPDATA%\vyapara-desktop\database\vyapara.db-wal</code> dan <code>-shm</code> (aman: hanya log redo, bukan data) → buka ulang.</li>
+<li>Periksa folder <code>vyapara-desktop\logs</code> (jika ada) untuk pesan error.</li>
+</ol>
+
+<h2>14.3 Produk tidak muncul di POS</h2>
+<ul>
+<li>Pastikan kategori chip <strong>Semua</strong> terpilih (jika tidak, hanya produk dalam kategori itu yang muncul).</li>
+<li>Pastikan produk <strong>aktif</strong> (<code>is_active=1</code>). Nonaktif tidak ditampilkan.</li>
+<li>Pastikan <strong>stok &gt; 0</strong> — produk habis tidak bisa diklik.</li>
+<li>Jika tidak ada produk sama sekali → seed data belum dijalankan (fresh install). Buat produk lewat backend atau hubungi administrator.</li>
+</ul>
+
+<h2>14.4 Login gagal padahal kata sandi benar</h2>
+<ol>
+<li><strong>8 kali gagal → kunci 30 detik.</strong> Tunggu lalu coba lagi.</li>
+<li><strong>Caps Lock aktif?</strong> — password case-sensitive.</li>
+<li><strong>Akun dinonaktifkan</strong> — hubungi admin.</li>
+<li><strong>Sesi lama:</strong> hapus <code>session.token</code> lalu login ulang.</li>
+</ol>
+
+<h2>14.5 Sync gagal / “Sync engine belum enrolled”</h2>
+<p>Artinya perangkat belum terdaftar di server. <strong>Hubungi administrator / penyedia server</strong> untuk proses enrollment (butuh <code>enrollmentSecret</code> dan URL server).</p>
+
+<h2>14.6 Stok tidak berkurang / bertambah sendiri</h2>
+<ul>
+<li><strong>Stok berkurang</strong> saat transaksi selesai (checkout) — normal.</li>
+<li><strong>Stok tidak berkurang</strong> → cek apakah transaksi benar-benar selesai (status <code>completed</code>), bukan draft.</li>
+<li><strong>Stok bertambah sendiri</strong> → cek apakah penerimaan barang (goods receiving) pernah dilakukan tanpa cek fisik.</li>
+</ul>
+
+<h2>14.7 “Produk tidak tersedia” saat sync</h2>
+<p>Event masuk dari perangkat lain mencantumkan produk yang belum ada di perangkat ini → aplikasi mengarantina event tersebut. Solusi: buat produk dengan SKU yang sama di perangkat ini, lalu sync ulang (atau tunggu admin push produk master).</p>
+
+<h2>14.8 Kode error &amp; pesan umum</h2>
+<table>
+<thead><tr><th>Pesan</th><th>Arti</th><th>Solusi</th></tr></thead>
+<tbody>
+<tr><td><code>PASSWORD_CHANGE_REQUIRED</code></td><td>Akun wajib ganti kata sandi (default bawaan terdeteksi)</td><td>Ganti password saat login berikutnya</td></tr>
+<tr><td><code>RATE_LIMITED</code></td><td>8 gagal login → terkunci 30 detik</td><td>Tunggu 30 detik, coba lagi</td></tr>
+<tr><td><code>DEVICE_REVOKED</code></td><td>Perangkat dicabut dari server</td><td>Hubungi admin</td></tr>
+<tr><td><code>SCHEMA_UNSUPPORTED</code></td><td>Versi aplikasi tidak cocok dengan server</td><td>Update aplikasi</td></tr>
+<tr><td><code>BUSINESS_APPLY_FAILED</code></td><td>Event dari perangkat lain gagal diterapkan (mis. produk tidak ada)</td><td>Buat produk/SKU yang sama, atau biarkan di karantina</td></tr>
+</tbody>
+</table>

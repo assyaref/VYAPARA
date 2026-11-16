@@ -1,0 +1,40 @@
+<!-- BAB 16 -->
+<h1 class="section" id="bab16">Bab 16 — Manajemen Produk, Retur &amp; Penyesuaian Stok</h1>
+
+<h2>16.1 Mengelola Produk</h2>
+<ol>
+<li>Menu <strong>Produk</strong> di sidebar (ikon kotak) — seluruh katalog muncul dalam tabel.</li>
+<li>Klik <strong>+ Tambah Produk</strong> → isi <em>Nama Produk</em> (wajib), <em>SKU</em> &amp; <em>Barcode</em> (opsional), <em>Kategori</em> (pilih dari kategori yang sudah ada), <em>Satuan</em>, <em>Harga</em>, <em>HPP</em>, dan <em>Stok</em> awal → <strong>Simpan</strong>.</li>
+<li>Klik <strong>Edit</strong> pada baris produk untuk mengubah harga/stok.</li>
+<li>Klik <strong>Nonaktif</strong> untuk menyembunyikan produk dari POS (tidak terhapus, riwayat transaksi tetap ada).</li>
+</ol>
+<div class="warn"><strong>Catatan:</strong> pengisian <em>Kategori</em> dan <em>Satuan</em> hanya bisa memilih dari data yang sudah di-seed (<code>ATK</code>, <code>Kertas</code>, <code>Pcs</code>, <code>Rim</code>, <code>Pack</code>) — belum ada UI tambah kategori/satuan baru; hubungi administrator untuk menambah kategori lewat backend.</div>
+
+<h2>16.2 Mencetak Delivery Order (Surat Jalan)</h2>
+<p>Menu kasir → pilih transaksi → pada modal struk klik <strong>Cetak DO</strong> (bukan <em>Cetak Nota</em>). Dokumen <strong>Delivery Order — Surat Jalan</strong> akan tampil dan langsung membuka dialog print Windows. Isinya:</p>
+<ul>
+<li>Logo + nama toko, nomor transaksi <code>INV-…</code>, tanggal &amp; kasir</li>
+<li>Alamat pelanggan (bila transaksi memiliki pelanggan terdaftar; kosong bila walk-in)</li>
+<li>Tabel item: <em># | Produk/Layanan | Qty | Harga Satuan | Subtotal</em></li>
+<li>Total &amp; kolom tanda tangan <em>Penerima</em> dan <em>Kasir</em></li>
+</ul>
+
+<h2>16.3 Retur Penjualan</h2>
+<ol>
+<li>Menu <strong>Retur Penjualan</strong>.</li>
+<li>Panel kiri menampilkan daftar transaksi terbaru — klik tombol <strong>Retur</strong> pada baris yang ingin dikembalikan.</li>
+<li>Konfirmasi → sistem mencatat retur <code>RET-YY-NNNN</code>, mengembalikan stok ke gudang, dan mencatat pembalikan HPP untuk laporan laba rugi.</li>
+<li><strong>Riwayat Retur</strong> menampilkan seluruh retur: No. Retur, waktu, jumlah item, total HPP, status.</li>
+</ol>
+
+<h2>16.4 Penyesuaian Stok (manual)</h2>
+<ol>
+<li>Menu <strong>Penyesuaian Stok</strong>.</li>
+<li>Formulir: pilih produk, pilih arah (<strong>Tambah/Kurang</strong>), isi <em>Jumlah</em>, <em>Alasan</em> (wajib, mis. “rusak/kadaluarsa/selisih opname”), <em>No. Referensi</em> (opsional).</li>
+<li>Klik <strong>Ajukan Penyesuaian</strong> — status menjadi <em>Pending</em>.</li>
+<li>Pengguna lain dengan izin <code>inventory:approve</code> (admin) akan melihat panel <strong>Menunggu Persetujuan</strong> → <strong>Setuju</strong> (stok terupdate) atau <strong>Tolak</strong>.</li>
+</ol>
+<div class="warn"><strong>Perhatian:</strong> stok hanya berubah setelah disetujui admin — kasir tidak bisa mengubah stok sesuka hati.</div>
+
+<h2>16.5 Menyimpan bukti retur untuk shift</h2>
+<p>Panel <em>Riwayat Retur</em> berguna untuk mencocokkan barang yang masuk/keluar dengan faktur pembelian — buka di akhir shift dan cek jumlah retur tidak melebihi wajar.</p>

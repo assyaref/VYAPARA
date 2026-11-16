@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>VYAPARA Business Management — Panduan Penggunaan &amp; Penjelasan Aplikasi v1.0.0</title>
+<style>
+@page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+@page :first { margin: 0; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #172033; margin: 0; font-size: 11pt; line-height: 1.45; }
+.cover { width: 210mm; height: 297mm; background: linear-gradient(150deg, #0D47A1 0%, #1565C0 55%, #1976D2 100%); color: #fff; padding: 28mm 22mm; display: flex; flex-direction: column; }
+.cover-logo { height: 34mm; margin-bottom: 6mm; margin-top: 2mm; }
+.cover h1 { font-size: 34pt; line-height: 1.15; margin: 8mm 0 2mm; font-weight: 800; }
+.cover .sub { font-size: 15pt; color: #BBDEFB; margin-bottom: 10mm; }
+.cover .badge { display: inline-block; background: #FF8F00; color: #0D47A1; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 999px; padding: 2mm 6mm; font-size: 10pt; }
+.cover-footer { margin-top: auto; font-size: 9pt; color: #BBDEFB; border-top: 1px solid rgba(255,255,255,.35); padding-top: 5mm; }
+.cover-footer strong { color: #fff; }
+h1.section { background: #0D47A1; color: #fff; padding: 4mm 6mm; border-radius: 2mm; font-size: 19pt; margin: 8mm 0 5mm; page-break-after: avoid; }
+h2 { color: #0D47A1; font-size: 15pt; border-bottom: 2.5px solid #FF8F00; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { color: #1976D2; font-size: 12pt; margin: 5mm 0 2mm; page-break-after: avoid; }
+p { margin: 0 0 3mm; text-align: justify; }
+ul, ol { margin: 1mm 0 4mm; padding-left: 6mm; }
+li { margin-bottom: 1.6mm; }
+table { width: 100%; border-collapse: collapse; margin: 3mm 0 6mm; font-size: 9pt; page-break-inside: auto; }
+th { background: #0D47A1; color: #fff; padding: 2mm 3mm; text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; }
+td { border-bottom: 1px solid #E2E8F0; padding: 1.8mm 3mm; vertical-align: top; }
+tr:nth-child(even) td { background: #F5F7FA; }
+tr { page-break-inside: avoid; }
+.callout { background: #E3F2FD; border-left: 4px solid #1976D2; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+.warn { background: #FFF3E0; border-left: 4px solid #FF8F00; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+.danger { background: #FFEBEE; border-left: 4px solid #C62828; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+.ok { background: #E8F5E9; border-left: 4px solid #2E7D32; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+.kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4mm; margin: 4mm 0; }
+.kpi { border: 1px solid #E2E8F0; border-radius: 3mm; padding: 4mm; background: #fff; }
+.kpi .label { font-size: 8pt; text-transform: uppercase; color: #64748B; letter-spacing: .08em; }
+.kpi .value { font-size: 17pt; font-weight: 800; color: #0D47A1; }
+code, pre { font-family: 'Consolas', 'Courier New', monospace; font-size: 9pt; }
+code { background: #F5F7FA; border: 1px solid #E2E8F0; border-radius: 1mm; padding: 0 1.5mm; }
+pre { background: #172033; color: #E3F2FD; border-radius: 2mm; padding: 3mm 4mm; overflow-x: auto; font-size: 8pt; }
+.img-full { width: 100%; border: 1px solid #E2E8F0; border-radius: 2mm; margin: 3mm 0 5mm; box-shadow: 0 2px 8px rgba(13,71,161,.15); }
+.img-caption { text-align:center; font-size: 8pt; color:#64748B; margin:-3mm 0 5mm; }
+.small { font-size: 8pt; color: #64748B; }
+.toc { background: #F5F7FA; border-radius: 3mm; padding: 5mm 8mm; margin: 6mm 0; }
+.toc a { color: #0D47A1; text-decoration: none; display: block; padding: 1.1mm 0; font-size: 10pt; }
+.toc a:hover { text-decoration: underline; }
+.toc .l2 { padding-left: 6mm; font-size: 9pt; color: #172033; }
+.two-col { column-count: 2; column-gap: 6mm; }
+.footer-note { border-top: 1px solid #E2E8F0; padding-top: 3mm; margin-top: 6mm; font-size: 8pt; color: #64748B; }
+.tag { display:inline-block; background:#0D47A1; color:#fff; border-radius:1mm; font-size:7pt; font-weight:700; padding: .3mm 1.6mm; letter-spacing:.05em; }
+.step { display: flex; gap: 4mm; margin-bottom: 3mm; page-break-inside: avoid; }
+.step-num { background: #0D47A1; color:#fff; font-weight:800; border-radius:50%; width: 7mm; height: 7mm; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size: 11pt; }
+.step-body { flex: 1; }
+.kbd { border: 1px solid #CBD5E1; border-bottom-width: 3px; border-radius: 1.5mm; padding: 0 1.5mm; background: #fff; font-family: Consolas, monospace; font-size: 8pt; }
+.flow { display:flex; align-items:center; gap:2mm; margin: 3mm 0; font-size:9pt; flex-wrap: wrap; }
+.flow .box { background:#E3F2FD; border:1px solid #1976D2; border-radius:2mm; padding: 2mm 3mm; font-weight:600; color:#0D47A1; }
+.flow .arrow { color:#FF8F00; font-weight:900; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <img class="cover-logo" src="logo-light.png" alt="VYAPARA">
+  <span class="badge">Panduan Pengguna &nbsp;·&nbsp; Versi 1.0.0</span>
+  <h1>VYAPARA<br>Business Management</h1>
+  <div class="sub">Panduan Penggunaan &amp; Penjelasan Aplikasi<br>POS Desktop Offline-First untuk Toko ATK, Kertas &amp; Percetakan</div>
+  <div class="cover-footer">
+    <p><strong>Dokumen ini ditujukan untuk:</strong> Pemilik toko, kasir, dan administrator</p>
+    <p><strong>Platform:</strong> Windows 10/11 · Aplikasi Desktop (Electron + SQLite lokal)</p>
+    <p><strong>Dokumen:</strong> VYAPARA_Panduan_Penggunaan.pdf · Diterbitkan 16 November 2026</p>
+    <p class="small" style="color:#90CAF9">Dokumen ini menjelaskan aplikasi yang sudah dibangun pada branch feature/phase-4.3-sync-engine. Isi mencakup fungsi yang benar-benar tersedia; fitur yang belum tersedia ditandai secara eksplisit.</p>
+  </div>
+</div>

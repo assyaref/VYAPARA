@@ -116,5 +116,8 @@ interface Window {
     rolesGetPermissions: (input: unknown) => Promise<any>;
     rolesSetPermissions: (input: unknown) => Promise<any>;
     permissionsGetAll: () => Promise<any>;
+    getDeliveryOrder: (input: unknown) => Promise<any>;
+    createSalesReturn: (input: unknown) => Promise<any>;
+    listSalesReturns: (input?: unknown) => Promise<any>;
   };
 }

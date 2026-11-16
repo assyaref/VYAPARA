@@ -50,6 +50,8 @@ const POS: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<any | null>(null);
+  const [doDoc, setDoDoc] = useState<any | null>(null);
+  const [doLoading, setDoLoading] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
   const discount = 0;
@@ -145,6 +147,25 @@ const POS: React.FC = () => {
   const printReceipt = () => {
     if (!receipt) return;
     window.print();
+  };
+
+  const printDeliveryOrder = async () => {
+    if (!receipt) return;
+    setDoLoading(true);
+    try {
+      const res = await vyapara.getDeliveryOrder({ token: '', transactionId: receipt.id });
+      if (!res?.ok || !res.data) {
+        setError(res?.error?.message ?? 'Gagal memuat delivery order');
+        return;
+      }
+      setDoDoc(res.data);
+      // allow DOM to paint the DO before print dialog
+      setTimeout(() => window.print(), 150);
+    } catch (err: any) {
+      setError(err.message || 'Gagal memuat delivery order');
+    } finally {
+      setDoLoading(false);
+    }
   };
 
   return (
@@ -376,7 +397,65 @@ const POS: React.FC = () => {
             <p className="text-center text-[10px] text-vyapara-secondary mb-4">Terima kasih telah berbelanja</p>
             <div className="flex justify-end gap-2 pt-2 border-t border-vyapara-border">
               <button onClick={printReceipt} className="px-5 py-2 border border-vyapara-border rounded-lg text-vyapara-secondary hover:bg-vyapara-surface font-medium text-sm">Cetak Nota</button>
+              <button onClick={printDeliveryOrder} disabled={doLoading} className="px-5 py-2 border border-vyapara-blue text-vyapara-blue rounded-lg hover:bg-vyapara-light-blue font-medium text-sm disabled:opacity-60">{doLoading ? 'Memuat…' : 'Cetak DO'}</button>
               <button onClick={() => setReceipt(null)} className="px-5 py-2 bg-vyapara-navy hover:bg-vyapara-blue text-white rounded-lg font-medium transition-colors text-sm">Selesai</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delivery Order — hidden until printed */}
+      {doDoc && (
+        <div id="do-print-root" className="hidden print:block">
+          <div className="do-doc">
+            <div className="do-head">
+              <div className="do-brand">
+                <div className="do-logo">V</div>
+                <div>
+                  <p className="do-store">VYAPARA Business Management</p>
+                  <p className="do-tag">DELIVERY ORDER — SURAT JALAN</p>
+                </div>
+              </div>
+              <div className="do-meta">
+                <p>No. : <strong>{doDoc.transactionNumber}</strong></p>
+                <p>Tanggal : {new Date(doDoc.createdAt).toLocaleString('id-ID')}</p>
+                <p>Kasir : {user?.name}</p>
+              </div>
+            </div>
+            <div className="do-cust">
+              <p className="do-label">Kepada Yth.</p>
+              <p className="do-cust-name">{doDoc.customerName || 'Pelanggan Umum'}</p>
+              {doDoc.customerPhone && <p>{doDoc.customerPhone}</p>}
+              {doDoc.customerAddress && <p>{doDoc.customerAddress}{doDoc.customerCity ? `, ${doDoc.customerCity}` : ''}</p>}
+              {!doDoc.customerName && <p className="do-muted">(Pelanggan umum / walk-in)</p>}
+            </div>
+            <table className="do-table">
+              <thead>
+                <tr><th>#</th><th>Produk / Layanan</th><th>Qty</th><th style={{ textAlign: 'right' }}>Harga Satuan</th><th style={{ textAlign: 'right' }}>Subtotal</th></tr>
+              </thead>
+              <tbody>
+                {doDoc.items.map((item: any, i: number) => (
+                  <tr key={i}>
+                    <td>{i + 1}</td>
+                    <td>{item.productName}</td>
+                    <td>{item.quantity}</td>
+                    <td style={{ textAlign: 'right' }}>Rp {Number(item.unitPrice).toLocaleString('id-ID')}</td>
+                    <td style={{ textAlign: 'right' }}>Rp {Number(item.subtotal).toLocaleString('id-ID')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="do-totals">
+              <div className="do-totals-row"><span>Subtotal</span><span>Rp {Number(doDoc.subtotal).toLocaleString('id-ID')}</span></div>
+              <div className="do-totals-row do-total"><span>TOTAL</span><span>Rp {Number(doDoc.subtotal).toLocaleString('id-ID')}</span></div>
+            </div>
+            {doDoc.notes && <div className="do-notes"><strong>Catatan:</strong> {doDoc.notes}</div>}
+            <div className="do-foot">
+              <p>Barang yang tercantum di atas telah diserahkan dalam kondisi baik.</p>
+              <div className="do-sig">
+                <div className="do-sig-box">Penerima</div>
+                <div className="do-sig-box">Kasir</div>
+              </div>
             </div>
           </div>
         </div>

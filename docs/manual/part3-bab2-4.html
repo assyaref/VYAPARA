@@ -1,0 +1,128 @@
+<!-- BAB 2 -->
+<h1 class="section" id="bab2">Bab 2 — Instalasi &amp; Pertama Kali Menjalankan</h1>
+
+<h2>2.1 Prasyarat</h2>
+<ul>
+<li>Windows 10 atau Windows 11 (64-bit)</li>
+<li>Minimal 4 GB RAM (disarankan 8 GB), 500 MB ruang disk kosong</li>
+<li>Layar minimal 1366×768 (lebar optimal 1400 px+)</li>
+<li>Tidak memerlukan koneksi internet untuk beroperasi</li>
+</ul>
+
+<h2>2.2 Memasang aplikasi</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body">Salin file installer <code>VYAPARA Setup 1.0.0.exe</code> ke komputer toko.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body">Klik dua kali installer. Windows menampilkan peringatan <strong>Windows protected your PC</strong> karena aplikasi belum bersertifikat (unsigned).<div class="callout" style="margin-top:2mm"><strong>Cara melanjutkan (aman):</strong> klik <strong>More info</strong> → tombol <strong>Run anyway</strong> muncul. Ini normal untuk installer tanpa tanda tangan digital. Pembelian sertifikat Authenticode meniadakan peringatan ini.</div></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body">Ikuti wizard: pilih folder instalasi (default: <code>C:\Program Files\VYAPARA</code>), klik <strong>Install</strong>, lalu <strong>Finish</strong>. Pintasan VYAPARA dibuat di desktop dan Start Menu.</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-body">Buka aplikasi dari pintasan <strong>VYAPARA</strong> di desktop. Splash screen muncul lalu jendela utama terbuka.</div></div>
+
+<h2>2.3 Pertama kali: Setup Administrator</h2>
+<p>Pada saat pertama kali dijalankan, aplikasi belum memiliki administrator sama sekali — layar <strong>“Siapkan Administrator”</strong> muncul dan <strong>tidak bisa ditutup</strong> selama belum ada admin.</p>
+<div class="step"><div class="step-num">1</div><div class="step-body">Isi <strong>Nama Lengkap</strong> (mis. pemilik toko), <strong>Username / Email</strong> (mis. admin@tokoanda.com), <strong>Kata Sandi</strong> (minimum 10 karakter, tidak boleh sama dengan email), dan <strong>Ulangi Kata Sandi</strong>.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body">Klik <strong>Buat Administrator &amp; Masuk</strong>. Aplikasi langsung masuk ke dashboard sebagai administrator.</div></div>
+<div class="warn"><strong>Catatan kata sandi:</strong> setelah admin pertama dibuat, aplikasi menolak kata sandi bawaan lemah (remediasi <code>admin123</code> otomatis: akun tersebut diwajibkan ganti kata sandi pada login berikutnya). Simpan kata sandi Anda di tempat aman.</div>
+
+<img class="img-full" src="img-login.png" alt="Layar setup administrator">
+<p class="img-caption">Layar “Siapkan Administrator” — tampil hanya pada fresh install (belum ada pengguna).</p>
+
+<h2>2.4 Login</h2>
+<ol>
+<li>Buka aplikasi → masukkan <strong>Username/Email</strong> dan <strong>Password</strong> → klik <strong>Masuk</strong>.</li>
+<li>Centang <strong>Ingat saya</strong> untuk menyimpan email di perangkat ini (password tidak pernah disimpan).</li>
+<li>Jika lupa password: hubungi <strong>administrator toko</strong> untuk direset lewat menu <strong>Pengaturan → Pengguna</strong>.</li>
+</ol>
+<div class="callout"><strong>Sesi &amp; timeout:</strong> sesi berlaku 12 jam. Setelah itu Anda harus login lagi. Tombol <strong>Keluar</strong> ada di pojok kiri bawah sidebar.</div>
+
+<h2>2.5 Struktur folder data</h2>
+<table>
+<thead><tr><th>Lokasi</th><th>Isi</th></tr></thead>
+<tbody>
+<tr><td><code>%APPDATA%\vyapara-desktop\</code></td><td>Folder utama data aplikasi (userData)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\database\vyapara.db</code></td><td>Database SQLite utama (WAL mode)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\database\vyapara.db-wal</code> / <code>-shm</code></td><td>File WAL (sementara, dibuat otomatis oleh SQLite, aman dihapus hanya saat aplikasi tertutup)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\session.token</code></td><td>Token sesi login (mode 0600; dihapus saat logout/kadaluarsa)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\device-identity.json</code></td><td>Identitas perangkat untuk sinkronisasi</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\sync-credentials.bin</code></td><td>Kredensial sinkronisasi terenkripsi DPAPI (Windows)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\backups\</code></td><td>Folder cadangan (dibuat saat Backup dari Pengaturan)</td></tr>
+</tbody>
+</table>
+
+<!-- BAB 3 -->
+<h1 class="section" id="bab3">Bab 3 — Peran Pengguna &amp; Hak Akses (RBAC)</h1>
+<p>VYAPARA menerapkan <strong>Role-Based Access Control (RBAC)</strong> di level aplikasi — bukan sekadar menyembunyikan tombol. Setiap panggilan sensitif divalidasi di main process dengan token sesi.</p>
+
+<h2>3.1 Matriks hak akses</h2>
+<table>
+<thead><tr><th>Modul / Tindakan</th><th>Admin</th><th>Kasir</th><th>Viewer</th></tr></thead>
+<tbody>
+<tr><td>Dashboard (baca)</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>POS / transaksi</td><td>✅</td><td>✅</td><td>👁 (baca)</td></tr>
+<tr><td>Keuangan (dompet kas, laporan keuangan)</td><td>✅</td><td>❌</td><td>👁 (baca)</td></tr>
+<tr><td>Pelanggan — baca / tambah / edit</td><td>✅</td><td>✅</td><td>👁</td></tr>
+<tr><td>Pemasok — baca / tambah / edit</td><td>✅</td><td>✅</td><td>👁</td></tr>
+<tr><td>Pembelian (PO, terima barang, retur beli)</td><td>✅</td><td>❌</td><td>👁</td></tr>
+<tr><td>Inventory (opname, penyesuaian)</td><td>✅</td><td>👁</td><td>👁</td></tr>
+<tr><td>Laporan &amp; analisis</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Pengaturan toko &amp; backup/restore DB</td><td>✅</td><td>❌</td><td>👁 (baca)</td></tr>
+<tr><td>Kelola pengguna / peran / izin</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>Offline Sync (baca / picu)</td><td>✅</td><td>✅</td><td>✅</td></tr>
+</tbody>
+</table>
+
+<h2>3.2 Mengelola pengguna</h2>
+<ol>
+<li>Masuk sebagai <strong>Admin</strong> → buka <strong>Pengaturan</strong> → tab <strong>Pengguna</strong>.</li>
+<li>Klik <strong>Tambah Pengguna</strong> → isi nama, email, kata sandi, pilih peran (Admin/Kasir/Viewer) → simpan.</li>
+<li>Untuk mengubah peran: pilih pengguna → <strong>Edit</strong> → ubah peran/status → simpan.</li>
+<li>Untuk menonaktifkan (bukan menghapus): <strong>Nonaktifkan</strong> — pengguna tidak bisa login lagi, tetapi riwayat transaksinya tetap ada.</li>
+</ol>
+
+<h2>3.3 Aturan password</h2>
+<ul>
+<li>Minimal <strong>10 karakter</strong>, maksimal 200</li>
+<li>Tidak boleh sama dengan email</li>
+<li>Saat pertama kali, akun <code>admin@vyapara.com</code>/<code>admin123</code> dipaksa ganti kata sandi (jika masih ada di database lama)</li>
+<li>Password dilindungi dengan <strong>scrypt</strong> (biaya 65536 iterasi, salt acak per akun) + <code>timingSafeEqual</code></li>
+<li><strong>8 kali</strong> gagal login berturut-turut → akun terkunci 30 detik (in-memory; reset saat aplikasi ditutup)</li>
+</ul>
+
+<h2>3.4 Sesi &amp; timeout</h2>
+<ul>
+<li>Sesi berlaku <strong>12 jam</strong> sejak login terakhir.</li>
+<li>Logout (tombol <strong>Keluar</strong> di sidebar) menonaktifkan sesi di sisi database <em>dan</em> menghapus token lokal.</li>
+<li>Ganti password mencabut <strong>semua</strong> sesi aktif milik pengguna tersebut (berlaku sebagai “logout semua perangkat”).</li>
+</ul>
+
+<!-- BAB 4 -->
+<h1 class="section" id="bab4">Bab 4 — Dashboard: Memantau Toko</h1>
+<p>Dashboard adalah halaman utama setelah login. Menampilkan kondisi toko hari ini secara ringkas.</p>
+
+<img class="img-full" src="img-dashboard-aktif.png" alt="Dashboard dengan transaksi nyata">
+<p class="img-caption">Dashboard dengan data transaksi nyata: omzet hari ini Rp 105.000, transaksi tercatat, pesanan terbaru “INV-20261115-DB1173”, grafik 7 hari terakhir, komposisi pendapatan.</p>
+
+<h2>4.1 Kartu KPI (atas)</h2>
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">Omzet Hari Ini</div><div class="value">Rp 105.000</div><div class="small">▲ tren vs kemarin (otomatis)</div></div>
+  <div class="kpi"><div class="label">Transaksi Hari Ini</div><div class="value">1</div><div class="small">▲ jumlah transaksi selesai</div></div>
+  <div class="kpi"><div class="label">Produk Aktif</div><div class="value">2</div><div class="small">item di katalog</div></div>
+  <div class="kpi"><div class="label">Stok Menipis</div><div class="value">0</div><div class="small">semua stok aman</div></div>
+</div>
+<ul>
+<li><strong>Omzet Hari Ini</strong> — total nilai transaksi <code>completed</code> hari ini. Panah hijau/merah dihitung otomatis vs kemarin.</li>
+<li><strong>Transaksi Hari Ini</strong> — jumlah transaksi selesai hari ini (+tren vs kemarin).</li>
+<li><strong>Produk Aktif</strong> — jumlah produk aktif di katalog.</li>
+<li><strong>Stok Menipis</strong> — jumlah produk yang stoknya ≤ minimum stok (dari pengaturan inventaris per produk).</li>
+</ul>
+
+<h2>4.2 Grafik Penjualan 7 Hari Terakhir</h2>
+<p>Grafik garis dengan area gradasi menampilkan omzet per hari selama 7 hari terakhir (dihitung dari transaksi <code>completed</code>). Puncak ditandai oranye (“Puncak …”). Data berasal dari database lokal — tidak perlu server.</p>
+
+<h2>4.3 Komposisi Pendapatan per Kategori</h2>
+<p>Donut chart membagi omzet berdasarkan <strong>kategori produk</strong> yang terjual (masing-masing irisan = persentase dari total). Kategori ditentukan dari <code>products.category_id</code> → tabel <code>categories</code>. Produk tanpa kategori masuk <strong>“Tanpa Kategori”</strong>. Jika belum ada transaksi, panel menampilkan keadaan kosong (“Belum ada transaksi.”).</p>
+
+<h2>4.4 Pesanan Terbaru</h2>
+<p>Tabel 5 transaksi terakhir dengan kolom: <code>No. Order (INV-…) | Waktu | Metode | Total | Status (Selesai)</code>. Klik tombol <strong>Refresh</strong> di kanan atas untuk muat ulang data kapan pun.</p>
+
+<h2>4.5 Stok Menipis (panel oranye)</h2>
+<p>Daftar maksimal 5 produk yang stoknya menyentuh/di bawah minimum, dengan badge stok saat ini. Klik <strong>Lihat Semua Stok →</strong> untuk mengelola inventaris (halaman penyesuaian stok tersedia untuk inventory secara backend; UI lengkap untuk opname menyusul).</p>
+
+<div class="callout"><strong>Tips:</strong> Buka dashboard setiap pagi — 30 detik membaca KPI memberi Anda gambaran kesehatan toko hari ini tanpa membuka laporan apa pun.</div>

@@ -1,0 +1,107 @@
+<!-- BAB 6 -->
+<h1 class="section" id="bab6">Bab 6 — Pelanggan &amp; Piutang</h1>
+
+<h2>6.1 Mendaftarkan pelanggan baru</h2>
+<ol>
+<li>Klik menu <strong>Pelanggan</strong> di sidebar.</li>
+<li>Klik tombol <strong>+ Tambah Pelanggan</strong>.</li>
+<li>Isi: <strong>Nama Pelanggan</strong> (wajib), Contact Person, Telepon, Email, Alamat, Kota — lalu klik <strong>Simpan</strong>.</li>
+<li>Pelanggan langsung muncul di daftar. Gunakan kolom pencarian (Nama) untuk menemukan kembali pelanggan.</li>
+</ol>
+
+<h2>6.2 Melihat detail &amp; Riwayat pelanggan</h2>
+<p>Klik nama pelanggan di daftar untuk membuka panel detail: <em>Saldo Piutang</em>, <em>Batas Kredit</em>, <em>Total Belanja</em>, dan daftar <em>Transaksi</em> terakhir serta <em>Piutang</em>.</p>
+
+<h2>6.3 Penjualan Kredit (menambah piutang)</h2>
+<ol>
+<li>Di <strong>Kasir (POS)</strong>, pilih pelanggan melalui panel atas keranjang (atau) &rarr; POS mendukung transaksi kredit dengan metode pembayaran <strong>Kredit</strong>.</li>
+<li>Checkout seperti biasa — transaksinya berjalan, tetapi piutang pelanggan bertambah sebesar total.</li>
+<li>Piutang tercatat otomatis di profil pelanggan.</li>
+</ol>
+
+<h2>6.4 Menerima pembayaran piutang</h2>
+<ol>
+<li>Buka <strong>Pelanggan</strong> → klik nama pelanggan → <strong>Bayar Piutang</strong>.</li>
+<li>Isi jumlah pembayaran dan klik <strong>Simpan</strong>.</li>
+<li>Saldo piutang berkurang. Transaksi pembayaran tercatat di riwayat.</li>
+</ol>
+
+<h2>6.5 Statistik pelanggan</h2>
+<p>Panel statistik menampilkan <em>Total Belanja</em>, <em>Frekuensi</em>, <em>Piutang</em>, dan rata-rata belanja per pelanggan — berguna untuk mengenali pelanggan paling bernilai.</p>
+
+<!-- BAB 7 -->
+<h1 class="section" id="bab7">Bab 7 — Pemasok &amp; Pengadaan</h1>
+
+<h2>7.1 Mendaftarkan pemasok</h2>
+<ol>
+<li>Klik menu <strong>Pemasok</strong> di sidebar.</li>
+<li>Klik <strong>+ Tambah Pemasok</strong> → isi Nama Pemasok (wajib), Contact Person, Telepon, Email, Alamat, Kota → <strong>Simpan</strong>.</li>
+<li>Pencarian berdasarkan nama.</li>
+</ol>
+
+<h2>7.2 Siklus pembelian</h2>
+<div class="flow">
+  <span class="box">Pemasok</span><span class="arrow">→</span>
+  <span class="box">Purchase Order</span><span class="arrow">→</span>
+  <span class="box">Terima Barang</span><span class="arrow">→</span>
+  <span class="box">Faktur</span><span class="arrow">→</span>
+  <span class="box">Bayar Faktur</span>
+</div>
+<ol>
+<li><strong>Buat PO</strong> dari menu <em>Pembelian → Purchase Order</em> (pilih pemasok, item, qty, harga). PO bisa dibatalkan bila belum diterima.</li>
+<li><strong>Terima barang</strong>: dari PO yang sama → <em>Terima Barang</em> — stok produk bertambah otomatis.</li>
+<li><strong>Faktur</strong>: faktur masuk tercatat per pemasok.</li>
+<li><strong>Bayar faktur</strong>: buka pemasok → <em>Faktur</em> → pilih faktur → <em>Bayar</em>. Status berubah menjadi <em>Lunas</em>.</li>
+</ol>
+<p class="small">Catatan: UI lengkap untuk Pembelian masih terbatas — beberapa aksi (retur beli ke pemasok, retur jual, kelola kategori/brand) diekspos lewat IPC backend dan belum punya layar. Lihat Bab 15.</p>
+
+<h2>7.3 Pemasok: pembayaran faktur</h2>
+<p>Di halaman detail pemasok, daftar faktur menampilkan <em>No. Faktur | Tanggal | Jatuh Tempo | Jumlah | Status (belum/lunas)</em>. Klik faktur untuk membuka rincian dan <strong>Bayar</strong> untuk mencatat pembayaran. Saldo payables di-refresh otomatis.</p>
+
+<!-- BAB 8 -->
+<h1 class="section" id="bab8">Bab 8 — Keuangan &amp; Dompet Kas</h1>
+
+<h2>8.1 Dompet Kas</h2>
+<p>Dompet kas merepresentasikan laci kas fisik di meja kasir. Satu shift = satu sesi buka/tutup.</p>
+<ol>
+<li><strong>Buka Dompet Kas</strong>: Keuangan → <em>Dompet Kas</em> → <strong>Buka Dompet</strong> → isi <em>Saldo Awal</em> + catatan → simpan. Status berubah <em>Terbuka</em>.</li>
+<li><strong>Tutup Dompet</strong>: <strong>Tutup Dompet</strong> → isi <em>Saldo Fisik</em> (hitung uang fisik) → simpan. Sistem menghitung selisih (mis. lebih/kurang).</li>
+<li>Riwayat buka/tutup tercatat per kasir/cabang.</li>
+</ol>
+
+<h2>8.2 Mencatat Pemasukan / Pengeluaran non-penjualan</h2>
+<ol>
+<li><strong>Keuangan → Pemasukan</strong> → <strong>Catat Pemasukan</strong> → isi tipe (mis. “Penjualan”, “Biaya”, “Lainnya”), jumlah, deskripsi → simpan.</li>
+<li><strong>Keuangan → Pengeluaran</strong> → <strong>Catat Pengeluaran</strong> → isi kategori (mis. “Listrik”, “Gaji”), jumlah, deskripsi → simpan.</li>
+</ol>
+<p class="small">Arus masuk/keluar tercatat terpisah dari penjualan sehingga laporan laba rugi akurat.</p>
+
+<h2>8.3 Laporan laba rugi &amp; arus kas</h2>
+<table>
+<thead><tr><th>Laporan</th><th>Isi</th><th>Sumber</th></tr></thead>
+<tbody>
+<tr><td>Pemasukan &amp; Pengeluaran</td><td>Daftar seluruh pemasukan &amp; pengeluaran dalam rentang tanggal</td><td>Tabel <code>income_records</code> / <code>expense_records</code></td></tr>
+<tr><td>Laba Rugi</td><td>Total pendapatan − total HPP − total biaya</td><td>Transaksi + inventory movements + income/expense</td></tr>
+<tr><td>Arus Kas</td><td>Pergerakan kas: masuk (penjualan + pemasukan) vs keluar (pengeluaran)</td><td>Cash movements</td></tr>
+</tbody>
+</table>
+<p>Semua laporan keuangan difilter berdasarkan <em>tanggal mulai / tanggal akhir</em>.</p>
+
+<!-- BAB 9 -->
+<h1 class="section" id="bab9">Bab 9 — Laporan &amp; Analisis</h1>
+<p>Menu <strong>Laporan &amp; Analisis</strong> membuka 9 jenis laporan. Semua dihitung dari database lokal Anda (tidak butuh server).</p>
+<table>
+<thead><tr><th>Tab</th><th>Isi</th></tr></thead>
+<tbody>
+<tr><td>Penjualan</td><td>Total omzet + jumlah transaksi per hari dalam rentang tanggal</td></tr>
+<tr><td>Terlaris</td><td>Produk terlaris (by qty &amp; revenue) dengan batas N teratas</td></tr>
+<tr><td>Bergerak Lambat</td><td>Produk tanpa penjualan dalam N hari terakhir (default 90 hari)</td></tr>
+<tr><td>Laba Kotor</td><td>Revenue, HPP, laba kotor (Rp &amp; %) per produk/tanggal</td></tr>
+<tr><td>Valuasi Stok</td><td>Nilai inventaris (qty × HPP) per produk + total</td></tr>
+<tr><td>Pembelian</td><td>Total pembelian per pemasok dalam rentang tanggal</td></tr>
+<tr><td>Pengeluaran</td><td>Total pengeluaran per kategori (listrik, gaji, dll)</td></tr>
+<tr><td>Kinerja Kasir</td><td>Omze per kasir dalam rentang tanggal</td></tr>
+<tr><td>Transaksi</td><td>Daftar transaksi lengkap (nomor, tanggal, kasir, total)</td></tr>
+</tbody>
+</table>
+<p class="small">Semua laporan dapat difilter <em>tanggal mulai &amp; akhir</em>. Hasil laporan ditampilkan di layar dan bisa diekspor/print via tombol print di masing-masing halaman (beberapa laporan masih butuh implementasi tombol Export CSV — lihat Bab 15).</p>

@@ -141,6 +141,10 @@ const api = {
   rolesGetPermissions: (input: unknown) => send('roles:getPermissions', input),
   rolesSetPermissions: (input: unknown) => send('roles:setPermissions', input),
   permissionsGetAll: () => send('permissions:getAll'),
+
+  getDeliveryOrder: (input: unknown) => send('deliveryOrder:get', input),
+  createSalesReturn: (input: unknown) => send('salesReturn:create', input),
+  listSalesReturns: (input?: unknown) => send('salesReturn:list', input ?? {}),
 };
 
 contextBridge.exposeInMainWorld('vyapara', api);

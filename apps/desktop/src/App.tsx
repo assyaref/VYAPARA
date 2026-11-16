@@ -10,6 +10,9 @@ import Reports from './Reports';
 import Settings from './Settings';
 import POS from './POS';
 import OfflineSync from './OfflineSync';
+import Products from './Products';
+import SalesReturns from './SalesReturns';
+import StockAdjustments from './StockAdjustments';
 import logo from './assets/logo.png';
 import './index.css';
 
@@ -22,7 +25,10 @@ type View =
   | 'reports'
   | 'settings'
   | 'pos'
-  | 'offline';
+  | 'offline'
+  | 'products'
+  | 'returns'
+  | 'adjustments';
 
 const iconCls = 'w-5 h-5 shrink-0';
 const icons = {
@@ -91,6 +97,24 @@ const icons = {
       <path d="M21 16v-5h-5" />
     </svg>
   ),
+  box: (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 7l9-4 9 4-9 4-9-4z" />
+      <path d="M3 7v10l9 4 9-4V7" />
+      <path d="M12 11v10" />
+    </svg>
+  ),
+  products: (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    </svg>
+  ),
+  returns: (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 14l-4-4 4-4" />
+      <path d="M5 10h9a4 4 0 0 1 0 8h-3" />
+    </svg>
+  ),
 };
 
 const navItems: { id: View; label: string; permission?: string; icon: React.ReactNode }[] = [
@@ -102,6 +126,9 @@ const navItems: { id: View; label: string; permission?: string; icon: React.Reac
   { id: 'reports', label: 'Laporan & Analisis', icon: icons.reports, permission: 'reports:read' },
   { id: 'supplier', label: 'Pemasok', icon: icons.supplier, permission: 'supplier:read' },
   { id: 'offline', label: 'Offline Sync', icon: icons.sync },
+  { id: 'products', label: 'Produk', icon: icons.products },
+  { id: 'returns', label: 'Retur Penjualan', icon: icons.returns },
+  { id: 'adjustments', label: 'Penyesuaian Stok', icon: icons.box },
   { id: 'settings', label: 'Pengaturan', icon: icons.settings, permission: 'settings:read' },
 ];
 
@@ -550,6 +577,9 @@ function App() {
         {currentView === 'customer' && <Customer />}
         {currentView === 'reports' && <Reports />}
         {currentView === 'offline' && <OfflineSync />}
+        {currentView === 'products' && <Products />}
+        {currentView === 'returns' && <SalesReturns />}
+        {currentView === 'adjustments' && <StockAdjustments />}
         {currentView === 'settings' && <Settings />}
         {currentView === 'supplier' && <Supplier />}
       </main>

@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>VYAPARA Business Management — Panduan Penggunaan &amp; Penjelasan Aplikasi v1.0.0</title>
+<style>
+@page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+@page :first { margin: 0; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #172033; margin: 0; font-size: 11pt; line-height: 1.45; }
+.cover { width: 210mm; height: 297mm; background: linear-gradient(150deg, #0D47A1 0%, #1565C0 55%, #1976D2 100%); color: #fff; padding: 28mm 22mm; display: flex; flex-direction: column; }
+.cover-logo { height: 34mm; margin-bottom: 6mm; margin-top: 2mm; }
+.cover h1 { font-size: 34pt; line-height: 1.15; margin: 8mm 0 2mm; font-weight: 800; }
+.cover .sub { font-size: 15pt; color: #BBDEFB; margin-bottom: 10mm; }
+.cover .badge { display: inline-block; background: #FF8F00; color: #0D47A1; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 999px; padding: 2mm 6mm; font-size: 10pt; }
+.cover-footer { margin-top: auto; font-size: 9pt; color: #BBDEFB; border-top: 1px solid rgba(255,255,255,.35); padding-top: 5mm; }
+.cover-footer strong { color: #fff; }
+h1.section { background: #0D47A1; color: #fff; padding: 4mm 6mm; border-radius: 2mm; font-size: 19pt; margin: 8mm 0 5mm; page-break-after: avoid; }
+h2 { color: #0D47A1; font-size: 15pt; border-bottom: 2.5px solid #FF8F00; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { color: #1976D2; font-size: 12pt; margin: 5mm 0 2mm; page-break-after: avoid; }
+p { margin: 0 0 3mm; text-align: justify; }
+ul, ol { margin: 1mm 0 4mm; padding-left: 6mm; }
+li { margin-bottom: 1.6mm; }
+table { width: 100%; border-collapse: collapse; margin: 3mm 0 6mm; font-size: 9pt; page-break-inside: auto; }
+th { background: #0D47A1; color: #fff; padding: 2mm 3mm; text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; }
+td { border-bottom: 1px solid #E2E8F0; padding: 1.8mm 3mm; vertical-align: top; }
+tr:nth-child(even) td { background: #F5F7FA; }
+tr { page-break-inside: avoid; }
+.callout { background: #E3F2FD; border-left: 4px solid #1976D2; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+.warn { background: #FFF3E0; border-left: 4px solid #FF8F00; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+.danger { background: #FFEBEE; border-left: 4px solid #C62828; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+.ok { background: #E8F5E9; border-left: 4px solid #2E7D32; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+.kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4mm; margin: 4mm 0; }
+.kpi { border: 1px solid #E2E8F0; border-radius: 3mm; padding: 4mm; background: #fff; }
+.kpi .label { font-size: 8pt; text-transform: uppercase; color: #64748B; letter-spacing: .08em; }
+.kpi .value { font-size: 17pt; font-weight: 800; color: #0D47A1; }
+code, pre { font-family: 'Consolas', 'Courier New', monospace; font-size: 9pt; }
+code { background: #F5F7FA; border: 1px solid #E2E8F0; border-radius: 1mm; padding: 0 1.5mm; }
+pre { background: #172033; color: #E3F2FD; border-radius: 2mm; padding: 3mm 4mm; overflow-x: auto; font-size: 8pt; }
+.img-full { width: 100%; border: 1px solid #E2E8F0; border-radius: 2mm; margin: 3mm 0 5mm; box-shadow: 0 2px 8px rgba(13,71,161,.15); }
+.img-caption { text-align:center; font-size: 8pt; color:#64748B; margin:-3mm 0 5mm; }
+.small { font-size: 8pt; color: #64748B; }
+.toc { background: #F5F7FA; border-radius: 3mm; padding: 5mm 8mm; margin: 6mm 0; }
+.toc a { color: #0D47A1; text-decoration: none; display: block; padding: 1.1mm 0; font-size: 10pt; }
+.toc a:hover { text-decoration: underline; }
+.toc .l2 { padding-left: 6mm; font-size: 9pt; color: #172033; }
+.two-col { column-count: 2; column-gap: 6mm; }
+.footer-note { border-top: 1px solid #E2E8F0; padding-top: 3mm; margin-top: 6mm; font-size: 8pt; color: #64748B; }
+.tag { display:inline-block; background:#0D47A1; color:#fff; border-radius:1mm; font-size:7pt; font-weight:700; padding: .3mm 1.6mm; letter-spacing:.05em; }
+.step { display: flex; gap: 4mm; margin-bottom: 3mm; page-break-inside: avoid; }
+.step-num { background: #0D47A1; color:#fff; font-weight:800; border-radius:50%; width: 7mm; height: 7mm; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size: 11pt; }
+.step-body { flex: 1; }
+.kbd { border: 1px solid #CBD5E1; border-bottom-width: 3px; border-radius: 1.5mm; padding: 0 1.5mm; background: #fff; font-family: Consolas, monospace; font-size: 8pt; }
+.flow { display:flex; align-items:center; gap:2mm; margin: 3mm 0; font-size:9pt; flex-wrap: wrap; }
+.flow .box { background:#E3F2FD; border:1px solid #1976D2; border-radius:2mm; padding: 2mm 3mm; font-weight:600; color:#0D47A1; }
+.flow .arrow { color:#FF8F00; font-weight:900; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <img class="cover-logo" src="logo-light.png" alt="VYAPARA">
+  <span class="badge">Panduan Pengguna &nbsp;·&nbsp; Versi 1.0.0</span>
+  <h1>VYAPARA<br>Business Management</h1>
+  <div class="sub">Panduan Penggunaan &amp; Penjelasan Aplikasi<br>POS Desktop Offline-First untuk Toko ATK, Kertas &amp; Percetakan</div>
+  <div class="cover-footer">
+    <p><strong>Dokumen ini ditujukan untuk:</strong> Pemilik toko, kasir, dan administrator</p>
+    <p><strong>Platform:</strong> Windows 10/11 · Aplikasi Desktop (Electron + SQLite lokal)</p>
+    <p><strong>Dokumen:</strong> VYAPARA_Panduan_Penggunaan.pdf · Diterbitkan 16 November 2026</p>
+    <p class="small" style="color:#90CAF9">Dokumen ini menjelaskan aplikasi yang sudah dibangun pada branch feature/phase-4.3-sync-engine. Isi mencakup fungsi yang benar-benar tersedia; fitur yang belum tersedia ditandai secara eksplisit.</p>
+  </div>
+</div>
+<!-- TOC -->
+<nav class="toc">
+  <h2 style="border:none;color:#0D47A1">Daftar Isi</h2>
+  <a class="l2" href="#bab1">Bab 1 — Penjelasan Aplikasi: Apa itu VYAPARA?</a>
+  <a class="l2" href="#bab2">Bab 2 — Instalasi &amp; Pertama Kali Menjalankan</a>
+  <a class="l2" href="#bab3">Bab 3 — Peran Pengguna &amp; Hak Akses</a>
+  <a class="l2" href="#bab4">Bab 4 — Dashboard: Memantau Toko</a>
+  <a class="l2" href="#bab5">Bab 5 — Kasir (POS): Operasi Penjualan</a>
+  <a class="l2" href="#bab6">Bab 6 — Pelanggan &amp; Piutang</a>
+  <a class="l2" href="#bab7">Bab 7 — Pemasok &amp; Pengadaan</a>
+  <a class="l2" href="#bab8">Bab 8 — Keuangan &amp; Dompet Kas</a>
+  <a class="l2" href="#bab9">Bab 9 — Laporan &amp; Analisis</a>
+  <a class="l2" href="#bab10">Bab 10 — Offline Sync: Sinkronisasi &amp; Konflik</a>
+  <a class="l2" href="#bab11">Bab 11 — Pengaturan: Pengguna, Peran &amp; Data</a>
+  <a class="l2" href="#bab12">Bab 12 — Backup &amp; Pemulihan Data</a>
+  <a class="l2" href="#bab13">Bab 13 — Keamanan &amp; Data Sensitif</a>
+  <a class="l2" href="#bab14">Bab 14 — Troubleshooting</a>
+  <a class="l2" href="#bab15">Bab 15 — Batasan &amp; Hal yang Belum Tersedia</a>
+  <a class="l2" href="#bab16">Bab 16 — Manajemen Produk, Retur &amp; Penyesuaian Stok</a>
+  <a class="l2" href="#lampiran">Lampiran A — Glossary &amp; FAQ</a>
+</nav>
+
+<!-- BAB 1 -->
+<h1 class="section" id="bab1">Bab 1 — Penjelasan Aplikasi</h1>
+
+<h2>1.1 Apa itu VYAPARA?</h2>
+<p><strong>VYAPARA Business Management</strong> adalah aplikasi <strong>Point of Sale (POS) desktop</strong> berbasis offline-first untuk toko ATK (Alat Tulis Kantor), kertas, dan layanan percetakan/fotocopy/laminating/jilid. Aplikasi berjalan di komputer toko tanpa perlu koneksi internet, menyimpan seluruh data secara lokal, dan — ketika server tersedia — menyinkronkan data ke server terpusat untuk pemantauan multi-cabang.</p>
+
+<div class="callout"><strong>Ringkasnya:</strong> VYAPARA = mesin kasir + manajemen stok + pelanggan + pemasok + keuangan + laporan + sinkronisasi offline-first, dalam satu aplikasi desktop Windows.</div>
+
+<h2>1.2 Arsitektur yang digunakan</h2>
+<table>
+<thead><tr><th>Lapisan</th><th>Teknologi</th><th>Fungsi</th></tr></thead>
+<tbody>
+<tr><td>Desktop shell</td><td>Electron (v45)</td><td>Menjalankan app Windows native; jendela utama aplikasi</td></tr>
+<tr><td>Renderer / UI</td><td>React 19 + Tailwind CSS v4 + Zustand</td><td>Tampilan: Dashboard, POS, Keuangan, dll.</td></tr>
+<tr><td>Main process</td><td>Electron main + IPC handlers</td><td>Otak aplikasi: akses database, autentikasi, sinkronisasi — renderer tidak pernah menyentuh file langsung</td></tr>
+<tr><td>Database lokal</td><td>SQLite (better-sqlite3, WAL mode)</td><td>Penyimpanan semua data: produk, transaksi, stok, pelanggan, pemasok, keuangan</td></tr>
+<tr><td>ORM &amp; migrasi</td><td>Drizzle ORM + file migrasi SQL (14 migrasi)</td><td>Membuat tabel saat pertama dijalankan; seed peran, kategori, satuan, izin</td></tr>
+<tr><td>Sync engine</td><td>outbox → server → inbound apply; conflict detector; queue</td><td>Mengirim perubahan ke server terpusat dan menerima perubahan dari perangkat lain</td></tr>
+<tr><td>Server sinkronisasi</td><td>Node HTTP + SQLite (apps/sync-server)</td><td>Server terpusat per-organisasi (multi-tenant), validasi token &amp; idempotency</td></tr>
+</tbody>
+</table>
+
+<h3>Alur data per transaksi penjualan</h3>
+<div class="flow">
+  <span class="box">Pilih produk</span><span class="arrow">→</span>
+  <span class="box">Keranjang</span><span class="arrow">→</span>
+  <span class="box">Bayar</span><span class="arrow">→</span>
+  <span class="box">Transaksi + stok terpotong</span><span class="arrow">→</span>
+  <span class="box">Event keluar ke outbox</span><span class="arrow">→</span>
+  <span class="box">Sync engine</span><span class="arrow">→</span>
+  <span class="box">Sinkron ke server</span>
+</div>
+<p>Seluruh langkah transaksi berjalan dalam <strong>satu transaksi database</strong> — jika listrik/aplikasi mati di tengah proses, tidak ada data separuh (atomik).</p>
+
+<h2>1.3 Modul yang tersedia</h2>
+<table>
+<thead><tr><th>Modul</th><th>Kegunaan</th><th>Peran utama</th></tr></thead>
+<tbody>
+<tr><td>Dashboard</td><td>Omzet hari ini, tren penjualan 7 hari, komposisi pendapatan per kategori, stok menipis, pesanan terbaru</td><td>Pemilik / semua</td></tr>
+<tr><td>Kasir (POS)</td><td>Transaksi penjualan: cari produk, keranjang, empat metode pembayaran, cetak struk</td><td>Kasir</td></tr>
+<tr><td>Keuangan</td><td>Dompet kas (buka/tutup), catat pemasukan/pengeluaran, laporan laba rugi &amp; arus kas</td><td>Keuangan / pemilik</td></tr>
+<tr><td>Pelanggan</td><td>Daftar pelanggan, piutang (pembelian kredit), pembayaran piutang</td><td>Kasir / pemilik</td></tr>
+<tr><td>Pemasok</td><td>Daftar pemasok, faktur masuk, pembayaran faktur</td><td>Admin / keuangan</td></tr>
+<tr><td>Pembelian</td><td>Purchase order ke pemasok, penerimaan barang, retur beli</td><td>Admin</td></tr>
+<tr><td>Laporan &amp; Analisis</td><td>Laporan penjualan, laba kotor, produk terlaris/bergerak lambat, valuasi stok, kinerja kasir</td><td>Pemilik / keuangan</td></tr>
+<tr><td>Offline Sync</td><td>Status sinkronisasi perangkat, picu sinkron manual, retry/konflik</td><td>Semua</td></tr>
+<tr><td>Pengaturan</td><td>Manajemen pengguna, peran &amp; izin, pengaturan toko, backup database</td><td>Administrator</td></tr>
+</tbody>
+</table>
+
+<h2>1.4 Prinsip desain: offline-first</h2>
+<ol>
+<li><strong>Transaksi tetap berjalan tanpa internet.</strong> Penjualan, cetak struk, dan stok terpotong langsung di komputer toko.</li>
+<li><strong>Data disimpan lokal</strong> pada file database SQLite di folder data pengguna Windows.</li>
+<li><strong>Saat online</strong>, setiap perubahan (event) dikirim ke server terpusat; konflik antar perangkat dideteksi dan diklasifikasikan otomatis.</li>
+<li><strong>Tidak ada data hilang</strong> saat jaringan putus di tengah sinkronisasi — event yang gagal akan di-retry dengan backoff, tidak dihapus.</li>
+</ol>
+
+<h2>1.5 Multi-perangkat &amp; multi-organisasi</h2>
+<p>Setiap perangkat toko didaftarkan ke <strong>satu organisasi</strong> (mis. Toko Sinar ATK — Cabang Maju Jaya). Server menegakkan <strong>isolasi tenant</strong>: perangkat organisasi A tidak dapat membaca data organisasi B, meskipun keduanya terdaftar di server yang sama. Satu organisasi dapat memiliki banyak perangkat (kasir, back-office, cabang kedua) yang saling sinkron.</p>
+<div class="warn"><strong>Penting:</strong> Pemantauan multi-cabang terpusat (dashboard web owner) berada di pihak server dan belum termasuk dalam rilis desktop ini. Lihat Bab 15.</div>
+
+<h2>1.6 Peran pengguna</h2>
+<table>
+<thead><tr><th>Peran</th><th>Boleh lakukan</th><th>Tidak boleh</th></tr></thead>
+<tbody>
+<tr><td><span class="tag">ADMIN</span></td><td>Semua — kelola pengguna/peran/izin, pengaturan toko, laporan, pos, keuangan, pelanggan, pemasok, pembelian, inventory, sync, backup</td><td>—</td></tr>
+<tr><td><span class="tag" style="background:#1976D2">KASIR</span></td><td>POS, transaksi, pelanggan (baca/tulis), laporan penjualan, pengaturan (baca)</td><td>Keuangan, pengaturan (tulis), hapus pengguna, pembelian</td></tr>
+<tr><td><span class="tag" style="background:#64748B">VIEWER</span></td><td>Hanya membaca: produk, transaksi, pelanggan, pemasok, laporan, pengaturan (baca)</td><td>Semua penempatan/perubahan/penghapusan</td></tr>
+</tbody>
+</table>
+<p class="small">Izin selalu ditegakkan di sisi main process (server-side), bukan hanya disembunyikan di tampilan — kasir tidak bisa mengakses data keuangan meski mengedit URL.</p>
+<!-- BAB 2 -->
+<h1 class="section" id="bab2">Bab 2 — Instalasi &amp; Pertama Kali Menjalankan</h1>
+
+<h2>2.1 Prasyarat</h2>
+<ul>
+<li>Windows 10 atau Windows 11 (64-bit)</li>
+<li>Minimal 4 GB RAM (disarankan 8 GB), 500 MB ruang disk kosong</li>
+<li>Layar minimal 1366×768 (lebar optimal 1400 px+)</li>
+<li>Tidak memerlukan koneksi internet untuk beroperasi</li>
+</ul>
+
+<h2>2.2 Memasang aplikasi</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body">Salin file installer <code>VYAPARA Setup 1.0.0.exe</code> ke komputer toko.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body">Klik dua kali installer. Windows menampilkan peringatan <strong>Windows protected your PC</strong> karena aplikasi belum bersertifikat (unsigned).<div class="callout" style="margin-top:2mm"><strong>Cara melanjutkan (aman):</strong> klik <strong>More info</strong> → tombol <strong>Run anyway</strong> muncul. Ini normal untuk installer tanpa tanda tangan digital. Pembelian sertifikat Authenticode meniadakan peringatan ini.</div></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body">Ikuti wizard: pilih folder instalasi (default: <code>C:\Program Files\VYAPARA</code>), klik <strong>Install</strong>, lalu <strong>Finish</strong>. Pintasan VYAPARA dibuat di desktop dan Start Menu.</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-body">Buka aplikasi dari pintasan <strong>VYAPARA</strong> di desktop. Splash screen muncul lalu jendela utama terbuka.</div></div>
+
+<h2>2.3 Pertama kali: Setup Administrator</h2>
+<p>Pada saat pertama kali dijalankan, aplikasi belum memiliki administrator sama sekali — layar <strong>“Siapkan Administrator”</strong> muncul dan <strong>tidak bisa ditutup</strong> selama belum ada admin.</p>
+<div class="step"><div class="step-num">1</div><div class="step-body">Isi <strong>Nama Lengkap</strong> (mis. pemilik toko), <strong>Username / Email</strong> (mis. admin@tokoanda.com), <strong>Kata Sandi</strong> (minimum 10 karakter, tidak boleh sama dengan email), dan <strong>Ulangi Kata Sandi</strong>.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body">Klik <strong>Buat Administrator &amp; Masuk</strong>. Aplikasi langsung masuk ke dashboard sebagai administrator.</div></div>
+<div class="warn"><strong>Catatan kata sandi:</strong> setelah admin pertama dibuat, aplikasi menolak kata sandi bawaan lemah (remediasi <code>admin123</code> otomatis: akun tersebut diwajibkan ganti kata sandi pada login berikutnya). Simpan kata sandi Anda di tempat aman.</div>
+
+<img class="img-full" src="img-login.png" alt="Layar setup administrator">
+<p class="img-caption">Layar “Siapkan Administrator” — tampil hanya pada fresh install (belum ada pengguna).</p>
+
+<h2>2.4 Login</h2>
+<ol>
+<li>Buka aplikasi → masukkan <strong>Username/Email</strong> dan <strong>Password</strong> → klik <strong>Masuk</strong>.</li>
+<li>Centang <strong>Ingat saya</strong> untuk menyimpan email di perangkat ini (password tidak pernah disimpan).</li>
+<li>Jika lupa password: hubungi <strong>administrator toko</strong> untuk direset lewat menu <strong>Pengaturan → Pengguna</strong>.</li>
+</ol>
+<div class="callout"><strong>Sesi &amp; timeout:</strong> sesi berlaku 12 jam. Setelah itu Anda harus login lagi. Tombol <strong>Keluar</strong> ada di pojok kiri bawah sidebar.</div>
+
+<h2>2.5 Struktur folder data</h2>
+<table>
+<thead><tr><th>Lokasi</th><th>Isi</th></tr></thead>
+<tbody>
+<tr><td><code>%APPDATA%\vyapara-desktop\</code></td><td>Folder utama data aplikasi (userData)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\database\vyapara.db</code></td><td>Database SQLite utama (WAL mode)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\database\vyapara.db-wal</code> / <code>-shm</code></td><td>File WAL (sementara, dibuat otomatis oleh SQLite, aman dihapus hanya saat aplikasi tertutup)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\session.token</code></td><td>Token sesi login (mode 0600; dihapus saat logout/kadaluarsa)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\device-identity.json</code></td><td>Identitas perangkat untuk sinkronisasi</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\sync-credentials.bin</code></td><td>Kredensial sinkronisasi terenkripsi DPAPI (Windows)</td></tr>
+<tr><td><code>%APPDATA%\vyapara-desktop\backups\</code></td><td>Folder cadangan (dibuat saat Backup dari Pengaturan)</td></tr>
+</tbody>
+</table>
+
+<!-- BAB 3 -->
+<h1 class="section" id="bab3">Bab 3 — Peran Pengguna &amp; Hak Akses (RBAC)</h1>
+<p>VYAPARA menerapkan <strong>Role-Based Access Control (RBAC)</strong> di level aplikasi — bukan sekadar menyembunyikan tombol. Setiap panggilan sensitif divalidasi di main process dengan token sesi.</p>
+
+<h2>3.1 Matriks hak akses</h2>
+<table>
+<thead><tr><th>Modul / Tindakan</th><th>Admin</th><th>Kasir</th><th>Viewer</th></tr></thead>
+<tbody>
+<tr><td>Dashboard (baca)</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>POS / transaksi</td><td>✅</td><td>✅</td><td>👁 (baca)</td></tr>
+<tr><td>Keuangan (dompet kas, laporan keuangan)</td><td>✅</td><td>❌</td><td>👁 (baca)</td></tr>
+<tr><td>Pelanggan — baca / tambah / edit</td><td>✅</td><td>✅</td><td>👁</td></tr>
+<tr><td>Pemasok — baca / tambah / edit</td><td>✅</td><td>✅</td><td>👁</td></tr>
+<tr><td>Pembelian (PO, terima barang, retur beli)</td><td>✅</td><td>❌</td><td>👁</td></tr>
+<tr><td>Inventory (opname, penyesuaian)</td><td>✅</td><td>👁</td><td>👁</td></tr>
+<tr><td>Laporan &amp; analisis</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Pengaturan toko &amp; backup/restore DB</td><td>✅</td><td>❌</td><td>👁 (baca)</td></tr>
+<tr><td>Kelola pengguna / peran / izin</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>Offline Sync (baca / picu)</td><td>✅</td><td>✅</td><td>✅</td></tr>
+</tbody>
+</table>
+
+<h2>3.2 Mengelola pengguna</h2>
+<ol>
+<li>Masuk sebagai <strong>Admin</strong> → buka <strong>Pengaturan</strong> → tab <strong>Pengguna</strong>.</li>
+<li>Klik <strong>Tambah Pengguna</strong> → isi nama, email, kata sandi, pilih peran (Admin/Kasir/Viewer) → simpan.</li>
+<li>Untuk mengubah peran: pilih pengguna → <strong>Edit</strong> → ubah peran/status → simpan.</li>
+<li>Untuk menonaktifkan (bukan menghapus): <strong>Nonaktifkan</strong> — pengguna tidak bisa login lagi, tetapi riwayat transaksinya tetap ada.</li>
+</ol>
+
+<h2>3.3 Aturan password</h2>
+<ul>
+<li>Minimal <strong>10 karakter</strong>, maksimal 200</li>
+<li>Tidak boleh sama dengan email</li>
+<li>Saat pertama kali, akun <code>admin@vyapara.com</code>/<code>admin123</code> dipaksa ganti kata sandi (jika masih ada di database lama)</li>
+<li>Password dilindungi dengan <strong>scrypt</strong> (biaya 65536 iterasi, salt acak per akun) + <code>timingSafeEqual</code></li>
+<li><strong>8 kali</strong> gagal login berturut-turut → akun terkunci 30 detik (in-memory; reset saat aplikasi ditutup)</li>
+</ul>
+
+<h2>3.4 Sesi &amp; timeout</h2>
+<ul>
+<li>Sesi berlaku <strong>12 jam</strong> sejak login terakhir.</li>
+<li>Logout (tombol <strong>Keluar</strong> di sidebar) menonaktifkan sesi di sisi database <em>dan</em> menghapus token lokal.</li>
+<li>Ganti password mencabut <strong>semua</strong> sesi aktif milik pengguna tersebut (berlaku sebagai “logout semua perangkat”).</li>
+</ul>
+
+<!-- BAB 4 -->
+<h1 class="section" id="bab4">Bab 4 — Dashboard: Memantau Toko</h1>
+<p>Dashboard adalah halaman utama setelah login. Menampilkan kondisi toko hari ini secara ringkas.</p>
+
+<img class="img-full" src="img-dashboard-aktif.png" alt="Dashboard dengan transaksi nyata">
+<p class="img-caption">Dashboard dengan data transaksi nyata: omzet hari ini Rp 105.000, transaksi tercatat, pesanan terbaru “INV-20261115-DB1173”, grafik 7 hari terakhir, komposisi pendapatan.</p>
+
+<h2>4.1 Kartu KPI (atas)</h2>
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">Omzet Hari Ini</div><div class="value">Rp 105.000</div><div class="small">▲ tren vs kemarin (otomatis)</div></div>
+  <div class="kpi"><div class="label">Transaksi Hari Ini</div><div class="value">1</div><div class="small">▲ jumlah transaksi selesai</div></div>
+  <div class="kpi"><div class="label">Produk Aktif</div><div class="value">2</div><div class="small">item di katalog</div></div>
+  <div class="kpi"><div class="label">Stok Menipis</div><div class="value">0</div><div class="small">semua stok aman</div></div>
+</div>
+<ul>
+<li><strong>Omzet Hari Ini</strong> — total nilai transaksi <code>completed</code> hari ini. Panah hijau/merah dihitung otomatis vs kemarin.</li>
+<li><strong>Transaksi Hari Ini</strong> — jumlah transaksi selesai hari ini (+tren vs kemarin).</li>
+<li><strong>Produk Aktif</strong> — jumlah produk aktif di katalog.</li>
+<li><strong>Stok Menipis</strong> — jumlah produk yang stoknya ≤ minimum stok (dari pengaturan inventaris per produk).</li>
+</ul>
+
+<h2>4.2 Grafik Penjualan 7 Hari Terakhir</h2>
+<p>Grafik garis dengan area gradasi menampilkan omzet per hari selama 7 hari terakhir (dihitung dari transaksi <code>completed</code>). Puncak ditandai oranye (“Puncak …”). Data berasal dari database lokal — tidak perlu server.</p>
+
+<h2>4.3 Komposisi Pendapatan per Kategori</h2>
+<p>Donut chart membagi omzet berdasarkan <strong>kategori produk</strong> yang terjual (masing-masing irisan = persentase dari total). Kategori ditentukan dari <code>products.category_id</code> → tabel <code>categories</code>. Produk tanpa kategori masuk <strong>“Tanpa Kategori”</strong>. Jika belum ada transaksi, panel menampilkan keadaan kosong (“Belum ada transaksi.”).</p>
+
+<h2>4.4 Pesanan Terbaru</h2>
+<p>Tabel 5 transaksi terakhir dengan kolom: <code>No. Order (INV-…) | Waktu | Metode | Total | Status (Selesai)</code>. Klik tombol <strong>Refresh</strong> di kanan atas untuk muat ulang data kapan pun.</p>
+
+<h2>4.5 Stok Menipis (panel oranye)</h2>
+<p>Daftar maksimal 5 produk yang stoknya menyentuh/di bawah minimum, dengan badge stok saat ini. Klik <strong>Lihat Semua Stok →</strong> untuk mengelola inventaris (halaman penyesuaian stok tersedia untuk inventory secara backend; UI lengkap untuk opname menyusul).</p>
+
+<div class="callout"><strong>Tips:</strong> Buka dashboard setiap pagi — 30 detik membaca KPI memberi Anda gambaran kesehatan toko hari ini tanpa membuka laporan apa pun.</div>
+<!-- BAB 5 -->
+<h1 class="section" id="bab5">Bab 5 — Kasir (POS): Operasi Penjualan</h1>
+<img class="img-full" src="img-pos.png" alt="Layar kasir POS">
+<p class="img-caption">Tampilan kasir: katalog kiri (pencarian + filter kategori), panel keranjang kanan (tabel item, total, metode bayar, tombol Bayar).</p>
+
+<h2>5.1 Ringkasan layar</h2>
+<table>
+<thead><tr><th>Area</th><th>Fungsi</th></tr></thead>
+<tbody>
+<tr><td>Pencarian produk (kiri atas)</td><td>Ketik nama/SKU/barcode — hasil langsung muncul. Tombol kategori (Semua, ATK, Kertas) mempersempit daftar</td></tr>
+<tr><td>Grid produk (kiri)</td><td>Ubin produk dengan ikon inisial berwarna + harga + stok saat ini. Klik ubin untuk menambah ke keranjang</td></tr>
+<tr><td>Panel “Keranjang Pesanan” (kanan)</td><td>Tabel item: Item | Qty (+/−) | Harga | Subtotal | 🗑 hapus; badge jumlah item; status “Dalam Proses”</td></tr>
+<tr><td>Total &amp; pembayaran (kanan bawah)</td><td>Subtotal, Diskon, <strong>Total</strong>; chip metode bayar; Jumlah Bayar (tunai) &amp; Kembalian; tombol <strong>Bayar (F10)</strong></td></tr>
+<tr><td>Struk (muncul setelah bayar)</td><td>Modal “Contoh Nota / Struk” berisi ringkasan + tombol <strong>Cetak Nota</strong> (struk pelanggan) &amp; <strong>Cetak DO</strong> (Surat Jalan/Delivery Order)</td></tr>
+</tbody>
+</table>
+
+<h2>5.2 Alur penjualan langkah demi langkah</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body"><strong>Cari produk.</strong> Ketik nama/SKU di kolom pencarian (autofocus saat halaman dibuka), atau klik chip kategori (Semua/ATK/Kertas) lalu klik ubin produk. Contoh: klik “Kertas HVS A4 — Rp 50.000”.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body"><strong>Atur kuantitas.</strong> Klik produk berulang kali untuk menambah 1 per klik, atau gunakan tombol <span class="kbd">+</span>/<span class="kbd">−</span> di samping qty di panel keranjang. Qty 0 otomatis menghapus baris.</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body"><strong>Pilih metode pembayaran.</strong> Klik chip: <strong>Tunai</strong> (default), <strong>QRIS</strong>, <strong>Transfer</strong>, <strong>Debit</strong>, atau <strong>Kredit</strong> (jika pelanggan kredit diaktifkan).</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-body"><strong>Isi Jumlah Bayar (khusus Tunai).</strong> Ketik nominal uang dari pelanggan, mis. 150000 untuk total 105.000. <strong>Kembalian</strong> dihitung otomatis: 45.000. Jika kurang, tombol Bayar nonaktif.</div></div>
+<div class="step"><div class="step-num">5</div><div class="step-body"><strong>Bayar.</strong> Klik <strong>Bayar (F10)</strong>. Aplikasi membuat transaksi secara atomik (stok terpotong + transaksi tercatat + event sinkron dikirim ke outbox). <kbd>F10</kbd> juga memicu checkout bila fokus di form.</div></div>
+<div class="step"><div class="step-num">6</div><div class="step-body"><strong>Struk muncul.</strong> Modal “Contoh Nota / Struk” menampilkan: nomor INV-…, kasir, waktu, daftar item, total, bayar, kembalian, dan barcode-style nomor transaksi. Klik <strong>Cetak Nota</strong> untuk cetak struk pelanggan, <strong>Cetak DO</strong> untuk cetak Delivery Order (Bab 16), <strong>Selesai</strong> untuk menutup dan melayani pelanggan berikutnya.</div></div>
+
+<img class="img-full" src="img-pos-empty.png" alt="POS kosong">
+<p class="img-caption">Layar kasir segar (keranjang kosong, checkout nonaktif). Struk sekarang memiliki dua tombol: <strong>Cetak Nota</strong> (struk pelanggan) dan <strong>Cetak DO</strong> (Delivery Order/Surat Jalan untuk pengiriman).</p>
+
+<h2>5.3 Menghapus item dari keranjang</h2>
+<ul>
+<li><strong>Qty −</strong> sampai 0 → baris hilang otomatis</li>
+<li>Tombol <strong>🗑</strong> (merah) di ujung kanan baris → langsung menghapus baris tersebut</li>
+<li>Tombol <strong>Kosongkan (N)</strong> di header → mengosongkan seluruh keranjang (hati-hati, tidak ada konfirmasi)</li>
+</ul>
+
+<h2>5.4 Metode pembayaran</h2>
+<table>
+<thead><tr><th>Metode</th><th>Kapan digunakan</th><th>Catatan</th></tr></thead>
+<tbody>
+<tr><td>Tunai</td><td>Pembayaran di tempat dengan uang tunai</td><td>Wajib isi “Jumlah Bayar”; kembalian otomatis</td></tr>
+<tr><td>QRIS</td><td>Pembayaran via QRIS/GoPay/OVO/DANA/ShopeePay</td><td>Nominal dibayar = Total; kembalian tidak relevan</td></tr>
+<tr><td>Transfer</td><td>Transfer bank (BCA/Mandiri/BRI/BNI dll)</td><td>Nominal = Total; cocok pembayaran B2B</td></tr>
+<tr><td>Debit</td><td>Kartu debit EDC</td><td>Nominal = Total</td></tr>
+<tr><td>Kredit</td><td>Pembelian atas nama pelanggan dengan tempo (piutang)</td><td>Pelanggan <strong>harus dipilih</strong> (lihat Bab 6); piutang tercatat otomatis</td></tr>
+</tbody>
+</table>
+
+<h2>5.5 Struk / Nota</h2>
+<div class="callout"><strong>Nomor INV:</strong> semua struk memakai format <code>INV-YYYYMMDD-&lt;part&gt;</code> (mis. <code>INV-20261116-D77FD1</code>). Nomor ini menjadi kunci deduplication saat sinkronisasi multi-perangkat — aman untuk cetak ulang.</div>
+<p><strong>Cetak Nota:</strong> klik → dialog print → pilih printer thermal. <strong>Cetak DO:</strong> klik <em>Cetak DO</em> (Bab 16) untuk dokumen pengiriman barang.</p>
+
+<h2>5.6 Stok terpotong otomatis</h2>
+<p>Setiap item pada transaksi mengurangi stok produk <strong>saat itu juga</strong>. Produk dengan stok 0 otomatis <strong>tidak bisa ditambahkan</strong> ke keranjang (tombol dikunci bila stok habis). Pantau stok menipis dari Dashboard → panel <strong>Stok Menipis</strong>.</p>
+
+<h2>5.7 Jika aplikasi mati di tengah checkout</h2>
+<p>Seluruh operasi checkout berjalan dalam satu transaksi database SQLite. Jika komputer mati/reboot di tengah transaksi, semua perubahan di-<strong>rollback</strong> — stok dan transaksi konsisten; tidak ada “transaksi separuh”. Outbox event yang sudah tertulis tetap aman dan disinkronkan saat aplikasi dibuka kembali.</p>
+<!-- BAB 6 -->
+<h1 class="section" id="bab6">Bab 6 — Pelanggan &amp; Piutang</h1>
+
+<h2>6.1 Mendaftarkan pelanggan baru</h2>
+<ol>
+<li>Klik menu <strong>Pelanggan</strong> di sidebar.</li>
+<li>Klik tombol <strong>+ Tambah Pelanggan</strong>.</li>
+<li>Isi: <strong>Nama Pelanggan</strong> (wajib), Contact Person, Telepon, Email, Alamat, Kota — lalu klik <strong>Simpan</strong>.</li>
+<li>Pelanggan langsung muncul di daftar. Gunakan kolom pencarian (Nama) untuk menemukan kembali pelanggan.</li>
+</ol>
+
+<h2>6.2 Melihat detail &amp; Riwayat pelanggan</h2>
+<p>Klik nama pelanggan di daftar untuk membuka panel detail: <em>Saldo Piutang</em>, <em>Batas Kredit</em>, <em>Total Belanja</em>, dan daftar <em>Transaksi</em> terakhir serta <em>Piutang</em>.</p>
+
+<h2>6.3 Penjualan Kredit (menambah piutang)</h2>
+<ol>
+<li>Di <strong>Kasir (POS)</strong>, pilih pelanggan melalui panel atas keranjang (atau) &rarr; POS mendukung transaksi kredit dengan metode pembayaran <strong>Kredit</strong>.</li>
+<li>Checkout seperti biasa — transaksinya berjalan, tetapi piutang pelanggan bertambah sebesar total.</li>
+<li>Piutang tercatat otomatis di profil pelanggan.</li>
+</ol>
+
+<h2>6.4 Menerima pembayaran piutang</h2>
+<ol>
+<li>Buka <strong>Pelanggan</strong> → klik nama pelanggan → <strong>Bayar Piutang</strong>.</li>
+<li>Isi jumlah pembayaran dan klik <strong>Simpan</strong>.</li>
+<li>Saldo piutang berkurang. Transaksi pembayaran tercatat di riwayat.</li>
+</ol>
+
+<h2>6.5 Statistik pelanggan</h2>
+<p>Panel statistik menampilkan <em>Total Belanja</em>, <em>Frekuensi</em>, <em>Piutang</em>, dan rata-rata belanja per pelanggan — berguna untuk mengenali pelanggan paling bernilai.</p>
+
+<!-- BAB 7 -->
+<h1 class="section" id="bab7">Bab 7 — Pemasok &amp; Pengadaan</h1>
+
+<h2>7.1 Mendaftarkan pemasok</h2>
+<ol>
+<li>Klik menu <strong>Pemasok</strong> di sidebar.</li>
+<li>Klik <strong>+ Tambah Pemasok</strong> → isi Nama Pemasok (wajib), Contact Person, Telepon, Email, Alamat, Kota → <strong>Simpan</strong>.</li>
+<li>Pencarian berdasarkan nama.</li>
+</ol>
+
+<h2>7.2 Siklus pembelian</h2>
+<div class="flow">
+  <span class="box">Pemasok</span><span class="arrow">→</span>
+  <span class="box">Purchase Order</span><span class="arrow">→</span>
+  <span class="box">Terima Barang</span><span class="arrow">→</span>
+  <span class="box">Faktur</span><span class="arrow">→</span>
+  <span class="box">Bayar Faktur</span>
+</div>
+<ol>
+<li><strong>Buat PO</strong> dari menu <em>Pembelian → Purchase Order</em> (pilih pemasok, item, qty, harga). PO bisa dibatalkan bila belum diterima.</li>
+<li><strong>Terima barang</strong>: dari PO yang sama → <em>Terima Barang</em> — stok produk bertambah otomatis.</li>
+<li><strong>Faktur</strong>: faktur masuk tercatat per pemasok.</li>
+<li><strong>Bayar faktur</strong>: buka pemasok → <em>Faktur</em> → pilih faktur → <em>Bayar</em>. Status berubah menjadi <em>Lunas</em>.</li>
+</ol>
+<p class="small">Catatan: UI lengkap untuk Pembelian masih terbatas — beberapa aksi (retur beli ke pemasok, retur jual, kelola kategori/brand) diekspos lewat IPC backend dan belum punya layar. Lihat Bab 15.</p>
+
+<h2>7.3 Pemasok: pembayaran faktur</h2>
+<p>Di halaman detail pemasok, daftar faktur menampilkan <em>No. Faktur | Tanggal | Jatuh Tempo | Jumlah | Status (belum/lunas)</em>. Klik faktur untuk membuka rincian dan <strong>Bayar</strong> untuk mencatat pembayaran. Saldo payables di-refresh otomatis.</p>
+
+<!-- BAB 8 -->
+<h1 class="section" id="bab8">Bab 8 — Keuangan &amp; Dompet Kas</h1>
+
+<h2>8.1 Dompet Kas</h2>
+<p>Dompet kas merepresentasikan laci kas fisik di meja kasir. Satu shift = satu sesi buka/tutup.</p>
+<ol>
+<li><strong>Buka Dompet Kas</strong>: Keuangan → <em>Dompet Kas</em> → <strong>Buka Dompet</strong> → isi <em>Saldo Awal</em> + catatan → simpan. Status berubah <em>Terbuka</em>.</li>
+<li><strong>Tutup Dompet</strong>: <strong>Tutup Dompet</strong> → isi <em>Saldo Fisik</em> (hitung uang fisik) → simpan. Sistem menghitung selisih (mis. lebih/kurang).</li>
+<li>Riwayat buka/tutup tercatat per kasir/cabang.</li>
+</ol>
+
+<h2>8.2 Mencatat Pemasukan / Pengeluaran non-penjualan</h2>
+<ol>
+<li><strong>Keuangan → Pemasukan</strong> → <strong>Catat Pemasukan</strong> → isi tipe (mis. “Penjualan”, “Biaya”, “Lainnya”), jumlah, deskripsi → simpan.</li>
+<li><strong>Keuangan → Pengeluaran</strong> → <strong>Catat Pengeluaran</strong> → isi kategori (mis. “Listrik”, “Gaji”), jumlah, deskripsi → simpan.</li>
+</ol>
+<p class="small">Arus masuk/keluar tercatat terpisah dari penjualan sehingga laporan laba rugi akurat.</p>
+
+<h2>8.3 Laporan laba rugi &amp; arus kas</h2>
+<table>
+<thead><tr><th>Laporan</th><th>Isi</th><th>Sumber</th></tr></thead>
+<tbody>
+<tr><td>Pemasukan &amp; Pengeluaran</td><td>Daftar seluruh pemasukan &amp; pengeluaran dalam rentang tanggal</td><td>Tabel <code>income_records</code> / <code>expense_records</code></td></tr>
+<tr><td>Laba Rugi</td><td>Total pendapatan − total HPP − total biaya</td><td>Transaksi + inventory movements + income/expense</td></tr>
+<tr><td>Arus Kas</td><td>Pergerakan kas: masuk (penjualan + pemasukan) vs keluar (pengeluaran)</td><td>Cash movements</td></tr>
+</tbody>
+</table>
+<p>Semua laporan keuangan difilter berdasarkan <em>tanggal mulai / tanggal akhir</em>.</p>
+
+<!-- BAB 9 -->
+<h1 class="section" id="bab9">Bab 9 — Laporan &amp; Analisis</h1>
+<p>Menu <strong>Laporan &amp; Analisis</strong> membuka 9 jenis laporan. Semua dihitung dari database lokal Anda (tidak butuh server).</p>
+<table>
+<thead><tr><th>Tab</th><th>Isi</th></tr></thead>
+<tbody>
+<tr><td>Penjualan</td><td>Total omzet + jumlah transaksi per hari dalam rentang tanggal</td></tr>
+<tr><td>Terlaris</td><td>Produk terlaris (by qty &amp; revenue) dengan batas N teratas</td></tr>
+<tr><td>Bergerak Lambat</td><td>Produk tanpa penjualan dalam N hari terakhir (default 90 hari)</td></tr>
+<tr><td>Laba Kotor</td><td>Revenue, HPP, laba kotor (Rp &amp; %) per produk/tanggal</td></tr>
+<tr><td>Valuasi Stok</td><td>Nilai inventaris (qty × HPP) per produk + total</td></tr>
+<tr><td>Pembelian</td><td>Total pembelian per pemasok dalam rentang tanggal</td></tr>
+<tr><td>Pengeluaran</td><td>Total pengeluaran per kategori (listrik, gaji, dll)</td></tr>
+<tr><td>Kinerja Kasir</td><td>Omze per kasir dalam rentang tanggal</td></tr>
+<tr><td>Transaksi</td><td>Daftar transaksi lengkap (nomor, tanggal, kasir, total)</td></tr>
+</tbody>
+</table>
+<p class="small">Semua laporan dapat difilter <em>tanggal mulai &amp; akhir</em>. Hasil laporan ditampilkan di layar dan bisa diekspor/print via tombol print di masing-masing halaman (beberapa laporan masih butuh implementasi tombol Export CSV — lihat Bab 15).</p>
+<!-- BAB 10 -->
+<h1 class="section" id="bab10">Bab 10 — Offline Sync: Sinkronisasi &amp; Konflik</h1>
+<img class="img-full" src="img-offline.png" alt="Halaman Offline Sync">
+<p class="img-caption">Halaman Offline Sync — status: fase kerja (menghubungkan/mengunduh/idle), jumlah event pending/gagal, tombol “Sinkronkan Sekarang”.</p>
+
+<h2>10.1 Cara kerja sinkronisasi</h2>
+<div class="flow">
+  <span class="box">Perangkat lokal (outbox)</span><span class="arrow">→</span>
+  <span class="box">Unggah ke server</span><span class="arrow">→</span>
+  <span class="box">Server ingest (idempotent)</span><span class="arrow">→</span>
+  <span class="box">Perangkat lain unduh cursor</span>
+</div>
+<ol>
+<li>Setiap perubahan di lokal (transaksi, penerimaan barang, pembayaran) ditulis ke <strong>outbox</strong> secara atomik bersama data transaksinya.</li>
+<li>Sync coordinator berjalan di main process; setiap 30 detik (atau saat manual) ia mengambil event pending dan mengunggahnya ke server.</li>
+<li>Server menyimpan event dengan <strong>server_seq</strong> (nomor urut per organisasi) dan mengembalikan <strong>remoteVersion</strong> per agregat.</li>
+<li>Perangkat lain mengunduh event setelahnya cursor tersimpan — memastikan <strong>tidak ada duplikasi</strong> di kedua sisi (idempotent).</li>
+<li>Bila token kedaluwarsa, coordinator melakukan <strong>renew</strong> otomatis menggunakan deviceToken.</li>
+</ol>
+
+<h2>10.2 Status sinkronisasi</h2>
+<table>
+<thead><tr><th>Fase</th><th>Arti</th><th>Aksi</th></tr></thead>
+<tbody>
+<tr><td><code>idle</code></td><td>Sinkron selesai / tidak ada aktivitas</td><td>—</td></tr>
+<tr><td><code>connecting</code> / <code>uploading</code> / <code>downloading</code></td><td>Sedang berkomunikasi dengan server</td><td>Tunggu</td></tr>
+<tr><td><code>offline</code></td><td>Tidak ada jaringan / server unreachable</td><td>Transaksi lokal tetap jalan; sync akan otomatis saat online</td></tr>
+<tr><td><code>retrying</code></td><td>Terjadi error sementara (jaringan/server)</td><td>Backoff otomatis (2s → ×2 → max 5 menit)</td></tr>
+<tr><td><code>error</code></td><td>Error permanen (device tidak terdaftar/ditolak)</td><td>Hubungi administrator</td></tr>
+</tbody>
+</table>
+
+<h2>10.3 Menyelesaikan konflik</h2>
+<p>Konflik terdeteksi otomatis untuk update master data bersamaan (produk/pelanggan/supplier) dan transaksi finansial:</p>
+<table>
+<thead><tr><th>Jenis</th><th>Keputusan otomatis</th><th>Contoh</th></tr></thead>
+<tbody>
+<tr><td>Duplicate event (sama event_id)</td><td><strong>Reject</strong> — event lokal tidak dikirim ulang</td><td>Idempotency key sama</td></tr>
+<tr><td>Master data — remote lebih baru (timestamp)</td><td><strong>Auto-accept remote</strong></td><td>Produk diedit di dua perangkat</td></tr>
+<tr><td>Inventori (stok)</td><td><strong>Manual review</strong></td><td>Stok berubah di 2 perangkat bersamaan</td></tr>
+<tr><td>Finansial (pembayaran, harga)</td><td><strong>Manual review</strong></td><td>Pembayaran faktur di-entry di 2 kasir</td></tr>
+</tbody>
+</table>
+<p class="small">Konflik yang menunggu review tersimpan di <code>sync_conflicts</code> dengan status <code>DETECTED</code>/<code>CLASSIFIED</code>/<code>PENDING_RESOLUTION</code> — muncul di panel Offline Sync untuk diselesaikan operator (auto-resolve hanya menangani duplicate &amp; master-data last-write-wins).</p>
+
+<h2>10.4 RemoteVersion (mengapa konflik bisa dideteksi)</h2>
+<div class="callout"><strong>Cara kerja:</strong> server menyimpan <code>remote_version</code> monotonik per agregat (produk X di server v3 → v4 → v5…). Desktop menyimpan versi lokal; saat unduh event baru, desktop membandingkan remote_version versus versi lokal → konflik terdeteksi <em>sebelum</em> data ditimpa.</div>
+
+<h2>10.5 Jika sync terus gagal</h2>
+<ol>
+<li>Pastikan <strong>admin/enrollment secret</strong> sudah benar (SYNC_ENROLLMENT_SECRET di server).</li>
+<li>Pastikan <strong>perangkat terdaftar</strong>: cek di tabel <code>sync_devices</code> — baris ada? status <code>active</code>?</li>
+<li>Pastikan <strong>server berjalan</strong> dan bisa diakses dari jaringan toko.</li>
+<li>Tombol <strong>Sinkronkan Sekarang</strong> memicu retry manual. Event yang gagal tetap pending (tidak hilang).</li>
+</ol>
+
+<!-- BAB 11 -->
+<h1 class="section" id="bab11">Bab 11 — Pengaturan</h1>
+
+<h2>11.1 Profil Toko &amp; Pajak</h2>
+<p><strong>Pengaturan → Toko</strong> → ubah <em>Nama Toko</em>, <em>Receipt Footer</em>, dan <em>Tarif Pajak</em> (basis poin, mis. 1100 = 11%). Perubahan langsung berlaku untuk transaksi berikutnya.</p>
+
+<h2>11.2 Pengguna &amp; Peran</h2>
+<p><strong>Pengaturan → Pengguna</strong> → kelola akun pengguna (tambah/edit/nonaktif). <strong>Peran</strong> → buat/ubah peran kustom (mis. <em>Supervisor</em>) dan atur izin per modul (checkbox).</p>
+
+<h2>11.3 Pengaturan Inventaris</h2>
+<p>Setel minimum stok per produk (atau secara massal) untuk mengaktifkan peringatan <strong>Stok Menipis</strong>. Pengaturan ini juga mengendalikan <em>low-stock alerts</em> pada dashboard.</p>
+
+<h2>11.4 Backup &amp; Restore Database</h2>
+<p>Menu <strong>Pengaturan → Backup</strong> → pilih folder → <strong>Backup</strong>. File <code>.vyapara.db</code> tersalin ke folder yang dipilih dengan verifikasi integritas (<code>integrity_check</code>) sebelum selesai. <strong>Restore</strong> mengganti database aktif dengan backup yang dipilih (versi saat ini disimpan sebagai <code>.pre-restore</code> sebagai jaga-jaga).</p>
+
+<!-- BAB 12 -->
+<h1 class="section" id="bab12">Bab 12 — Backup &amp; Pemulihan Data</h1>
+
+<h2>12.1 Cara backup manual</h2>
+<ol>
+<li>Buka <strong>Pengaturan → Backup</strong>.</li>
+<li>Klik <strong>Buat cadangan</strong> → pilih lokasi penyimpanan (disarankan: drive eksternal + USB).</li>
+<li>Tunggu selesai — aplikasi memverifikasi integritas file sebelum konfirmasi.</li>
+</ol>
+
+<h2>12.2 Strategi backup rekomendasi</h2>
+<table>
+<thead><tr><th>Interval</th><th>Aksi</th><th>Catatan</th></tr></thead>
+<tbody>
+<tr><td>Harian</td><td>Backup manual (atau scheduled task Windows untuk salin folder <code>%APPDATA%\vyapara-desktop\database</code>)</td><td>Lakukan setelah tutup toko</td></tr>
+<tr><td>Mingguan</td><td>Verifikasi restore ke komputer lain (uji pulih)</td><td>Bukan hanya backup saja — pastikan bisa dipulihkan</td></tr>
+<tr><td>Sebelum update aplikasi</td><td>Backup manual</td><td>Selalu</td></tr>
+</tbody>
+</table>
+
+<h2>12.3 Apa yang terjadi bila data rusak</h2>
+<ol>
+<li>Aplikasi mendeteksi integritas saat startup (<code>PRAGMA integrity_check</code>).</li>
+<li>Bila gagal → aplikasi tidak bisa dibuka → <strong>restore dari backup terakhir</strong> lewat <em>Pengaturan → Backup → Restore</em>.</li>
+<li>Database yang lebih baru dari backup terakhir akan hilang — itulah sebabnya interval backup harian sangat disarankan.</li>
+</ol>
+
+<h2>12.4 Memindahkan ke komputer baru</h2>
+<ol>
+<li>Install aplikasi di komputer baru.</li>
+<li>Salin folder <code>%APPDATA%\vyapara-desktop\database\</code> dari komputer lama.</li>
+<li>Buka aplikasi — semua data, pengguna, pengaturan tersinkron otomatis dari file yang disalin (tidak perlu registrasi ulang perangkat).</li>
+</ol>
+<!-- BAB 13 -->
+<h1 class="section" id="bab13">Bab 13 — Keamanan &amp; Data Sensitif</h1>
+
+<h2>13.1 Apa yang dilindungi &amp; cara kerjanya</h2>
+<table>
+<thead><tr><th>Aset</th><th>Perlindungan</th></tr></thead>
+<tbody>
+<tr><td>Password pengguna</td><td><code>scrypt(N=65536, r=8, p=1)</code> + salt acak 16-byte per akun; verifikasi <code>timingSafeEqual</code> (tahan timing attack)</td></tr>
+<tr><td>Token sesi</td><td>Random 32 bytes; hanya <strong>SHA-256 hash</strong> yang disimpan; kedaluwarsa 12 jam; logout mencabut</td></tr>
+<tr><td>Token perangkat (sync)</td><td>SHA-256 hash di server; plaintext hanya saat registrasi; TLS di produksi</td></tr>
+<tr><td>Kredensial sync lokal</td><td>Enkripsi <code>safeStorage</code> DPAPI Windows di <code>sync-credentials.bin</code>; file <code>.sync-credentials.json</code> legacy <strong>ditolak</strong> (fail-closed)</td></tr>
+<tr><td>RBAC</td><td>Setiap handler IPC memverifikasi <code>requireUser</code> + izin modul di main process; bukan hanya sembunyikan menu</td></tr>
+<tr><td>Database lokal</td><td>File SQLite di profil pengguna; akses via process IPC saja (contextIsolation, nodeIntegration=false, sandbox=false untuk preload ESM)</td></tr>
+<tr><td>Produksi (web)</td><td>CSP: <code>default-src 'self'</code> — tidak ada script/style inline dari luar</td></tr>
+<tr><td>Navigasi</td><td><code>will-navigate</code> hanya ke localhost:1420 / HTTPS / file://; jendela baru (window.open) ditolak, link HTTPS dibuka di browser luar</td></tr>
+</tbody>
+</table>
+
+<h2>13.2 Apa yang TIDAK dilindungi (ke jujuran)</h2>
+<ul>
+<li><strong>Database lokal tidak dienkripsi.</strong> File <code>vyapara.db</code> bisa dibaca jika laptop dicuri (tanpa BitLocker). Saran: aktifkan <strong>BitLocker</strong>/device encryption; bukan fitur aplikasi.</li>
+<li><strong>Struk bisa dicetak siapa pun</strong> — tidak ada PIN per-kasir untuk print.</li>
+<li><strong>In-memory rate limit</strong> (8 gagal login → 30 detik kunci) — reset saat restart; brute-force terdistribusi tidak dicegah oleh ini.</li>
+<li><strong>Token sesi di memory renderer</strong> — jika renderer compromised (XSS di renderer), token bisa diambil. Mitigasi: contextIsolation, no nodeIntegration, CSP, input sanitization.</li>
+</ul>
+
+<h2>13.3 Praktik terbaik untuk toko</h2>
+<ul>
+<li>Ganti kata sandi admin <strong>setelah instalasi</strong> (default kosong).</li>
+<li>Buat akun kasir terpisah — jangan menggunakan akun admin untuk kasir.</li>
+<li>Kunci komputer <strong>saat kasir pergi</strong> (<kbd>Win + L</kbd>).</li>
+<li>Backup terenkripsi (atau minimal di drive yang tidak terhubung internet).</li>
+<li>Perbarui aplikasi saat ada rilis baru (termasuk security fix).</li>
+</ul>
+
+<!-- BAB 14 -->
+<h1 class="section" id="bab14">Bab 14 — Troubleshooting</h1>
+
+<h2>14.1 Aplikasi tidak terbuka / langsung menutup</h2>
+<p><strong>Gejala:</strong> klik VYAPARA, jendela tidak muncul, atau muncul sebentar lalu hilang.<br>
+<strong>Penyebab paling umum:</strong></p>
+<ol>
+<li><strong>Database korup.</strong> Hapus <em>atau rename</em> <code>vyapara.db</code> di <code>%APPDATA%\vyapara-desktop\database\</code> → buka ulang → restore dari backup.</li>
+<li><strong>Migrasi gagal.</strong> File migrasi sudah ada tetapi tidak bisa dijalankan (disk penuh / read-only). Pastikan disk bebas &amp; folder <code>vyapara-desktop</code> bisa ditulis.</li>
+<li><strong>Konflik versi DLL.</strong> Reinstall.</li>
+</ol>
+
+<h2>14.2 Layar putih / aplikasi loading terus</h2>
+<ol>
+<li>Tekan <kbd>Ctrl</kbd>+<kbd>R</kbd> untuk reload renderer.</li>
+<li>Jika tetap blank: tutup app → hapus file <code>%APPDATA%\vyapara-desktop\database\vyapara.db-wal</code> dan <code>-shm</code> (aman: hanya log redo, bukan data) → buka ulang.</li>
+<li>Periksa folder <code>vyapara-desktop\logs</code> (jika ada) untuk pesan error.</li>
+</ol>
+
+<h2>14.3 Produk tidak muncul di POS</h2>
+<ul>
+<li>Pastikan kategori chip <strong>Semua</strong> terpilih (jika tidak, hanya produk dalam kategori itu yang muncul).</li>
+<li>Pastikan produk <strong>aktif</strong> (<code>is_active=1</code>). Nonaktif tidak ditampilkan.</li>
+<li>Pastikan <strong>stok &gt; 0</strong> — produk habis tidak bisa diklik.</li>
+<li>Jika tidak ada produk sama sekali → seed data belum dijalankan (fresh install). Buat produk lewat backend atau hubungi administrator.</li>
+</ul>
+
+<h2>14.4 Login gagal padahal kata sandi benar</h2>
+<ol>
+<li><strong>8 kali gagal → kunci 30 detik.</strong> Tunggu lalu coba lagi.</li>
+<li><strong>Caps Lock aktif?</strong> — password case-sensitive.</li>
+<li><strong>Akun dinonaktifkan</strong> — hubungi admin.</li>
+<li><strong>Sesi lama:</strong> hapus <code>session.token</code> lalu login ulang.</li>
+</ol>
+
+<h2>14.5 Sync gagal / “Sync engine belum enrolled”</h2>
+<p>Artinya perangkat belum terdaftar di server. <strong>Hubungi administrator / penyedia server</strong> untuk proses enrollment (butuh <code>enrollmentSecret</code> dan URL server).</p>
+
+<h2>14.6 Stok tidak berkurang / bertambah sendiri</h2>
+<ul>
+<li><strong>Stok berkurang</strong> saat transaksi selesai (checkout) — normal.</li>
+<li><strong>Stok tidak berkurang</strong> → cek apakah transaksi benar-benar selesai (status <code>completed</code>), bukan draft.</li>
+<li><strong>Stok bertambah sendiri</strong> → cek apakah penerimaan barang (goods receiving) pernah dilakukan tanpa cek fisik.</li>
+</ul>
+
+<h2>14.7 “Produk tidak tersedia” saat sync</h2>
+<p>Event masuk dari perangkat lain mencantumkan produk yang belum ada di perangkat ini → aplikasi mengarantina event tersebut. Solusi: buat produk dengan SKU yang sama di perangkat ini, lalu sync ulang (atau tunggu admin push produk master).</p>
+
+<h2>14.8 Kode error &amp; pesan umum</h2>
+<table>
+<thead><tr><th>Pesan</th><th>Arti</th><th>Solusi</th></tr></thead>
+<tbody>
+<tr><td><code>PASSWORD_CHANGE_REQUIRED</code></td><td>Akun wajib ganti kata sandi (default bawaan terdeteksi)</td><td>Ganti password saat login berikutnya</td></tr>
+<tr><td><code>RATE_LIMITED</code></td><td>8 gagal login → terkunci 30 detik</td><td>Tunggu 30 detik, coba lagi</td></tr>
+<tr><td><code>DEVICE_REVOKED</code></td><td>Perangkat dicabut dari server</td><td>Hubungi admin</td></tr>
+<tr><td><code>SCHEMA_UNSUPPORTED</code></td><td>Versi aplikasi tidak cocok dengan server</td><td>Update aplikasi</td></tr>
+<tr><td><code>BUSINESS_APPLY_FAILED</code></td><td>Event dari perangkat lain gagal diterapkan (mis. produk tidak ada)</td><td>Buat produk/SKU yang sama, atau biarkan di karantina</td></tr>
+</tbody>
+</table>
+<!-- BAB 15 -->
+<h1 class="section" id="bab15">Bab 15 — Batasan &amp; Hal yang Belum Tersedia</h1>
+
+<h2>15.1 Fitur yang <strong>tidak</strong> ada di rilis ini</h2>
+<table>
+<thead><tr><th>Fitur yang diharapkan orang</th><th>Status</th><th>Solusi saat ini</th></tr></thead>
+<tbody>
+<tr><td>Kelola kategori &amp; satuan produk dari UI</td><td>❌ Belum ada</td><td>Di-seed otomatis saat install (ATK, Kertas, Pcs, Rim, Pack)</td></tr>
+<tr><td>Kelola produk (tambah/edit/hapus) dari UI</td><td>❌ Belum ada</td><td>Backend IPC ada; harus ditambahkan UI</td></tr>
+<tr><td>Stock opname / penyesuaian stok dari UI</td><td>❌ Belum ada</td><td>Backend + IPC ada; UI menyusul</td></tr>
+<tr><td>Return penjualan (retur jual) UI</td><td>❌ Belum ada</td><td>Backend service ada (sales-returns.ts)</td></tr>
+<tr><td>“Pesanan Campuran” (1 keranjang banyak layanan)</td><td>❌ Belum didukung model data</td><td>Layanan terpisah per transaksi</td></tr>
+<tr><td>Dashboard web owner / PWA</td><td>❌ Belum ada</td><td>Hanya desktop</td></tr>
+<tr><td>Printer thermal otomatis (ESC/POS)</td><td>❌ Belum terintegrasi</td><td>Print via dialog Windows (pilih printer thermal yang terpasang sebagai printer Windows)</td></tr>
+<tr><td>Export laporan CSV/Excel</td><td>❌ Belum ada</td><td>Print / screenshot</td></tr>
+<tr><td>Multi-currency</td><td>❌ Hanya Rupiah</td><td>—</td></tr>
+</tbody>
+</table>
+
+<h2>15.2 Batasan teknis</h2>
+<ul>
+<li><strong>Isolasi server:</strong> sync server berjalan per deployment; tidak ada hosted multi-tenant SaaS. Toko harus men-set up server sendiri atau menggunakan server yang disediakan vendor.</li>
+<li><strong>Installer belum ditandatangani</strong> (unsigned) → SmartScreen peringatan saat install (normal).</li>
+<li><strong>RemoteVersion</strong> — server asli sudah mengirim remoteVersion; klien lama (sebelum rilis ini) akan karantina semua event masuk sampai di-update.</li>
+<li><strong>Tidak ada auto-update.</strong> Update harus dilakukan manual (download installer baru).</li>
+<li><strong>Backup manual only</strong> — tidak ada scheduled backup otomatis di aplikasi.</li>
+</ul>
+
+<h2>15.3 Saran prioritas untuk rilis berikutnya</h2>
+<ol>
+<li>Kelola produk dari UI (CRUD + kategori) — paling banyak diminta.</li>
+<li>UI stock opname &amp; penyesuaian stok — manajemen inventaris harus di tangan kasir/admin.</li>
+<li>UI retur penjualan — pelengkap siklus POS.</li>
+<li>Auto-update.</li>
+<li>Signing sertifikat installer.</li>
+</ol>
+
+<!-- BAB 16 -->
+<h1 class="section" id="bab16">Bab 16 — Manajemen Produk, Retur &amp; Penyesuaian Stok</h1>
+
+<h2>16.1 Mengelola Produk</h2>
+<ol>
+<li>Menu <strong>Produk</strong> di sidebar (ikon kotak) — seluruh katalog muncul dalam tabel.</li>
+<li>Klik <strong>+ Tambah Produk</strong> → isi <em>Nama Produk</em> (wajib), <em>SKU</em> &amp; <em>Barcode</em> (opsional), <em>Kategori</em> (pilih dari kategori yang sudah ada), <em>Satuan</em>, <em>Harga</em>, <em>HPP</em>, dan <em>Stok</em> awal → <strong>Simpan</strong>.</li>
+<li>Klik <strong>Edit</strong> pada baris produk untuk mengubah harga/stok.</li>
+<li>Klik <strong>Nonaktif</strong> untuk menyembunyikan produk dari POS (tidak terhapus, riwayat transaksi tetap ada).</li>
+</ol>
+<div class="warn"><strong>Catatan:</strong> pengisian <em>Kategori</em> dan <em>Satuan</em> hanya bisa memilih dari data yang sudah di-seed (<code>ATK</code>, <code>Kertas</code>, <code>Pcs</code>, <code>Rim</code>, <code>Pack</code>) — belum ada UI tambah kategori/satuan baru; hubungi administrator untuk menambah kategori lewat backend.</div>
+
+<h2>16.2 Mencetak Delivery Order (Surat Jalan)</h2>
+<p>Menu kasir → pilih transaksi → pada modal struk klik <strong>Cetak DO</strong> (bukan <em>Cetak Nota</em>). Dokumen <strong>Delivery Order — Surat Jalan</strong> akan tampil dan langsung membuka dialog print Windows. Isinya:</p>
+<ul>
+<li>Logo + nama toko, nomor transaksi <code>INV-…</code>, tanggal &amp; kasir</li>
+<li>Alamat pelanggan (bila transaksi memiliki pelanggan terdaftar; kosong bila walk-in)</li>
+<li>Tabel item: <em># | Produk/Layanan | Qty | Harga Satuan | Subtotal</em></li>
+<li>Total &amp; kolom tanda tangan <em>Penerima</em> dan <em>Kasir</em></li>
+</ul>
+
+<h2>16.3 Retur Penjualan</h2>
+<ol>
+<li>Menu <strong>Retur Penjualan</strong>.</li>
+<li>Panel kiri menampilkan daftar transaksi terbaru — klik tombol <strong>Retur</strong> pada baris yang ingin dikembalikan.</li>
+<li>Konfirmasi → sistem mencatat retur <code>RET-YY-NNNN</code>, mengembalikan stok ke gudang, dan mencatat pembalikan HPP untuk laporan laba rugi.</li>
+<li><strong>Riwayat Retur</strong> menampilkan seluruh retur: No. Retur, waktu, jumlah item, total HPP, status.</li>
+</ol>
+
+<h2>16.4 Penyesuaian Stok (manual)</h2>
+<ol>
+<li>Menu <strong>Penyesuaian Stok</strong>.</li>
+<li>Formulir: pilih produk, pilih arah (<strong>Tambah/Kurang</strong>), isi <em>Jumlah</em>, <em>Alasan</em> (wajib, mis. “rusak/kadaluarsa/selisih opname”), <em>No. Referensi</em> (opsional).</li>
+<li>Klik <strong>Ajukan Penyesuaian</strong> — status menjadi <em>Pending</em>.</li>
+<li>Pengguna lain dengan izin <code>inventory:approve</code> (admin) akan melihat panel <strong>Menunggu Persetujuan</strong> → <strong>Setuju</strong> (stok terupdate) atau <strong>Tolak</strong>.</li>
+</ol>
+<div class="warn"><strong>Perhatian:</strong> stok hanya berubah setelah disetujui admin — kasir tidak bisa mengubah stok sesuka hati.</div>
+
+<h2>16.5 Menyimpan bukti retur untuk shift</h2>
+<p>Panel <em>Riwayat Retur</em> berguna untuk mencocokkan barang yang masuk/keluar dengan faktur pembelian — buka di akhir shift dan cek jumlah retur tidak melebihi wajar.</p>
+
+
+<!-- LAMPIRAN -->
+<h1 class="section" id="lampiran">Lampiran A — Glossary &amp; FAQ</h1>
+
+<h2>A.1 Glossary</h2>
+<table>
+<thead><tr><th>Istilah</th><th>Arti</th></tr></thead>
+<tbody>
+<tr><td>Outbox</td><td>Tabel <code>sync_outbox</code> — antrean event yang belum dikirim ke server</td></tr>
+<tr><td>Backoff</td><td>Strategi retry dengan jeda meningkat (2s → 4s → 8s → … → max 5 menit)</td></tr>
+<tr><td>Conflict Remote Version</td><td>remoteVersion per agregat di server — digunakan untuk deteksi konflik</td></tr>
+<tr><td>Cursor</td><td>Penanda posisi unduh percakapan server — disimpan di <code>sync_state</code></td></tr>
+<tr><td>Idempotency</td><td>Menerima event yang sama berkali-kali tanpa efek tambahan (key idempotency_key/event_id)</td></tr>
+<tr><td>Inbound apply</td><td>Proses memasukkan event dari server ke database lokal</td></tr>
+<tr><td>Quarantine</td><td>Tabel untuk event yang gagal diterapkan — disimpan untuk ditinjau, tidak dihapus</td></tr>
+<tr><td>RBAC</td><td>Role-Based Access Control — izin ditentukan oleh peran pengguna</td></tr>
+<tr><td>Receipt</td><td>Bukti <code>sync_applied_events</code> — bukti bahwa event sudah/terapkan</td></tr>
+<tr><td>Tenant / Organisasi</td><td>Entitas bisnis terisolasi; 1 organisasi = 1 properti bisnis</td></tr>
+<tr><td>WAL</td><td>Write-Ahead Logging — mode SQLite untuk concurrency tinggi</td></tr>
+</tbody>
+</table>
+
+<h2>A.2 FAQ</h2>
+
+<div class="callout"><strong>Q: Boleh beberapa kasir login di komputer yang sama?</strong><br>
+A: Boleh — aplikasi multitasking. Setiap login membuat sesi terpisah. Sesi kadaluarsa 12 jam.</div>
+
+<div class="callout"><strong>Q: Apakah saya bisa buka aplikasi offline?</strong><br>
+A: Ya — 100% fitur bekerja offline kecuali sinkronisasi (yang akan otomatis saat online).</div>
+
+<div class="callout"><strong>Q: Bagaimana jika komputer saya hilang dicuri?</strong><br>
+A: Data lokal bisa dibaca siapa pun yang mencuri laptop (kecuali enkripsi disk aktif). Gunakan BitLocker. Password akun tidak bisa diambil meski pencuri membuka aplikasi (butuh email + password).</div>
+
+<div class="callout"><strong>Q: Berapa harga lisensi?</strong><br>
+A: Tanyakan kepada vendor/partner yang menyediakan aplikasi ini. Dokumen ini tidak mencantumkan model lisensi.</div>
+
+<div class="callout"><strong>Q: Apakah laporan bisa diexport?</strong><br>
+A: Belum ada tombol Export CSV/Excel. Gunakan fitur Print dan simpan sebagai PDF dari dialog print.</div>
+
+<div class="callout"><strong>Q: Apakah aplikasi bisa untuk multi-toko?</strong><br>
+A: Ya — dengan sync server. Setiap toko install aplikasi yang sama; setiap toko mendaftar sebagai perangkat organisasi yang sama; data sinkron otomatis. Tetapi <strong>dashboard owner terpusat belum tersedia</strong> — Anda harus melihat masing-masing toko di perangkat/aplikasi terpisah.</div>
+
+<div class="callout"><strong>Q: Katalog produk kosong?</strong><br>
+A: Fresh install — tidak ada produk. Produk harus dibuat lewat backend/administrator (UI belum tersedia).</div>
+
+<div class="callout"><strong>Q: Bagaimana cara lapor bug?</strong><br>
+A: Hubungi vendor. Sertakan: versi aplikasi (Pengaturan → Tentang), langkah reproduksi, dan screenshot.</div>
+
+<div class="callout"><strong>Q: Apakah data saya bisa di-pulihkan tanpa backup?</strong><br>
+A: Tidak. File <code>vyapara.db</code> satu-satunya salinan pada komputer toko — backup adalah satu-satunya jalan.</div>
+
+<div class="callout"><strong>Q: Server sinkronisasi wajib?</strong><br>
+A: Tidak. Tanpa server, transaksi tetap tercatat lokal. Hanya fitur multi-perangkat yang tidak bekerja.</div>
+
+<div class="footer-note">
+<p><strong>Dokumen ini diterbitkan 16 November 2026.</strong> Versi aplikasi: VYAPARA POS 1.0.0 (Electron 45, React 19, Tailwind v4, SQLite WAL, Drizzle ORM, better-sqlite3 13).</p>
+<p>Dokumen ditujukan untuk pengguna dengan pengetahuan dasar komputer. Jika ada ketidaksesuaian antara dokumen dan aplikasi, versi aplikasi yang berlaku.</p>
+<p>Pelaporan kesalahan dokumen: hubungi vendor/partner.</p>
+</div>
+
+</body>
+</html>

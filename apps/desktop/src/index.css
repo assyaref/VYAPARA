@@ -14,3 +14,33 @@
   --color-vyapara-dark: #103F6E;
   --font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
+
+/* ===== Delivery Order print document ===== */
+.do-doc { font-family: 'Inter', 'Segoe UI', sans-serif; max-width: 720px; margin: 0 auto; color: #172033; }
+.do-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5px solid #0D47A1; padding-bottom: 8px; margin-bottom: 10px; }
+.do-brand { display: flex; align-items: center; gap: 10px; }
+.do-logo { width: 44px; height: 44px; background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff; font-weight: 900; font-size: 22px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+.do-store { font-size: 15px; font-weight: 800; color: #0D47A1; margin: 0; }
+.do-tag { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #FF8F00; font-weight: 800; margin: 2px 0 0; }
+.do-meta p { margin: 2px 0; font-size: 11px; color: #172033; }
+.do-cust { border: 1px dashed #CBD5E1; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 12px; }
+.do-label { font-size: 9px; text-transform: uppercase; color: #64748B; letter-spacing: 0.1em; margin: 0 0 2px; }
+.do-cust-name { font-weight: 800; font-size: 14px; margin: 0 0 2px; color: #0D47A1; }
+.do-muted { color: #64748B; font-size: 10px; margin: 2px 0 0; }
+.do-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
+.do-table th { background: #0D47A1; color: #fff; padding: 6px 8px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; }
+.do-table td { border-bottom: 1px solid #E2E8F0; padding: 6px 8px; }
+.do-table tr:nth-child(even) td { background: #F5F7FA; }
+.do-totals { border-top: 2px solid #0D47A1; padding-top: 6px; font-size: 12px; }
+.do-totals-row { display: flex; justify-content: space-between; padding: 2px 0; }
+.do-total { font-weight: 900; font-size: 14px; color: #0D47A1; }
+.do-notes { font-size: 11px; color: #172033; background: #FFF8E7; border: 1px solid #FFE0A0; border-radius: 6px; padding: 6px 10px; margin: 10px 0; }
+.do-foot { margin-top: 24px; font-size: 10px; color: #64748B; }
+.do-sig { display: flex; gap: 60px; margin-top: 36px; }
+.do-sig-box { width: 180px; border-top: 1px solid #172033; padding-top: 4px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #172033; }
+@media print {
+  body * { visibility: hidden; }
+  #do-print-root, #do-print-root * { visibility: visible; }
+  #do-print-root { position: absolute; top: 0; left: 0; width: 100%; padding: 12mm; }
+  .do-doc { max-width: none; }
+}
