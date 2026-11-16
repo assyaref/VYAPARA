@@ -1,3 +1,6 @@
+> **ADDENDUM 2026-11-16 — remoteVersion contract closed; installer artifact built (unsigned); install test pending VM.**
+> Server-side per-aggregate versioning (003-remote-versioning.sql) implemented and round-trip tested. `VYAPARA Setup 1.0.0.exe` produced (unsigned, no cert provided); `win-unpacked` verified E2E 16/16. Staging/production still blocked: no host, no TLS, no cert, no installer test on clean machine, owner has not authorized go-live.
+
 > **ADDENDUM 2026-11-16 — remoteVersion contract closed; still no staging/deploy authority.**
 > Server-side per-aggregate versioning implemented (003-remote-versioning); round-trip test passes;
 > inbound events from real inter-device sync now apply end-to-end. Poison events quarantine as

@@ -2,6 +2,9 @@
   "name": "vyapara-desktop-app",
   "private": true,
   "type": "module",
+  "version": "1.0.0",
+  "description": "VYAPARA — Point of Sale desktop application for retail/ATK/printing businesses",
+  "author": "VYAPARA",
   "main": "out/main/main.js",
   "scripts": {
     "dev": "vite dev",
@@ -13,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "better-sqlite3": "^13.1.1",
     "jsbarcode": "^3.11.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -28,9 +32,9 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^1.2.0",
     "autoprefixer": "^10.4.16",
-    "better-sqlite3": "^13.1.1",
     "drizzle-kit": "^0.31.11",
     "drizzle-orm": "^0.45.4",
+    "electron-builder": "^26.18.0",
     "eslint": "^9.21.2",
     "eslint-plugin-react": "^7.37.4",
     "globals": "^6.1.0",
@@ -41,5 +45,30 @@
     "vite": "^8.3.8",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^5.1.0"
+  },
+  "build": {
+    "appId": "id.vyapara.desktop",
+    "productName": "VYAPARA",
+    "electronDist": "../../node_modules/electron/dist",
+    "electronVersion": "45.3.1",
+    "npmRebuild": false,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**",
+      "dist/**",
+      "assets/brand/**",
+      "drizzle/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/brand/vyapara-icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

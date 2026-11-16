@@ -1,6 +1,14 @@
+> **ADDENDUM 2026-11-16 — Installer artifact now exists; install test still pending clean VM.**
+> electron-builder 26.18.0 installed (approved). `apps/desktop/package.json` now carries `version: 1.0.0`, `description`, `author`, and a `build` config (appId `id.vyapara.desktop`, productName `VYAPARA`, NSIS target, perMachine installer, `npmRebuild: false` because the prebuilt `better-sqlite3` binding already ships working for Electron 45 — rebuilding demands Visual Studio Build Tools, absent here).
+> Runtime native module moved `better-sqlite3` from devDependencies to dependencies so it is packaged.
+> **Built artifact (unsigned):**
+> `apps/desktop/release/VYAPARA Setup 1.0.0.exe` (132,028,764 bytes, SHA256 e197b0a3c118d3d52a22eece16d1e6390906194cdf880157d0f0e182694fc5d7) + `VYAPARA Setup 1.0.0.exe.blockmap`.
+> **Verified:** `release/win-unpacked/VYAPARA.exe` launched with isolated temp profile passes the full production E2E (16/16 PASS, 0 page errors, POS sale persisted). Installer executable itself was NOT installed/launched (no clean VM; would mutate this host).
+> Remaining gate: clean-machine install/uninstall/upgrade acceptance + optional Authenticode signing.
+
 # VYAPARA — Phase 9 Windows Release Engineering Report
 
-- **Status:** **BLOCKED / NOT VERIFIED** — packaging tooling, code-signing certificate, and a clean Windows test environment are all absent in this environment. No installer was produced; nothing may be claimed production-ready.
+- **Status:** **PARTIAL / NOT VERIFIED FOR RELEASE** — installer artifact built (unsigned); install/uninstall/upgrade acceptance on clean VM NOT VERIFIED. Production remains unclaimable until clean-machine acceptance + optional Authenticode signing.
 - **Date:** 2026-11-16
 
 ## 1. What is verified (release-readiness prerequisites that DO exist)
