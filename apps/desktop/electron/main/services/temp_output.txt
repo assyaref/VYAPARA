@@ -1,0 +1,70 @@
+
+ RUN  v5.1.0 D:/PROJECT - FullStack Developer/PROGRESS/VYAPARA POS Windows Desktop hybird/apps/desktop/electron/main/services
+
+ Γ¥» supplier.payment.test.ts (0 test)
+ Γ¥» customer.test.ts (6 tests | 4 failed) 1499ms
+   Γ¥» customer payments (6)
+     ├ù partial customer payment 279ms
+     ├ù full customer payment 273ms
+     ├ù overpayment rejection 259ms
+     ├ù correct balance_after 323ms
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Suites 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  supplier.payment.test.ts [ supplier.payment.test.ts ]
+ReferenceError: beforeEach is not defined
+ Γ¥» supplier.payment.test.ts:49:3
+     47|
+     48| describe('supplier payments', () => {
+     49|   beforeEach(() => {
+       |   ^
+     50|     verifyTables(createDb());
+     51|   });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/5]ΓÄ»
+
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 4 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  customer.test.ts > customer payments > partial customer payment
+SqliteError: near "(": syntax error
+ Γ¥» Database.prepare ../../../node_modules/better-sqlite3/lib/methods/wrappers.js:5:21
+ Γ¥» createTransaction customer.test.ts:35:26
+
+ Γ¥» customer.test.ts:57:5
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/5]ΓÄ»
+
+ FAIL  customer.test.ts > customer payments > full customer payment
+SqliteError: near "(": syntax error
+ Γ¥» Database.prepare ../../../node_modules/better-sqlite3/lib/methods/wrappers.js:5:21
+ Γ¥» createTransaction customer.test.ts:35:26
+
+ Γ¥» customer.test.ts:79:5
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/5]ΓÄ»
+
+ FAIL  customer.test.ts > customer payments > overpayment rejection
+SqliteError: near "(": syntax error
+ Γ¥» Database.prepare ../../../node_modules/better-sqlite3/lib/methods/wrappers.js:5:21
+ Γ¥» createTransaction customer.test.ts:35:26
+
+ Γ¥» customer.test.ts:100:5
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/5]ΓÄ»
+
+ FAIL  customer.test.ts > customer payments > correct balance_after
+SqliteError: near "(": syntax error
+ Γ¥» Database.prepare ../../../node_modules/better-sqlite3/lib/methods/wrappers.js:5:21
+ Γ¥» createTransaction customer.test.ts:35:26
+
+ Γ¥» customer.test.ts:125:5
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/5]ΓÄ»
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 2 passed (6)
+   Start at  22:07:20
+   Duration  3.32s (tests 49%, import 45%, transform 6%, worker 1%)
+

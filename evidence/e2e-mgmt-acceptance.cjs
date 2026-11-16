@@ -104,8 +104,8 @@ const check = (name, ok) => { results.push({ name, ok }); console.log(`${ok ? 'P
   })()`);
 
   await nav('Retur Penjualan');
-  // find the row with our transaction (INV- prefix) and click Retur
-  const returBtn = page.locator('button:has-text("Retur"):not(:has-text("Penjualan"))').first();
+  // find the row with our transaction (INV- prefix) and click Retur (in the first table, not nav)
+  const returBtn = page.locator('table:first-of-type button:has-text("Retur")').first();
   await returBtn.waitFor({ timeout: 8000 });
   page.once('dialog', (d) => d.accept());
   await returBtn.click();
@@ -121,7 +121,7 @@ const check = (name, ok) => { results.push({ name, ok }); console.log(`${ok ? 'P
   await nav('Penyesuaian Stok');
   // pick product and qty via UI
   const productSelect = page.locator('select#sa-product');
-  await productSelect.selectOption({ label: 'Buku Gambar A3 (stok: 30 pcs)' });
+  await productSelect.selectOption({ index: 1 });
   await page.fill('#sa-qty', '5');
   await page.fill('#sa-reason', 'selisih opname uji');
   await page.locator('button:has-text("Ajukan Penyesuaian")').click();

@@ -48,18 +48,6 @@
     "ast_hash": "2a347aa374654ca3b11c1ea4626c8914",
     "semantic_hash": ""
   },
-  "apps/desktop/src/Barcode.tsx": {
-    "mtime": 1794491756.8739302,
-    "seen": 1794524916.576398,
-    "ast_hash": "f28300326f9217219e81b4c792ea1e84",
-    "semantic_hash": "f28300326f9217219e81b4c792ea1e84"
-  },
-  "apps/desktop/src/DocumentServices.tsx": {
-    "mtime": 1794492030.9168835,
-    "seen": 1794524916.5765347,
-    "ast_hash": "8564de591e91055b9ab73297e6e0dd56",
-    "semantic_hash": "8564de591e91055b9ab73297e6e0dd56"
-  },
   "apps/desktop/src/Finance.tsx": {
     "mtime": 1794678301.1776938,
     "seen": 1794680625.3398001,
@@ -71,12 +59,6 @@
     "seen": 1794820256.4098437,
     "ast_hash": "ab1df75aed9f679c380b70fdb14812f0",
     "semantic_hash": ""
-  },
-  "apps/desktop/src/NextDashboard.tsx": {
-    "mtime": 1794492222.032657,
-    "seen": 1794524916.5770783,
-    "ast_hash": "089fb8cf1c3548fd02246988133df640",
-    "semantic_hash": "089fb8cf1c3548fd02246988133df640"
   },
   "apps/desktop/src/OfflineSync.tsx": {
     "mtime": 1794705734.0317805,
@@ -90,53 +72,11 @@
     "ast_hash": "51b9b23df1c372e8f0b9b83f738d1de0",
     "semantic_hash": ""
   },
-  "apps/desktop/src/Performance.tsx": {
-    "mtime": 1794492636.8717713,
-    "seen": 1794524916.5775714,
-    "ast_hash": "1dd968ecff7031e1d814823d8ffc9efe",
-    "semantic_hash": "1dd968ecff7031e1d814823d8ffc9efe"
-  },
-  "apps/desktop/src/PrintBanner.tsx": {
-    "mtime": 1794492060.3851051,
-    "seen": 1794524916.5777051,
-    "ast_hash": "1132804b94b240af39a030a07a089951",
-    "semantic_hash": "1132804b94b240af39a030a07a089951"
-  },
-  "apps/desktop/src/Printer.tsx": {
-    "mtime": 1794491727.764803,
-    "seen": 1794524916.5778236,
-    "ast_hash": "1a3fc46a3a7648203dd53311dc374656",
-    "semantic_hash": "1a3fc46a3a7648203dd53311dc374656"
-  },
   "apps/desktop/src/Procurement.tsx": {
     "mtime": 1794678301.1776938,
     "seen": 1794680625.340828,
     "ast_hash": "81f2700f1c5be3f30f08b0f8b386841c",
     "semantic_hash": ""
-  },
-  "apps/desktop/src/Release.tsx": {
-    "mtime": 1794492645.5364928,
-    "seen": 1794524916.5780544,
-    "ast_hash": "b2f4b92dbb7ba9d88132f62eb1d36a3d",
-    "semantic_hash": "b2f4b92dbb7ba9d88132f62eb1d36a3d"
-  },
-  "apps/desktop/src/SecurityBackup.tsx": {
-    "mtime": 1794492250.5643396,
-    "seen": 1794524916.578169,
-    "ast_hash": "890877c31d45f6672e42bbd340608c69",
-    "semantic_hash": "890877c31d45f6672e42bbd340608c69"
-  },
-  "apps/desktop/src/Supabase.tsx": {
-    "mtime": 1794492182.1319609,
-    "seen": 1794524916.5782852,
-    "ast_hash": "0ccebc8faa3839b24d447378f7abf19a",
-    "semantic_hash": "0ccebc8faa3839b24d447378f7abf19a"
-  },
-  "apps/desktop/src/WindowsInstaller.tsx": {
-    "mtime": 1794492282.8040602,
-    "seen": 1794524916.5784013,
-    "ast_hash": "8fb7026df33e71d42336f3e1e55189a6",
-    "semantic_hash": "8fb7026df33e71d42336f3e1e55189a6"
   },
   "apps/desktop/src/authStore.ts": {
     "mtime": 1794744795.7090533,
@@ -1447,15 +1387,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794823472.32039,
-    "seen": 1794823478.9601262,
-    "ast_hash": "ae5e04babb3d3ff0fa3ce92a6a0ee3b1",
+    "mtime": 1794823788.6218977,
+    "seen": 1794824330.8887143,
+    "ast_hash": "e8fe14b8a817722b6110b4e648e375ee",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794823473.415702,
-    "seen": 1794823478.9601321,
-    "ast_hash": "337e633a21329284caac90994effff9b",
+    "mtime": 1794823789.7114375,
+    "seen": 1794824330.8887215,
+    "ast_hash": "a305d3dd99a13a69bcf315aa0bfc1326",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1471,8 +1411,8 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794823471.238053,
-    "seen": 1794823478.9601297,
+    "mtime": 1794823787.5570478,
+    "seen": 1794824330.8887181,
     "ast_hash": "81ed22ec03dd0349c16ab111c08e268c",
     "semantic_hash": ""
   },
@@ -1783,9 +1723,9 @@
     "semantic_hash": ""
   },
   "evidence/e2e-mgmt-acceptance.cjs": {
-    "mtime": 1794817083.29959,
-    "seen": 1794817167.6315947,
-    "ast_hash": "5c799ff7b71d09c3844a30345f1bd4ba",
+    "mtime": 1794824105.292773,
+    "seen": 1794824330.868763,
+    "ast_hash": "0932e2152484cc07abe5d590ad250254",
     "semantic_hash": ""
   },
   "evidence/e2e-backup-shot.cjs": {
