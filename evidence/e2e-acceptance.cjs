@@ -59,18 +59,18 @@ const check = (name, ok) => {
 
   // 3. POS sale: 2 x Kertas + 1 x Pulpen = 105.000
   await nav('Kasir (POS)');
-  await page.fill('input[placeholder="Scan barcode atau cari produk..."]', 'Kertas');
+  await page.fill('input[placeholder="Cari produk atau layanan…"]', 'Kertas');
   await page.waitForTimeout(400);
-  await page.locator('.cursor-pointer', { hasText: 'Kertas HVS A4' }).click();
-  await page.locator('.cursor-pointer', { hasText: 'Kertas HVS A4' }).click();
-  await page.fill('input[placeholder="Scan barcode atau cari produk..."]', 'Pulpen');
+  await page.locator('button:has-text("Kertas HVS A4")').click();
+  await page.locator('button:has-text("Kertas HVS A4")').click();
+  await page.fill('input[placeholder="Cari produk atau layanan…"]', 'Pulpen');
   await page.waitForTimeout(400);
-  await page.locator('.cursor-pointer', { hasText: 'Pulpen Hitam' }).click();
+  await page.locator('button:has-text("Pulpen Hitam")').click();
   await fillByLabel('Jumlah Bayar', '150000');
-  const checkoutBtn = page.locator('button:has-text("Checkout")');
+  const checkoutBtn = page.locator('button:has-text("Bayar")');
   check('Checkout enabled with sufficient payment', await checkoutBtn.isEnabled());
   await checkoutBtn.click();
-  await page.waitForSelector('text=Struk Pembelian', { timeout: 10000 });
+  await page.waitForSelector('text=CONTOH NOTA / STRUK', { timeout: 10000 });
   check('Receipt modal renders with transaction number', true);
   await page.locator('button:has-text("Tutup"), button:has-text("Selesai")').first().click({ timeout: 2000 }).catch(async () => {
     await page.locator('.fixed.inset-0.z-50 > .fixed').first().click({ timeout: 2000 }).catch(() => {});

@@ -1,3 +1,18 @@
+> **ADDENDUM 2026-11-16 — Reference-image redesign delivered.**
+> POS rebuilt to match `VYAPARA_Visual_Assets/00_Previews/Overall_Implementation_Overview.png`:
+> left catalogue with search + category chips (live from `category:getAll`), colored gradient
+> initials tiles, stock badges; right "Keranjang Pesanan" panel: item table (Item/Qty/Harga/Subtotal),
+> qty +/- and delete per line, badge item count, "Dalam Proses" status, Subtotal/Diskon/Total,
+> payment method chips (Tunai/QRIS/Transfer/Debit), "Jumlah Bayar" with auto Kembalian,
+> "Bayar (F10)" gradient CTA. Receipt modal restyled to branded "Contoh Nota / Struk"
+> (logo header, monospace body, barcode-style number, Cetak Nota/Selesai).
+> Dashboard: trend-aware KPI cards (▲/▼ vs yesterday, real data), SVG line chart of last-7-day
+> omzet (replacing bars), donut "Komposisi Pendapatan" computed from transaction items mapped to
+> product categories (honest: "Tanpa Kategori" when products lack categories), "Stok Menipis"
+> panel preserved, "Pesanan Terbaru" preserved. Login uses `Logo_Primary_Concept.png`.
+> Full suite 237/237 green (21 files); 4 typechecks clean; E2E 16/16 PASS; installer rebuilt
+> (SHA256 64160269558eb1c69b26d59901086e1e89797b71fb86b2732a26ed00cc5b453e).
+
 # VYAPARA — Phase 7 UI/UX & Application Completion Report
 
 - **Date:** 2026-11-16

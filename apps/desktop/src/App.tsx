@@ -115,13 +115,15 @@ type TxnRow = { createdAt?: string; totalAmount?: number; transactionNumber?: st
 type ProductRow = { id: string; name: string; stock: number; price: number };
 type AlertRow = { productId: string; productName: string; currentStock: number; minimumStock: number; unitName: string | null };
 
-function KpiCard(props: { label: string; value: string; sub: string; tone: 'blue' | 'green' | 'orange' | 'red'; icon: React.ReactNode }) {
+function KpiCard(props: { label: string; value: string; sub: string; tone: 'blue' | 'green' | 'orange' | 'red' | 'purple'; icon: React.ReactNode; trend?: 'up' | 'down' | 'flat'; trendLabel?: string }) {
   const tones = {
     blue: 'from-[#1976D2] to-[#42A5F5]',
     green: 'from-[#2E7D32] to-[#66BB6A]',
     orange: 'from-[#F57C00] to-[#FFB74D]',
     red: 'from-[#C62828] to-[#EF5350]',
+    purple: 'from-[#5E35B1] to-[#9575CD]',
   } as const;
+  const trendColor = props.trend === 'up' ? 'text-emerald-600' : props.trend === 'down' ? 'text-red-500' : 'text-vyapara-secondary';
   return (
     <div className="bg-white rounded-2xl border border-vyapara-border p-4 shadow-sm flex items-center gap-3 min-w-0">
       <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tones[props.tone]} flex items-center justify-center text-white shrink-0`}>
@@ -130,7 +132,9 @@ function KpiCard(props: { label: string; value: string; sub: string; tone: 'blue
       <div className="min-w-0">
         <p className="text-[10px] uppercase tracking-wider text-vyapara-secondary truncate">{props.label}</p>
         <p className="text-lg xl:text-xl font-extrabold text-vyapara-navy leading-tight truncate">{props.value}</p>
-        <p className="text-[10px] text-vyapara-secondary truncate">{props.sub}</p>
+        <p className={`text-[10px] font-semibold ${trendColor} leading-tight`}>
+          {props.trend === 'up' ? '▲' : props.trend === 'down' ? '▼' : '•'} {props.trendLabel ?? props.sub}
+        </p>
       </div>
     </div>
   );
@@ -141,18 +145,21 @@ function Dashboard({ userName, userRole, isOnline }: { userName: string; userRol
   const [txns, setTxns] = useState<TxnRow[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [alerts, setAlerts] = useState<AlertRow[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [t, p, a] = await Promise.all([
+      const [t, p, a, c] = await Promise.all([
         (window as any).vyapara?.getTransactions?.({ token: '', limit: 200 }),
         (window as any).vyapara?.getProducts?.({ token: '', includeInactive: false }),
         (window as any).vyapara?.getLowStockAlerts?.(),
+        (window as any).vyapara?.getCategories?.(),
       ]);
       setTxns(Array.isArray(t?.data) ? t.data : []);
       setProducts(Array.isArray(p?.data) ? p.data : []);
       setAlerts(Array.isArray(a?.data) ? a.data : []);
+      setCategories(Array.isArray(c?.data) ? c.data : []);
     } catch {
       // keep previous state; cards render empty-state values
     } finally {
@@ -178,9 +185,45 @@ function Dashboard({ userName, userRole, isOnline }: { userName: string; userRol
     txns.filter((t) => String(t.createdAt ?? '').slice(0, 10) === dayKey(d)).reduce((s, t) => s + (Number(t.totalAmount) || 0), 0),
   );
   const maxSum = Math.max(...daySums, 1);
+  const todaySum = daySums[6] ?? 0;
+  const yesterdaySum = daySums[5] ?? 0;
+  const omzetTrend = yesterdaySum > 0 ? (todaySum >= yesterdaySum ? 'up' : 'down') : 'flat';
+  const omzetTrendLabel = yesterdaySum > 0
+    ? `${todaySum >= yesterdaySum ? '+' : ''}${(((todaySum - yesterdaySum) / yesterdaySum) * 100).toFixed(1)}% vs kemarin`
+    : '— hari pertama';
+  const todayTxCount = todayTx.length;
+  const yesterdayTxCount = txns.filter((t) => String(t.createdAt ?? '').slice(0, 10) === dayKey(new Date(Date.now() - 86400000))).length;
+  const txTrend = yesterdayTxCount > 0 ? (todayTxCount >= yesterdayTxCount ? 'up' : 'down') : 'flat';
+  const txTrendLabel = yesterdayTxCount > 0
+    ? `${todayTxCount >= yesterdayTxCount ? '+' : ''}${(((todayTxCount - yesterdayTxCount) / yesterdayTxCount) * 100).toFixed(1)}% vs kemarin`
+    : '— hari pertama';
 
   const recent = txns.slice(0, 5);
   const lowStock = alerts.slice(0, 5);
+
+  // --- composition of revenue by product category (real data) ---
+  const productById = new Map((products as any[]).map((p: any) => [p.id, p]));
+  const catName = new Map((categories as any[]).map((c: any) => [c.id, c.name]));
+  const catTotals = new Map<string, number>();
+  for (const t of txns) {
+    for (const it of (t as any).items ?? []) {
+      const p = productById.get(it.productId as string) as any | undefined;
+      const label = (p?.categoryName as string) || (p?.categoryId && catName.get(p.categoryId)) || 'Tanpa Kategori';
+      catTotals.set(label, (catTotals.get(label) ?? 0) + (Number(it.subtotal) || 0));
+    }
+  }
+  const grandTotal = [...catTotals.values()].reduce((s, v) => s + v, 0);
+  const composition = [...catTotals.entries()]
+    .map(([label, value]) => ({ label, value, pct: grandTotal > 0 ? (value / grandTotal) * 100 : 0 }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 4);
+  const compositionPal = ['#1976D2', '#FF8F00', '#42A5F5', '#66BB6A'];
+  let compAccum = 0;
+  const compSlices = composition.map((c, i) => {
+    const start = compAccum;
+    compAccum += c.pct;
+    return { ...c, start, end: compAccum, color: compositionPal[i % compositionPal.length]! };
+  });
 
   const svgProps = { className: 'w-6 h-6', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
 
@@ -215,42 +258,75 @@ function Dashboard({ userName, userRole, isOnline }: { userName: string; userRol
 
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         <KpiCard label="Omzet Hari Ini" value={fmtIDR(omzetToday)} sub={`${todayTx.length} transaksi selesai`} tone="blue"
-          icon={<svg {...svgProps}><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M3 10h18" /></svg>} />
-        <KpiCard label="Transaksi Hari Ini" value={String(todayTx.length)} sub="transaksi tercatat" tone="green"
-          icon={<svg {...svgProps}><path d="M9 5h6M9 5a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2M9 12h6M9 16h6" /></svg>} />
+          icon={<svg {...svgProps}><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M3 10h18" /></svg>} trend={omzetTrend as 'up' | 'down' | 'flat'} trendLabel={omzetTrendLabel} />
+        <KpiCard label="Transaksi Hari Ini" value={String(todayTx.length)} sub="transaksi selesai" tone="green"
+          icon={<svg {...svgProps}><path d="M9 5h6M9 5a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2M9 12h6M9 16h6" /></svg>} trend={txTrend as 'up' | 'down' | 'flat'} trendLabel={txTrendLabel} />
         <KpiCard label="Produk Aktif" value={String(products.length)} sub="item di katalog" tone="orange"
-          icon={<svg {...svgProps}><path d="M3 7l9-4 9 4-9 4-9-4z" /><path d="M3 7v10l9 4 9-4V7" /></svg>} />
+          icon={<svg {...svgProps}><path d="M3 7l9-4 9 4-9 4-9-4z" /><path d="M3 7v10l9 4 9-4V7" /></svg>} trend="flat" trendLabel="item di katalog" />
         <KpiCard label="Stok Menipis" value={String(alerts.length)} sub={alerts.length > 0 ? 'perlu restock' : 'semua stok aman'} tone="red"
-          icon={<svg {...svgProps}><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" /></svg>} />
+          icon={<svg {...svgProps}><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" /></svg>} trend="flat" trendLabel={alerts.length > 0 ? 'perlu restock' : 'semua stok aman'} />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="xl:col-span-2 bg-white rounded-2xl border border-vyapara-border p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-vyapara-navy">Grafik Penjualan 7 Hari Terakhir</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-bold text-vyapara-navy">Grafik Penjualan 7 Hari Terakhir</h2>
             <span className="text-[10px] uppercase tracking-wider text-vyapara-secondary">Omzet harian</span>
           </div>
-          <div className="flex items-end gap-2 sm:gap-3 h-44">
-            {days.map((d, i) => {
-              const daySum = daySums[i] ?? 0;
-              return (
-                <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1 h-full">
-                  <span className="text-[10px] text-vyapara-secondary">{daySum > 0 ? fmtShort(daySum) : ''}</span>
-                  <div
-                    className="w-full rounded-t-md bg-gradient-to-t from-[#1976D2] to-[#7CB3E8]"
-                    style={{ height: `${Math.max(5, Math.round((daySum / maxSum) * 72))}%` }}
-                    title={fmtIDR(daySum)}
-                  />
-                  <span className="text-[10px] font-medium text-vyapara-secondary capitalize">{d.toLocaleDateString('id-ID', { weekday: 'short' })}</span>
-                </div>
-              );
-            })}
-          </div>
+          {(() => {
+            const W = 640; const H = 180; const PAD = { l: 34, r: 10, t: 22, b: 26 };
+            const max = Math.max(...daySums, 1);
+            const pts = daySums.map((v, i) => {
+              const x = PAD.l + (i * (W - PAD.l - PAD.r)) / Math.max(daySums.length - 1, 1);
+              const y = PAD.t + (1 - v / max) * (H - PAD.t - PAD.b);
+              return [x, y] as const;
+            });
+            const line = pts.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`)).join(' ');
+            const area = pts.length === 0
+              ? ''
+              : `${line} L${pts[pts.length - 1]![0]},${H - PAD.b} L${pts[0]![0]},${H - PAD.b} Z`;
+            const yTicks = [0, 1, 2, 3].map((i) => Math.round((max / 3) * (3 - i)));
+            const peak = Math.max(...daySums, 0);
+            return (
+              <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-44" role="img" aria-label="Grafik penjualan 7 hari terakhir">
+                {yTicks.map((v, i) => {
+                  const y = PAD.t + (i * (H - PAD.t - PAD.b)) / 3;
+                  return (
+                    <g key={i}>
+                      <line x1={PAD.l} x2={W - PAD.r} y1={y} y2={y} stroke="#E2E8F0" strokeDasharray="3 4" />
+                      <text x={PAD.l - 6} y={y + 3} fontSize="10" fill="#64748B" textAnchor="end">{fmtShort(v)}</text>
+                    </g>
+                  );
+                })}
+                <path d={area} fill="url(#gradArea)" opacity="0.25" />
+                <path d={line} fill="none" stroke="#1976D2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <defs>
+                  <linearGradient id="gradArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#42A5F5" />
+                    <stop offset="100%" stopColor="#42A5F5" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                {pts.map(([x, y], i) => (
+                  <circle key={i} cx={x} cy={y} r="3.5" fill="#0D47A1" stroke="#fff" strokeWidth="1.5" />
+                ))}
+                <text x={PAD.l} y={14} fontSize="11" fontWeight="700" fill="#FF8F00">
+                  {peak > 0 ? `Puncak ${fmtIDR(peak)}` : 'Belum ada data'}
+                </text>
+                {days.map((d, i) => (
+                  <text key={i} x={pts[i]?.[0]} y={H - 6} fontSize="10" fill="#64748B" textAnchor="middle">
+                    {d.toLocaleDateString('id-ID', { weekday: 'short' })}
+                  </text>
+                ))}
+              </svg>
+            );
+          })()}
         </div>
 
         <div className="bg-white rounded-2xl border border-vyapara-border p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-vyapara-navy">Stok Menipis</h2>
+        <div className="bg-white rounded-2xl border border-vyapara-border p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-bold text-vyapara-navy">Stok Menipis</h2>
             <span className="text-[10px] uppercase tracking-wider text-vyapara-secondary">{alerts.length} item</span>
           </div>
           {lowStock.length === 0 ? (
@@ -266,6 +342,54 @@ function Dashboard({ userName, userRole, isOnline }: { userName: string; userRol
                 </li>
               ))}
             </ul>
+          )}
+        </div>
+
+            <h2 className="font-bold text-vyapara-navy">Komposisi Pendapatan</h2>
+            <span className="text-[10px] uppercase tracking-wider text-vyapara-secondary">per kategori</span>
+          </div>
+          {grandTotal === 0 ? (
+            <p className="text-sm text-vyapara-secondary py-8 text-center">{loading ? 'Memuat…' : 'Belum ada transaksi.'}</p>
+          ) : (
+            <div className="flex items-center gap-5">
+              <svg viewBox="0 0 42 42" className="w-36 h-36 shrink-0" role="img" aria-label="Komposisi pendapatan per kategori">
+                <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#F1F5F9" strokeWidth="6" />
+                {compSlices.map((s) => {
+                  const r = 15.9155;
+                  const C = 2 * Math.PI * r;
+                  const startAngle = (s.start / 100) * 360 - 90;
+                  const endAngle = (s.end / 100) * 360 - 90;
+                  const large = endAngle - startAngle > 180 ? 1 : 0;
+                  const toXY = (deg: number) => {
+                    const rad = (deg * Math.PI) / 180;
+                    return { x: 21 + r * Math.cos(rad), y: 21 + r * Math.sin(rad) };
+                  };
+                  const p1 = toXY(startAngle); const p2 = toXY(endAngle);
+                  const d = `M21,21 L${p1.x.toFixed(3)},${p1.y.toFixed(3)} A${r},${r} 0 ${large} 1 ${p2.x.toFixed(3)},${p2.y.toFixed(3)} Z`;
+                  return <path key={s.label} d={d} fill={s.color} stroke="#fff" strokeWidth="1" />;
+                })}
+                <circle cx="21" cy="21" r="9" fill="#fff" />
+                <text x="21" y="20" textAnchor="middle" fontSize="4.5" fontWeight="700" fill="#0D47A1">Total</text>
+                <text x="21" y="26" textAnchor="middle" fontSize="6" fontWeight="800" fill="#0D47A1">{fmtShort(grandTotal)}</text>
+              </svg>
+              <ul className="flex-1 space-y-1.5 text-[12px]">
+                {compSlices.map((s) => (
+                  <li key={s.label} className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-2 min-w-0">
+                      <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: s.color }} />
+                      <span className="truncate text-vyapara-text font-medium">{s.label}</span>
+                    </span>
+                    <span className="font-semibold text-vyapara-navy">{s.pct.toFixed(0)}%</span>
+                  </li>
+                ))}
+                {grandTotal > 0 && composition.length < catTotals.size && (
+                  <li className="flex items-center justify-between gap-2 text-vyapara-secondary">
+                    <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm shrink-0 bg-vyapara-border" />Lainnya</span>
+                    <span className="font-semibold">{(100 - composition.reduce((s, c) => s + c.pct, 0)).toFixed(0)}%</span>
+                  </li>
+                )}
+              </ul>
+            </div>
           )}
         </div>
       </div>

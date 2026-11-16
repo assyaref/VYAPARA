@@ -1,3 +1,7 @@
+> **ADDENDUM 2026-11-16 — UI redesigned to reference image; installer rebuilt.**
+> POS + Dashboard upgraded to `Overall_Implementation_Overview.png` (category chips, gradient
+> tiles, order-table cart, Bayar(F10), branded struk, trend KPIs, SVG line chart, kategori-based
+> revenue donut). Installer rebuilt after UI change (SHA256 in PHASE_9 addendum). All tests green.
 > **ADDENDUM 2026-11-16 — remoteVersion contract closed; installer artifact built (unsigned); install test pending VM.**
 > Server-side per-aggregate versioning (003-remote-versioning.sql) implemented and round-trip tested. `VYAPARA Setup 1.0.0.exe` produced (unsigned, no cert provided); `win-unpacked` verified E2E 16/16. Staging/production still blocked: no host, no TLS, no cert, no installer test on clean machine, owner has not authorized go-live.
 

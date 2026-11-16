@@ -97,7 +97,7 @@ export function ingestEventsBatch(
       if (v === undefined) {
         const row = db.sqlite
           .prepare(`SELECT MAX(remote_version) AS m FROM sync_events WHERE organization_id = ? AND aggregate_type = ? AND aggregate_id = ?`)
-          .get(orgId, aggregateType, aggregateId) as any;
+          .get(orgId, aggregateType, aggregateId) as { m: number | null } | undefined;
         v = (row?.m ?? 0) + 1;
       }
       versionCounters.set(key, v + 1);

@@ -18,16 +18,31 @@ type PaymentLine = {
 };
 
 const PAYMENT_METHODS = [
-  { value: 'cash', label: 'Tunai' },
-  { value: 'transfer', label: 'Transfer' },
-  { value: 'qris', label: 'QRIS' },
-  { value: 'debit', label: 'Debit' },
-  { value: 'credit', label: 'Kredit' },
+  { value: 'cash', label: 'Tunai', hint: 'Kas' },
+  { value: 'qris', label: 'QRIS', hint: 'QR' },
+  { value: 'transfer', label: 'Transfer', hint: 'Bank' },
+  { value: 'debit', label: 'Debit', hint: 'Kartu' },
 ];
+
+// deterministic hue from product id/name for image placeholder
+function hueFromString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+  return h;
+}
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+}
+const idr = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
 
 const POS: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [activeCat, setActiveCat] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -37,11 +52,12 @@ const POS: React.FC = () => {
   const [receipt, setReceipt] = useState<any | null>(null);
 
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  const taxRateBps = 0;
-  const taxAmount = Math.round((subtotal * taxRateBps) / 10_000);
-  const total = subtotal + taxAmount;
+  const discount = 0;
+  const taxAmount = 0;
+  const total = subtotal - discount + taxAmount;
   const paid = paymentMethod === 'cash' ? (parseInt(paymentAmount, 10) || 0) : total;
   const change = Math.max(0, paid - total);
+  const cartQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const loadProducts = useCallback(async () => {
     const result = await vyapara.getProducts({ token: '', includeInactive: false });
@@ -54,7 +70,19 @@ const POS: React.FC = () => {
 
   useEffect(() => {
     loadProducts();
+    void (async () => {
+      try {
+        const cats = await vyapara.getCategories();
+        if (cats?.ok && Array.isArray(cats.data)) setCategories(cats.data);
+      } catch { /* ignore */ }
+    })();
   }, [loadProducts]);
+
+  const filtered = products.filter((p) => {
+    if (activeCat && p.categoryId !== activeCat) return false;
+    if (!search) return true;
+    return p.name.toLowerCase().includes(search.toLowerCase()) || (p.sku || '').toLowerCase().includes(search.toLowerCase());
+  });
 
   const addToCart = (product: any) => {
     const existing = cart.find((item) => item.productId === product.id);
@@ -121,223 +149,234 @@ const POS: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-vyapara-surface text-vyapara-text font-inter">
-      <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-vyapara-navy mb-2">Point of Sale</h1>
-          <p className="text-vyapara-secondary">Transaksi penjualan tunai dan non-tunai</p>
+          <h1 className="text-2xl font-extrabold text-vyapara-navy leading-tight">Transaksi &amp; Pesanan</h1>
+          <p className="text-[11px] text-vyapara-secondary">Kasir (POS) — transaksi tunai dan non-tunai</p>
         </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Scan barcode atau cari produk..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none w-full md:w-80"
-          />
-        </div>
+        <button
+          onClick={() => setCart([])}
+          title="Kosongkan keranjang"
+          className="text-[10px] uppercase tracking-wider font-semibold text-vyapara-secondary bg-white border border-vyapara-border rounded-full px-3 py-1.5 hover:text-vyapara-red hover:border-vyapara-red transition-colors"
+        >
+          Kosongkan ({cartQty})
+        </button>
       </header>
 
       {error && (
-        <div className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+        <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* ==== LEFT: catalogue ==== */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-xl shadow-sm border border-vyapara-border overflow-hidden">
-            <div className="p-6 border-b border-vyapara-border">
-              <h2 className="text-lg font-bold text-vyapara-navy">Produk</h2>
+          <div className="bg-white rounded-2xl border border-vyapara-border shadow-sm overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-vyapara-border space-y-3">
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-vyapara-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Cari produk atau layanan…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-vyapara-border rounded-xl outline-none focus:ring-2 focus:ring-vyapara-blue text-sm"
+                />
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1 -mb-1">
+                <button
+                  onClick={() => setActiveCat(null)}
+                  className={`shrink-0 text-[11px] font-semibold rounded-full px-3 py-1.5 transition-colors ${activeCat === null ? 'bg-vyapara-navy text-white' : 'bg-vyapara-surface text-vyapara-secondary hover:bg-vyapara-light-blue'}`}
+                >
+                  Semua
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setActiveCat(c.id)}
+                    className={`shrink-0 text-[11px] font-semibold rounded-full px-3 py-1.5 transition-colors ${activeCat === c.id ? 'bg-vyapara-navy text-white' : 'bg-vyapara-surface text-vyapara-secondary hover:bg-vyapara-light-blue'}`}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="overflow-y-auto max-h-[600px]">
-              <div className="grid grid-cols-3 gap-4 p-4">
-                {products
-                  .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || (p.sku || '').toLowerCase().includes(search.toLowerCase()))
-                  .map((product) => (
+
+            <div className="overflow-y-auto max-h-[520px] p-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {filtered.map((product) => (
+                  <button
+                    key={product.id}
+                    onClick={() => addToCart(product)}
+                    className="group text-left bg-vyapara-surface hover:bg-white rounded-xl border border-vyapara-border hover:border-vyapara-blue hover:shadow-md transition-all p-2.5 focus:outline-none focus:ring-2 focus:ring-vyapara-blue"
+                  >
                     <div
-                      key={product.id}
-                      className="bg-vyapara-surface rounded-lg p-4 border border-vyapara-border hover:bg-vyapara-blue/10 cursor-pointer transition-colors"
-                      onClick={() => addToCart(product)}
+                      className="h-20 rounded-lg mb-2 flex items-center justify-center text-white text-xl font-extrabold tracking-wide select-none"
+                      style={{ background: `linear-gradient(135deg, hsl(${hueFromString(product.id)} 65% 55%) 0%, hsl(${hueFromString(product.id)} 70% 40%) 100%)` }}
                     >
-                      <div className="text-sm font-medium text-vyapara-text">{product.name}</div>
-                      <div className="text-xs text-vyapara-secondary">{product.sku || product.barcode || '-'}</div>
-                      <div className="mt-2 text-lg font-bold text-vyapara-navy">
-                        {product.price.toLocaleString('id-ID')}
-                      </div>
+                      {initials(product.name)}
                     </div>
-                  ))}
-                {products.length === 0 && (
-                  <div className="p-8 text-center text-vyapara-secondary">Produk tidak ditemukan</div>
+                    <div className="text-[12px] font-semibold text-vyapara-text leading-tight line-clamp-2 min-h-[2em]">{product.name}</div>
+                    <div className="mt-1 flex items-end justify-between gap-1">
+                      <div className="text-[13px] font-extrabold text-vyapara-navy">{idr(product.price)}</div>
+                      <span className="text-[9px] uppercase font-bold text-white bg-vyapara-blue group-hover:bg-vyapara-navy rounded-full w-5 h-5 flex items-center justify-center transition-colors">+</span>
+                    </div>
+                    <div className="text-[9px] text-vyapara-secondary mt-0.5">{typeof product.stock === 'number' ? `Stok: ${product.stock}` : product.sku ?? product.barcode ?? '-'}</div>
+                  </button>
+                ))}
+                {filtered.length === 0 && (
+                  <div className="col-span-full py-10 text-center text-vyapara-secondary text-sm">Produk tidak ditemukan</div>
                 )}
               </div>
             </div>
           </div>
         </div>
 
+        {/* ==== RIGHT: order panel ==== */}
         <div className="lg:col-span-5">
-          <div className="bg-white rounded-xl shadow-sm border border-vyapara-border overflow-hidden">
-            <div className="p-6 border-b border-vyapara-border">
-              <h2 className="text-lg font-bold text-vyapara-navy">Keranjang</h2>
+          <div className="bg-white rounded-2xl border border-vyapara-border shadow-sm overflow-hidden flex flex-col h-full">
+            {/* header */}
+            <div className="px-4 py-3 border-b border-vyapara-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-vyapara-navy" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6h15l-1.5 9h-12z" /><path d="M6 6L5.2 3H3" /><circle cx="10" cy="19" r="1.5" /><circle cx="17" cy="19" r="1.5" /></svg>
+                <h2 className="font-extrabold text-vyapara-navy">Keranjang Pesanan</h2>
+                {cart.length > 0 && <span className="text-[10px] font-bold text-vyapara-navy bg-vyapara-light-blue border border-vyapara-blue rounded-full px-2 py-0.5">{cartQty} item</span>}
+              </div>
+              <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">Dalam Proses</span>
             </div>
-            <div className="overflow-y-auto max-h-[400px] p-4">
+
+            {/* table */}
+            <div className="overflow-y-auto max-h-[300px] p-3 flex-1">
               {cart.length === 0 ? (
-                <div className="text-center text-vyapara-secondary py-8">Keranjang kosong</div>
+                <div className="text-center text-vyapara-secondary py-10 text-sm">Keranjang kosong</div>
               ) : (
-                <div className="space-y-2">
-                  {cart.map((item) => (
-                    <div key={item.productId} className="flex items-center justify-between p-2 border-b border-vyapara-border/50">
-                      <div className="flex-1">
-                        <div className="text-sm font-medium">{item.productName}</div>
-                        <div className="text-xs text-vyapara-secondary">
-                          {item.price.toLocaleString('id-ID')} × {item.quantity}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => changeQuantity(item.productId, -1)}
-                          className="w-6 h-6 rounded bg-vyapara-surface text-vyapara-text flex items-center justify-center hover:bg-vyapara-blue hover:text-white"
-                        >
-                          −
-                        </button>
-                        <span className="w-6 text-center text-sm font-medium">{item.quantity}</span>
-                        <button
-                          onClick={() => changeQuantity(item.productId, 1)}
-                          className="w-6 h-6 rounded bg-vyapara-surface text-vyapara-text flex items-center justify-center hover:bg-vyapara-blue hover:text-white"
-                        >
-                          +
-                        </button>
-                        <button
-                          onClick={() => removeFromCart(item.productId)}
-                          className="ml-2 text-red-600 hover:bg-red-50 rounded p-1"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div className="text-sm font-medium text-right">
-                        {item.subtotal.toLocaleString('id-ID')}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="text-left text-[9px] uppercase tracking-wider text-vyapara-secondary">
+                      <th className="pb-2 pr-2">Item</th>
+                      <th className="pb-2 px-1 text-center">Qty</th>
+                      <th className="pb-2 px-1 text-right">Harga</th>
+                      <th className="pb-2 pl-2 text-right">Subtotal</th>
+                      <th className="pb-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-vyapara-border">
+                    {cart.map((item) => (
+                      <tr key={item.productId} className="align-top">
+                        <td className="py-1.5 pr-1">
+                          <p className="font-semibold text-vyapara-text leading-tight">{item.productName}</p>
+                        </td>
+                        <td className="py-1.5 px-1">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={() => changeQuantity(item.productId, -1)} className="w-5 h-5 rounded bg-vyapara-surface hover:bg-vyapara-blue hover:text-white text-xs font-bold flex items-center justify-center">−</button>
+                            <span className="w-5 text-center font-semibold">{item.quantity}</span>
+                            <button onClick={() => changeQuantity(item.productId, 1)} className="w-5 h-5 rounded bg-vyapara-surface hover:bg-vyapara-blue hover:text-white text-xs font-bold flex items-center justify-center">+</button>
+                          </div>
+                        </td>
+                        <td className="py-1.5 px-1 text-right font-medium text-vyapara-text">{idr(item.price)}</td>
+                        <td className="py-1.5 pl-2 text-right font-bold text-vyapara-navy">{idr(item.subtotal)}</td>
+                        <td className="py-1.5 pl-1 text-right">
+                          <button onClick={() => removeFromCart(item.productId)} title="Hapus item" className="text-vyapara-red hover:bg-red-50 rounded p-1">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-7 0v12a2 2 0 002 2h4a2 2 0 002-2V7" /></svg>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
-            <div className="p-6 border-t border-vyapara-border">
-              <div className="space-y-2 mb-6">
-                <div className="flex justify-between text-sm">
-                  <span className="text-vyapara-secondary">Subtotal</span>
-                  <span className="font-medium">{subtotal.toLocaleString('id-ID')}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-vyapara-secondary">Pajak</span>
-                  <span className="font-medium">{taxAmount.toLocaleString('id-ID')}</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold">
-                  <span className="text-vyapara-navy">Total</span>
-                  <span>{total.toLocaleString('id-ID')}</span>
-                </div>
-              </div>
 
-              <div className="space-y-3 mb-6">
-                <label className="block text-sm font-medium text-vyapara-secondary">Metode Pembayaran</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {PAYMENT_METHODS.map((pm) => (
-                    <button
-                      key={pm.value}
-                      onClick={() => setPaymentMethod(pm.value)}
-                      className={`px-4 py-2 rounded border text-sm font-medium transition-colors ${paymentMethod === pm.value ? 'bg-vyapara-blue text-white border-vyapara-blue' : 'bg-vyapara-surface text-vyapara-text border-vyapara-border hover:bg-vyapara-blue/50'}`}
-                    >
-                      {pm.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {/* totals */}
+            <div className="px-4 py-3 border-t border-vyapara-border space-y-1 text-[12px]">
+              <div className="flex justify-between"><span className="text-vyapara-secondary">Subtotal</span><span className="font-medium">{idr(subtotal)}</span></div>
+              <div className="flex justify-between"><span className="text-vyapara-secondary">Diskon</span><span className="font-medium">− Rp 0</span></div>
+              <div className="flex justify-between pt-1 border-t border-vyapara-border"><span className="font-extrabold text-vyapara-navy">Total</span><span className="font-extrabold text-2xl text-vyapara-navy">{idr(total)}</span></div>
+            </div>
 
+            {/* payment */}
+            <div className="px-4 py-3 border-t border-vyapara-border">
+              <label className="block text-[10px] uppercase tracking-wider font-semibold text-vyapara-secondary mb-1.5">Metode Pembayaran</label>
+              <div className="flex gap-2 flex-wrap mb-2">
+                {PAYMENT_METHODS.map((pm) => (
+                  <button
+                    key={pm.value}
+                    onClick={() => setPaymentMethod(pm.value)}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all ${paymentMethod === pm.value ? 'bg-vyapara-navy text-white border-vyapara-navy shadow' : 'bg-vyapara-surface text-vyapara-text border-vyapara-border hover:border-vyapara-blue'}`}
+                  >
+                    {pm.label}
+                  </button>
+                ))}
+              </div>
               {paymentMethod === 'cash' && (
-                <div className="space-y-2 mb-6">
-                  <label className="block text-sm font-medium text-vyapara-secondary">Jumlah Bayar</label>
+                <div className="flex items-center gap-3">
+                  <label className="text-[10px] uppercase tracking-wider font-semibold text-vyapara-secondary whitespace-nowrap">Jumlah Bayar</label>
                   <input
                     type="number"
                     value={paymentAmount}
                     onChange={(e) => setPaymentAmount(e.target.value)}
-                    className="w-full px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none"
+                    placeholder="0"
+                    className="w-full px-3 py-2 border border-vyapara-border rounded-lg outline-none focus:ring-2 focus:ring-vyapara-blue text-sm"
                   />
-                  <div className="text-sm text-vyapara-secondary">
-                    Kembalian: {change.toLocaleString('id-ID')}
-                  </div>
                 </div>
               )}
+              <p className="mt-1 text-[11px] text-vyapara-secondary">Kembalian: <span className="font-semibold text-vyapara-text">{idr(change)}</span></p>
+            </div>
 
+            {/* pay button */}
+            <div className="p-4 border-t border-vyapara-border bg-vyapara-surface/60">
               <button
                 onClick={handleCheckout}
                 disabled={loading || cart.length === 0 || (paymentMethod === 'cash' && paid < total)}
-                className="w-full py-3 px-4 bg-vyapara-navy hover:bg-vyapara-blue text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#0D47A1] to-[#1976D2] text-white font-bold text-sm tracking-wide shadow-lg hover:shadow-xl hover:brightness-110 transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {loading ? 'Memproses...' : 'Checkout'}
+                {loading ? 'Memproses…' : (
+                  <>
+                    Bayar (F10)
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M3 10h18M7 15h2" /></svg>
+                  </>
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
 
+      {/* ==== Nota/Struk modal ==== */}
       {receipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setReceipt(null)}
-          />
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-vyapara-navy mb-2">Struk Pembelian</h3>
-            <div className="font-mono text-sm space-y-1 mb-4">
-              <div className="text-center font-bold text-lg">VYAPARA</div>
-              <div className="text-center text-vyapara-secondary text-xs">Terima kasih telah berbelanja</div>
-              <div className="border-t border-b border-vyapara-border my-2"></div>
-              <div className="flex justify-between">
-                <span>Nomor: {receipt.transactionNumber}</span>
-                <span>{new Date(receipt.createdAt).toLocaleString('id-ID')}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Kasir: {user?.name}</span>
-                <span></span>
-              </div>
-              <div className="border-b border-vyapara-border my-2"></div>
-              {receipt.items.map((item: any) => (
-                <div key={item.id} className="flex justify-between text-xs">
-                  <span>{item.productName} × {item.quantity}</span>
-                  <span>{item.subtotal.toLocaleString('id-ID')}</span>
-                </div>
-              ))}
-              <div className="border-t border-vyapara-border my-2"></div>
-              <div className="flex justify-between font-bold">
-                <span>Total</span>
-                <span>{receipt.totalAmount.toLocaleString('id-ID')}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Bayar</span>
-                <span>{receipt.paymentAmount.toLocaleString('id-ID')}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Kembali</span>
-                <span>{receipt.changeAmount.toLocaleString('id-ID')}</span>
-              </div>
-              <div className="border-t border-vyapara-border my-2 text-center text-vyapara-secondary text-xs">
-                Terima kasih
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setReceipt(null)} />
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center gap-3 border-b border-vyapara-border pb-4 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0D47A1] to-[#1976D2] flex items-center justify-center text-white font-extrabold text-lg">V</div>
+              <div>
+                <p className="font-extrabold text-vyapara-navy leading-tight">VYAPARA Business Management</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-vyapara-secondary">Contoh Nota / Struk</p>
               </div>
             </div>
-            <div className="flex justify-end gap-2 pt-4">
-              <button
-                onClick={printReceipt}
-                className="px-6 py-2 border border-vyapara-border rounded-lg text-vyapara-secondary hover:bg-vyapara-surface font-medium"
-              >
-                Cetak
-              </button>
-              <button
-                onClick={() => setReceipt(null)}
-                className="px-6 py-2 bg-vyapara-navy hover:bg-vyapara-blue text-white rounded-lg font-medium transition-colors"
-              >
-                Tutup
-              </button>
+            <div className="font-mono text-[12px] space-y-1 mb-4">
+              <div className="flex justify-between"><span>No. :</span><span>{receipt.transactionNumber}</span></div>
+              <div className="flex justify-between"><span>Kasir:</span><span>{user?.name}</span></div>
+              <div className="flex justify-between"><span>Waktu:</span><span>{new Date(receipt.createdAt).toLocaleString('id-ID')}</span></div>
+              <div className="border-t border-vyapara-border my-2"></div>
+              {receipt.items.map((item: any) => (
+                <div key={item.id} className="flex justify-between gap-2 text-[11px]"><span>{item.productName} × {item.quantity}</span><span>{idr(item.subtotal)}</span></div>
+              ))}
+              <div className="border-t border-vyapara-border my-2"></div>
+              <div className="flex justify-between font-extrabold text-[13px]"><span>TOTAL</span><span>{idr(receipt.totalAmount)}</span></div>
+              <div className="flex justify-between text-vyapara-secondary text-[11px]"><span>Bayar</span><span>{idr(receipt.paymentAmount)}</span></div>
+              <div className="flex justify-between text-vyapara-secondary text-[11px]"><span>Kembali</span><span>{idr(receipt.changeAmount)}</span></div>
+            </div>
+            {/* barcode-style number */}
+            <div className="flex justify-center mb-1">
+              <div className="tracking-[0.35em] text-[13px] font-bold text-vyapara-text select-none">{receipt.transactionNumber?.replace(/[^0-9]/g, '').padStart(12, '0') ?? '000000000000'}</div>
+            </div>
+            <p className="text-center text-[10px] text-vyapara-secondary mb-4">Terima kasih telah berbelanja</p>
+            <div className="flex justify-end gap-2 pt-2 border-t border-vyapara-border">
+              <button onClick={printReceipt} className="px-5 py-2 border border-vyapara-border rounded-lg text-vyapara-secondary hover:bg-vyapara-surface font-medium text-sm">Cetak Nota</button>
+              <button onClick={() => setReceipt(null)} className="px-5 py-2 bg-vyapara-navy hover:bg-vyapara-blue text-white rounded-lg font-medium transition-colors text-sm">Selesai</button>
             </div>
           </div>
         </div>
