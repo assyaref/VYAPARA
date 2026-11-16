@@ -43,9 +43,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
-    "mtime": 1794821297.765196,
-    "seen": 1794821921.1582756,
-    "ast_hash": "d2e5cb02ef65cf756ffafe6093d17ea4",
+    "mtime": 1794822130.6429205,
+    "seen": 1794823151.197621,
+    "ast_hash": "fc2c5fbbdc1782a2eab414929ca792d8",
     "semantic_hash": ""
   },
   "apps/desktop/src/Barcode.tsx": {
@@ -301,9 +301,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/procurement.ts": {
-    "mtime": 1794662130.2739315,
-    "seen": 1794663711.498358,
-    "ast_hash": "76179cdd13dd0ab027da5df0de18ffff",
+    "mtime": 1794822873.874968,
+    "seen": 1794823151.1905353,
+    "ast_hash": "69b41c2bb1e9fe55c8839c377f05f509",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/products.test.ts": {
@@ -1447,15 +1447,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794821841.895712,
-    "seen": 1794821921.1830816,
-    "ast_hash": "7c34604262afaf72457cbb2c13406f05",
+    "mtime": 1794823058.4413488,
+    "seen": 1794823151.2243483,
+    "ast_hash": "db37e2a475a3e7785e257587809cebaa",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794821842.9776914,
-    "seen": 1794821921.1830876,
-    "ast_hash": "1774536e60a32fa5913b8babd3648989",
+    "mtime": 1794823059.5257764,
+    "seen": 1794823151.2243547,
+    "ast_hash": "89607909cacb1d2503d450445b04ff97",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1471,9 +1471,9 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794821840.833039,
-    "seen": 1794821921.183085,
-    "ast_hash": "54d2138fa70abee6bd9ed3f890f86c20",
+    "mtime": 1794823057.3567667,
+    "seen": 1794823151.2243524,
+    "ast_hash": "5ec87609e8106b761d0376dbb3b0ec69",
     "semantic_hash": ""
   },
   "evidence/perf-probe.cjs": {
@@ -1834,6 +1834,36 @@
     "mtime": 1794821863.2775133,
     "seen": 1794821921.1650004,
     "ast_hash": "8e35c6e4cb691fb76962584073956261",
+    "semantic_hash": ""
+  },
+  "apps/desktop/src/PurchaseReturns.tsx": {
+    "mtime": 1794822105.7212229,
+    "seen": 1794823151.1993167,
+    "ast_hash": "ae92605f2c5fae6d517c2462c868992b",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-purchase-return.cjs": {
+    "mtime": 1794822976.3123794,
+    "seen": 1794823151.2051063,
+    "ast_hash": "9a9fc20115b992f7055c6414fc70c1c9",
+    "semantic_hash": ""
+  },
+  "evidence/probe-data.cjs": {
+    "mtime": 1794822432.7815888,
+    "seen": 1794823151.2058203,
+    "ast_hash": "7a834b366405df517eeac16bebe6e7dc",
+    "semantic_hash": ""
+  },
+  "evidence/probe-po.cjs": {
+    "mtime": 1794822621.6876242,
+    "seen": 1794823151.205823,
+    "ast_hash": "528d05a030ffa5141a056d44e99c5206",
+    "semantic_hash": ""
+  },
+  "evidence/probe-prod.cjs": {
+    "mtime": 1794822674.7956505,
+    "seen": 1794823151.2058246,
+    "ast_hash": "c647340a5351fa9d291e4f21f85b4465",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

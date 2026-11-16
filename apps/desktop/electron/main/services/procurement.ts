@@ -542,7 +542,7 @@ export function getGoodsReceiving(db: AppDatabase, id: string): GoodsReceivingRe
       `SELECT gri.*, p.name AS product_name
        FROM goods_receiving_items gri
        JOIN products p ON p.id = gri.product_id
-       WHERE gri.goods_receiving_id = ? ORDER BY rowid`,
+       WHERE gri.goods_receiving_id = ? ORDER BY gri.rowid`,
     )
     .all(id) as GrItemRow[];
   return {
@@ -749,7 +749,7 @@ export function getPurchaseReturn(db: AppDatabase, id: string): PurchaseReturnRe
       `SELECT pri.*, p.name AS product_name
        FROM purchase_return_items pri
        JOIN products p ON p.id = pri.product_id
-       WHERE pri.purchase_return_id = ? ORDER BY rowid`,
+       WHERE pri.purchase_return_id = ? ORDER BY pri.rowid`,
     )
     .all(id) as PrItemRow[];
   return {
