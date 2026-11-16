@@ -16,6 +16,7 @@ import StockAdjustments from './StockAdjustments';
 import Catalog from './Catalog';
 import SupplierInvoices from './SupplierInvoices';
 import PurchaseReturns from './PurchaseReturns';
+import StockOpname from './StockOpname';
 import logo from './assets/logo.png';
 import './index.css';
 
@@ -30,6 +31,7 @@ type View =
   | 'pos'
   | 'supplierInvoices'
   | 'purchaseReturns'
+  | 'stockOpname'
   | 'offline'
   | 'products'
   | 'returns'
@@ -145,6 +147,7 @@ const navItems: { id: View; label: string; permission?: string; icon: React.Reac
   { id: 'supplier', label: 'Pemasok', icon: icons.supplier, permission: 'supplier:read' },
   { id: 'supplierInvoices', label: 'Faktur Pemasok', icon: icons.file, permission: 'supplier:read' },
   { id: 'purchaseReturns', label: 'Retur Pembelian', icon: icons.returns, permission: 'procurement:read' },
+  { id: 'stockOpname', label: 'Opname Stok', icon: icons.box, permission: 'inventory:read' },
   { id: 'offline', label: 'Offline Sync', icon: icons.sync },
   { id: 'products', label: 'Produk', icon: icons.products },
   { id: 'returns', label: 'Retur Penjualan', icon: icons.returns },
@@ -606,6 +609,7 @@ function App() {
         {currentView === 'supplier' && <Supplier />}
         {currentView === 'supplierInvoices' && <SupplierInvoices />}
         {currentView === 'purchaseReturns' && <PurchaseReturns />}
+        {currentView === 'stockOpname' && <StockOpname />}
       </main>
     </div>
   );

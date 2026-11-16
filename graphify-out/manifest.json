@@ -43,9 +43,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
-    "mtime": 1794822130.6429205,
-    "seen": 1794823151.197621,
-    "ast_hash": "fc2c5fbbdc1782a2eab414929ca792d8",
+    "mtime": 1794823351.6631725,
+    "seen": 1794823478.9325085,
+    "ast_hash": "2a347aa374654ca3b11c1ea4626c8914",
     "semantic_hash": ""
   },
   "apps/desktop/src/Barcode.tsx": {
@@ -1447,15 +1447,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794823058.4413488,
-    "seen": 1794823151.2243483,
-    "ast_hash": "db37e2a475a3e7785e257587809cebaa",
+    "mtime": 1794823472.32039,
+    "seen": 1794823478.9601262,
+    "ast_hash": "ae5e04babb3d3ff0fa3ce92a6a0ee3b1",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794823059.5257764,
-    "seen": 1794823151.2243547,
-    "ast_hash": "89607909cacb1d2503d450445b04ff97",
+    "mtime": 1794823473.415702,
+    "seen": 1794823478.9601321,
+    "ast_hash": "337e633a21329284caac90994effff9b",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1471,9 +1471,9 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794823057.3567667,
-    "seen": 1794823151.2243524,
-    "ast_hash": "5ec87609e8106b761d0376dbb3b0ec69",
+    "mtime": 1794823471.238053,
+    "seen": 1794823478.9601297,
+    "ast_hash": "81ed22ec03dd0349c16ab111c08e268c",
     "semantic_hash": ""
   },
   "evidence/perf-probe.cjs": {
@@ -1848,22 +1848,16 @@
     "ast_hash": "9a9fc20115b992f7055c6414fc70c1c9",
     "semantic_hash": ""
   },
-  "evidence/probe-data.cjs": {
-    "mtime": 1794822432.7815888,
-    "seen": 1794823151.2058203,
-    "ast_hash": "7a834b366405df517eeac16bebe6e7dc",
+  "apps/desktop/src/StockOpname.tsx": {
+    "mtime": 1794823320.4608889,
+    "seen": 1794823478.9349837,
+    "ast_hash": "e9a6935e4a473ca79d55f6aefd20e0e7",
     "semantic_hash": ""
   },
-  "evidence/probe-po.cjs": {
-    "mtime": 1794822621.6876242,
-    "seen": 1794823151.205823,
-    "ast_hash": "528d05a030ffa5141a056d44e99c5206",
-    "semantic_hash": ""
-  },
-  "evidence/probe-prod.cjs": {
-    "mtime": 1794822674.7956505,
-    "seen": 1794823151.2058246,
-    "ast_hash": "c647340a5351fa9d291e4f21f85b4465",
+  "evidence/e2e-stock-opname.cjs": {
+    "mtime": 1794823369.481602,
+    "seen": 1794823478.9409916,
+    "ast_hash": "c5b47959098e6d4d17c74ae964b067b9",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {
