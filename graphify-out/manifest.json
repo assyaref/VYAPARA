@@ -265,9 +265,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/backup.ts": {
-    "mtime": 1794561113.4938877,
-    "seen": 1794663711.4983368,
-    "ast_hash": "9585a944fadc63d5a73626eb4b2c8454",
+    "mtime": 1794820416.4811332,
+    "seen": 1794820574.1813436,
+    "ast_hash": "f69041a27b0a1d6a37fbc0560e4f16c8",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/customer.ts": {
@@ -1447,15 +1447,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794820174.947147,
-    "seen": 1794820256.456098,
-    "ast_hash": "38d612c08d99433cabaad10184d1558e",
+    "mtime": 1794820517.9713862,
+    "seen": 1794820574.2146986,
+    "ast_hash": "c01b341884b53e006326c6eeabd1be85",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794820175.9866056,
-    "seen": 1794820256.456106,
-    "ast_hash": "a88970be5b8e3b809405bcc0c707e974",
+    "mtime": 1794820519.0237668,
+    "seen": 1794820574.2147048,
+    "ast_hash": "aa492642edb1eba93fc6972aea5133ac",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1471,8 +1471,8 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794820173.9212806,
-    "seen": 1794820256.4561024,
+    "mtime": 1794820516.9330046,
+    "seen": 1794820574.2147021,
     "ast_hash": "5b114d304a37f248945d892b1c3d2158",
     "semantic_hash": ""
   },

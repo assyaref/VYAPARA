@@ -1,7 +1,7 @@
 # Graph Report - VYAPARA POS Windows Desktop hybird  (2026-11-16)
 
 ## Corpus Check
-- 176 files · ~157,135 words
+- 176 files · ~157,139 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: .pid 6, (none) 1, .css 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bb1266ee`
+- Built from commit: `9a581bde`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -129,14 +129,14 @@
 ## Surprising Connections (you probably didn't know these)
 - `runDownloadOnce()` --calls--> `encodeCursor()`  [EXTRACTED]
   apps/desktop/electron/main/sync/download.ts → packages/shared/src/sync.ts
-- `LoginPage()` --calls--> `useAuth`  [EXTRACTED]
-  apps/desktop/src/Login.tsx → apps/desktop/src/authStore.ts
 - `createDb()` --calls--> `AppDatabase`  [EXTRACTED]
   apps/desktop/electron/main/services/customer.test.ts → apps/desktop/electron/main/db/open.ts
 - `createDb()` --calls--> `AppDatabase`  [EXTRACTED]
   apps/desktop/electron/main/services/finance.test.ts → apps/desktop/electron/main/db/open.ts
 - `createDb()` --calls--> `AppDatabase`  [EXTRACTED]
   apps/desktop/electron/main/services/transactions.test.ts → apps/desktop/electron/main/db/open.ts
+- `deleteCategory()` --calls--> `AppError`  [EXTRACTED]
+  apps/desktop/electron/main/services/catalog.ts → apps/desktop/electron/main/errors.ts
 
 ## Import Cycles
 - None detected.
@@ -448,16 +448,16 @@ Nodes (3): Supplier(), SupplierRecord, SupplierTransaction
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `electron` connect `electron` to `ref_path`, `package.json`, `main.ts`, `createSyncCoordinator`, `credentials.ts`?**
-  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+  _High betweenness centrality (0.087) - this node is a cross-community bridge._
 - **What connects `./tsconfig.json` to the rest of the system?**
   _1 weakly-connected nodes found - possible missing edges._
 - **Should `useAuth` be split into smaller, more focused modules?**
   _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
-- **Why does `scripts` connect `scripts` to `package.json`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `inventory.ts`, `procurement.ts`, `reports.ts`, `transactions.ts`, `AppDatabase`, `reports.ts`, `inbound.ts`, `outbox.ts`, `AppError`, `admin.ts`, `products.ts`, `db.test.ts`?**
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
 - **Should `web/package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.06423034330011074 - nodes in this community are weakly interconnected._
-- **Why does `AppDatabase` connect `AppDatabase` to `inbound.ts`, `outbox.ts`, `AppError`, `stress-4.5.test.ts`, `conflict-resolution.test.ts`, `main/db/open.ts`, `inventory.ts`, `procurement.ts`, `reports.ts`, `transactions.ts`, `applyMigrations`, `reports.ts`, `AppError`, `coordinator.ts`, `products.ts`, `db.test.ts`, `transport.ts`, `createWindow`, `admin.ts`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `devDependencies` connect `devDependencies` to `package.json`, `drizzle-orm@^0.45.4`, `@fontsource/inter@^5.2.2`, `electron-vite`, `typescript@^5.9.3`, `unbuild@^3.0.1`, `electron`, `tailwindcss@^4.3.5`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
   _Cohesion score 0.08695652173913043 - nodes in this community are weakly interconnected._

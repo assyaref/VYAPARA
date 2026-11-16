@@ -18,7 +18,9 @@ function assertIntegrity(filePath: string): void {
 
 export async function backupDatabase(db: AppDatabase, destination: string): Promise<string> {
   const directory = path.dirname(destination);
-  fs.mkdirSync(directory, { recursive: true });
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory, { recursive: true });
+  }
   await db.sqlite.backup(destination);
   assertIntegrity(destination);
   return destination;
