@@ -1435,9 +1435,9 @@
     "semantic_hash": ""
   },
   "PHASE_4_BUSINESS_FUNCTIONAL_ACCEPTANCE.md": {
-    "mtime": 1794751060.5866797,
-    "seen": 1794790912.5894728,
-    "ast_hash": "a941cd60ce387fb81e44f5e3c06bcbf1",
+    "mtime": 1794817162.1896937,
+    "seen": 1794817167.6377718,
+    "ast_hash": "8fd6629635fb5473b6014045bc3254c0",
     "semantic_hash": ""
   },
   "PHASE_5_SECURITY_AUDIT.md": {
@@ -1465,9 +1465,9 @@
     "semantic_hash": ""
   },
   "PHASE_7_UI_UX_COMPLETION.md": {
-    "mtime": 1794798748.7624328,
-    "seen": 1794798759.796668,
-    "ast_hash": "4893130340d4dccc3f7badf7f2704a1e",
+    "mtime": 1794817162.1907108,
+    "seen": 1794817167.6381025,
+    "ast_hash": "952dfa2452a2a573c36022be72a8914b",
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
@@ -1531,9 +1531,9 @@
     "semantic_hash": ""
   },
   "PHASE_MASTER_STATUS.md": {
-    "mtime": 1794798748.8307905,
-    "seen": 1794798759.7967927,
-    "ast_hash": "583f82ce11056209133580295f02d565",
+    "mtime": 1794817162.2694266,
+    "seen": 1794817167.6384156,
+    "ast_hash": "ca51db50e469122425337f43f1f2f7f0",
     "semantic_hash": ""
   },
   "apps/sync-server/test/remote-versioning.test.ts": {
@@ -1780,6 +1780,12 @@
     "mtime": 1794815367.4887762,
     "seen": 1794815771.0413177,
     "ast_hash": "e9fc4b242266fee428c431afca0f3a64",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-mgmt-acceptance.cjs": {
+    "mtime": 1794817083.29959,
+    "seen": 1794817167.6315947,
+    "ast_hash": "5c799ff7b71d09c3844a30345f1bd4ba",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

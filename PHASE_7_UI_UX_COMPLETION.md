@@ -1,3 +1,8 @@
+> **ADDENDUM 2026-11-16 — Produk / Catalog / Retur Penjualan / Penyesuaian Stok: all E2E-verified.**
+> `evidence/e2e-mgmt-acceptance.cjs` exercises the full management journey on a fresh production-profile:
+> create product via form → create category & unit via UI → POS sale (stock 30→29) → Retur UI (stock restored 30)
+> → submit stock adjustment (seller/selisih opname) → approve as admin → stock 30→35. **10/10 PASS, 0 page errors.**
+> The four modules are therefore runtime-verified — not merely present in source.
 > **ADDENDUM 2026-11-16 — Reference-image redesign delivered.**
 > POS rebuilt to match `VYAPARA_Visual_Assets/00_Previews/Overall_Implementation_Overview.png`:
 > left catalogue with search + category chips (live from `category:getAll`), colored gradient
