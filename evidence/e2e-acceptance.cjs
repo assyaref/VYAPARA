@@ -33,7 +33,7 @@ const check = (name, ok) => {
     await input.fill(String(value));
   };
   const nav = async (label) => {
-    await page.locator('nav button', { hasText: label }).click();
+    await page.getByRole('button', { name: label, exact: true }).first().click();
     await page.waitForTimeout(900);
   };
 

@@ -43,9 +43,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
-    "mtime": 1794814861.3374555,
-    "seen": 1794815770.9810445,
-    "ast_hash": "b3a3eae0cbb62e86ff3b7ea264e8119b",
+    "mtime": 1794821297.765196,
+    "seen": 1794821921.1582756,
+    "ast_hash": "d2e5cb02ef65cf756ffafe6093d17ea4",
     "semantic_hash": ""
   },
   "apps/desktop/src/Barcode.tsx": {
@@ -1429,9 +1429,9 @@
     "semantic_hash": ""
   },
   "evidence/e2e-acceptance.cjs": {
-    "mtime": 1794819769.9489744,
-    "seen": 1794820256.4220986,
-    "ast_hash": "543d7e8af55c0bac7d5612e3e2afbfde",
+    "mtime": 1794821773.8148496,
+    "seen": 1794821921.1644363,
+    "ast_hash": "f84c266fd55f91698731b4e9d8fcaa2e",
     "semantic_hash": ""
   },
   "PHASE_4_BUSINESS_FUNCTIONAL_ACCEPTANCE.md": {
@@ -1447,15 +1447,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794820517.9713862,
-    "seen": 1794820574.2146986,
-    "ast_hash": "c01b341884b53e006326c6eeabd1be85",
+    "mtime": 1794821841.895712,
+    "seen": 1794821921.1830816,
+    "ast_hash": "7c34604262afaf72457cbb2c13406f05",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794820519.0237668,
-    "seen": 1794820574.2147048,
-    "ast_hash": "aa492642edb1eba93fc6972aea5133ac",
+    "mtime": 1794821842.9776914,
+    "seen": 1794821921.1830876,
+    "ast_hash": "1774536e60a32fa5913b8babd3648989",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1471,9 +1471,9 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794820516.9330046,
-    "seen": 1794820574.2147021,
-    "ast_hash": "5b114d304a37f248945d892b1c3d2158",
+    "mtime": 1794821840.833039,
+    "seen": 1794821921.183085,
+    "ast_hash": "54d2138fa70abee6bd9ed3f890f86c20",
     "semantic_hash": ""
   },
   "evidence/perf-probe.cjs": {
@@ -1822,6 +1822,18 @@
     "mtime": 1794817931.081456,
     "seen": 1794820256.4565027,
     "ast_hash": "1c8eda285d56a6ac9907b4a6a4a5b017",
+    "semantic_hash": ""
+  },
+  "apps/desktop/src/SupplierInvoices.tsx": {
+    "mtime": 1794821252.5117323,
+    "seen": 1794821921.1609428,
+    "ast_hash": "5a6f7e6966659320a0a642f1047bd9dd",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-supplier-invoice.cjs": {
+    "mtime": 1794821863.2775133,
+    "seen": 1794821921.1650004,
+    "ast_hash": "8e35c6e4cb691fb76962584073956261",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

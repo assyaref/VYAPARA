@@ -1,17 +1,17 @@
 # Graph Report - VYAPARA POS Windows Desktop hybird  (2026-11-16)
 
 ## Corpus Check
-- 176 files · ~157,139 words
+- 178 files · ~159,241 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: .pid 6, (none) 1, .css 1)
 
 ## Summary
-- 1470 nodes · 2882 edges · 111 communities (74 shown, 37 thin omitted)
+- 1486 nodes · 2907 edges · 115 communities (77 shown, 38 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9a581bde`
+- Built from commit: `f7915535`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,14 +34,14 @@
 - src/sync.ts
 - compilerOptions
 - electron
-- inbound.ts
+- supplier.ts
 - app.ts
 - main.ts
 - outbox.ts
 - AppError
-- stress-4.5.test.ts
+- AppDatabase
 - vyapara.d.ts
-- conflict-resolution.test.ts
+- stress-4.5.test.ts
 - src/index.ts
 - main/db/open.ts
 - schema.ts
@@ -51,32 +51,33 @@
 - reports.ts
 - e2e-mgmt-acceptance.cjs
 - build
-- package.json
-- transactions.ts
+- dependencies
+- pos.ts
 - VyaparaDatabase
+- ref_vitest
 - sql.d.ts
 - e2e-debug-pos.cjs
 - @neondatabase/serverless@^1.2.0
 - postcss@^8.4.33
 - e2e-shot-pos.cjs
-- applyMigrations
+- customer.ts
 - reports.ts
 - e2e-unpacked.cjs
 - perf-probe.cjs
-- createSyncCoordinator
+- sync/credentials.ts
 - acceptance-4.2.test.ts
 - AppError
-- coordinator.ts
+- sync-engine.test.ts
 - products.ts
 - devices.ts
 - services/sync.ts
-- sync-server.test.ts
+- SupplierInvoices.tsx
 - App.tsx
 - db.test.ts
 - Products.tsx
-- transport.ts
+- e2e-supplier-invoice.cjs
 - Reports.tsx
-- Procurement.tsx
+- App
 - ref_path
 - e2e-smoke.cjs
 - assets.d.ts
@@ -86,12 +87,12 @@
 - POS.tsx
 - desktop/package.json
 - ref_fs
-- workspaces
+- package.json
 - @vitejs/plugin-react@^1.2.0
 - createWindow
-- AppDatabase
+- auth.ts
 - tsconfig.electron.json
-- tailwindcss@^4.3.5
+- device-identity.ts
 - admin.ts
 - credentials.ts
 - steps
@@ -107,17 +108,22 @@
 - e2e-backup-shot.cjs
 - vite-tsconfig-paths@^6.1.1
 - tailwindcss@^4.3.5
-- Supplier.tsx
+- Catalog.tsx
 - vitest.config.ts
-- drizzle-orm@^0.45.4
-- @fontsource/inter@^5.2.2
-- typescript@^5.9.3
-- unbuild@^3.0.1
+- ref_playwright
+- eslint@^9.21.2
+- eslint-plugin-react@^7.37.4
+- globals@^6.1.0
+- @playwright/test@^1.65.0
+- postcss@^8.4.33
+- @tailwindcss/vite@^4.3.5
+- @types/node@^22.13.1
+- vitest@^5.1.0
 
 ## God Nodes (most connected - your core abstractions)
 1. `AppError` - 89 edges
 2. `AppDatabase` - 60 edges
-3. `useAuth` - 35 edges
+3. `useAuth` - 36 edges
 4. `setupAdmin()` - 33 edges
 5. `createSyncCoordinator()` - 26 edges
 6. `createWindow()` - 22 edges
@@ -127,25 +133,25 @@
 10. `applyInboundEventAtomically()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `runDownloadOnce()` --calls--> `encodeCursor()`  [EXTRACTED]
-  apps/desktop/electron/main/sync/download.ts → packages/shared/src/sync.ts
+- `createTransaction()` --calls--> `quoteSale()`  [EXTRACTED]
+  apps/desktop/electron/main/services/transactions.ts → packages/shared/src/pos.ts
+- `createTransaction()` --calls--> `settlePayments()`  [EXTRACTED]
+  apps/desktop/electron/main/services/transactions.ts → packages/shared/src/pos.ts
+- `downloadEvents()` --calls--> `encodeCursor()`  [EXTRACTED]
+  apps/sync-server/src/services/sync.ts → packages/shared/src/sync.ts
 - `createDb()` --calls--> `AppDatabase`  [EXTRACTED]
-  apps/desktop/electron/main/services/customer.test.ts → apps/desktop/electron/main/db/open.ts
+  apps/desktop/electron/main/services/auth.test.ts → apps/desktop/electron/main/db/open.ts
 - `createDb()` --calls--> `AppDatabase`  [EXTRACTED]
   apps/desktop/electron/main/services/finance.test.ts → apps/desktop/electron/main/db/open.ts
-- `createDb()` --calls--> `AppDatabase`  [EXTRACTED]
-  apps/desktop/electron/main/services/transactions.test.ts → apps/desktop/electron/main/db/open.ts
-- `deleteCategory()` --calls--> `AppError`  [EXTRACTED]
-  apps/desktop/electron/main/services/catalog.ts → apps/desktop/electron/main/errors.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (111 total, 37 thin omitted)
+## Communities (115 total, 38 thin omitted)
 
 ### Community 0 - "useAuth"
-Cohesion: 0.13
-Nodes (15): AuthState, useAuth, User, UserRole, Customer(), CustomerRecord, DocumentServices(), Finance() (+7 more)
+Cohesion: 0.12
+Nodes (18): AuthState, useAuth, User, UserRole, Customer(), CustomerRecord, DocumentServices(), Finance() (+10 more)
 
 ### Community 1 - "web/package.json"
 Cohesion: 0.06
@@ -176,8 +182,8 @@ Cohesion: 0.13
 Nodes (15): devDependencies, autoprefixer@^10.4.16, eslint-plugin-react@^7.37.4, @types/react@^19.3.0, typescript@^5.9.3, typescript-eslint@^8.24.1, vite@^8.3.8, vitest@^5.1.0 (+7 more)
 
 ### Community 8 - "devDependencies"
-Cohesion: 0.08
-Nodes (25): devDependencies, autoprefixer@^10.4.16, globals@^6.1.0, @playwright/test@^1.65.0, postcss@^8.4.33, prettier@^3.5.3, @types/babel__core@^7.20.5, @types/better-sqlite3@^9.6.0 (+17 more)
+Cohesion: 0.11
+Nodes (19): devDependencies, autoprefixer@^10.4.16, drizzle-orm@^0.45.4, prettier@^3.5.3, tailwindcss@^4.3.5, @types/babel__core@^7.20.5, @types/react@^19.3.0, typescript-eslint@^8.24.1 (+11 more)
 
 ### Community 9 - "desktop/package.json"
 Cohesion: 0.18
@@ -200,8 +206,8 @@ Cohesion: 0.09
 Nodes (27): dependencies, better-sqlite3@^12.8.0, vyapara-shared@workspace:*, zod@^4.3.6, devDependencies, tsx@^4.20.6, @types/better-sqlite3@^7.6.13, @types/node@^25.5.2 (+19 more)
 
 ### Community 15 - "src/sync.ts"
-Cohesion: 0.09
-Nodes (25): aggregateIdSchema, aggregateTypeSchema, deviceIdSchema, DeviceRegisterRequest, deviceRegisterRequestSchema, deviceRegisterResponseSchema, DeviceRevokeRequest, deviceRevokeRequestSchema (+17 more)
+Cohesion: 0.08
+Nodes (31): DeviceRegisterResponse, DeviceTokenRenewResponse, SyncDownloadResponse, SyncUploadResponse, TransportError, TransportOptions, aggregateIdSchema, aggregateTypeSchema (+23 more)
 
 ### Community 16 - "compilerOptions"
 Cohesion: 0.12
@@ -211,12 +217,12 @@ Nodes (15): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, 
 Cohesion: 0.40
 Nodes (5): api, send(), withToken(), electron@^45.3.1, electron
 
-### Community 18 - "inbound.ts"
-Cohesion: 0.20
-Nodes (20): applyAutoResolution(), createConflictRecord(), insertConflictHistory(), updateConflictStatus(), applyBusinessEvent(), applyCustomerPayment(), applyInboundEventAtomically(), applyInventoryMovement() (+12 more)
+### Community 18 - "supplier.ts"
+Cohesion: 0.14
+Nodes (25): createSupplier(), createSupplierInvoice(), deactivateSupplier(), generateSupplierCode(), getPayablesSummary(), getSupplier(), getSupplierBalance(), getSupplierInvoice() (+17 more)
 
 ### Community 19 - "app.ts"
-Cohesion: 0.33
+Cohesion: 0.41
 Nodes (8): handleRequest(), HttpError, readJsonBody(), requireBearerDeviceAuth(), sendError(), sendJson(), sendOk(), SYNC_LIMITS
 
 ### Community 20 - "main.ts"
@@ -224,48 +230,48 @@ Cohesion: 0.04
 Nodes (5): AppInfo, AppInfoSchema, EnvironmentStatus, EnvironmentStatusSchema, gotLock
 
 ### Community 21 - "outbox.ts"
-Cohesion: 0.05
-Nodes (47): createCustomer(), customerCode(), CustomerRecord, CustomerRow, CustomerTransactionRecord, CustomerTxRow, deactivateCustomer(), getCustomer() (+39 more)
+Cohesion: 0.11
+Nodes (19): countOutboxEvents(), AppendOutboxInput, eventPayloadSchemas, isoDateSchema, listOutboxEvents(), mapRow(), markOutboxAcknowledged(), markOutboxConflict() (+11 more)
 
 ### Community 22 - "AppError"
-Cohesion: 0.23
-Nodes (11): CatalogCategory, CatalogUnit, createCategory(), createUnit(), deleteCategory(), deleteUnit(), normDescription(), normName() (+3 more)
+Cohesion: 0.25
+Nodes (12): AppError, CatalogCategory, CatalogUnit, createCategory(), createUnit(), deleteCategory(), deleteUnit(), normDescription() (+4 more)
 
-### Community 23 - "stress-4.5.test.ts"
-Cohesion: 0.16
-Nodes (6): getPendingConflicts(), adminId(), createSale(), makeDb(), seedProduct(), { state }
+### Community 23 - "AppDatabase"
+Cohesion: 0.12
+Nodes (20): AppDatabase, createDb(), needsSetup(), setupAdmin(), appendOutboxEventMock, createCustomerRecord(), createCustomerWithDebit(), createDb() (+12 more)
 
 ### Community 24 - "vyapara.d.ts"
 Cohesion: 0.40
 Nodes (4): *.css, SyncStatusSnapshot, VyaparaIpcResult, Window
 
-### Community 25 - "conflict-resolution.test.ts"
-Cohesion: 0.15
-Nodes (23): buildConflictRecord(), detectConcurrentUpdate(), detectConflictForEvent(), detectDuplicateEvent(), detectOutOfOrderEvent(), detectStaleVersion(), getEntityVersion(), upsertEntityVersion() (+15 more)
+### Community 25 - "stress-4.5.test.ts"
+Cohesion: 0.07
+Nodes (49): SyncOutboxStatus, buildConflictRecord(), detectConcurrentUpdate(), detectConflictForEvent(), detectDuplicateEvent(), detectOutOfOrderEvent(), detectStaleVersion(), getEntityVersion() (+41 more)
 
 ### Community 29 - "src/index.ts"
 Cohesion: 0.05
-Nodes (71): AuthChangePasswordSchema, AuthTokenSchema, BestSellingQuerySchema, CashDrawerCloseSchema, CashDrawerOpenSchema, CashDrawerQuerySchema, CashierPerformanceQuerySchema, CashMovementsQuerySchema (+63 more)
+Nodes (70): AuthChangePasswordSchema, AuthTokenSchema, BestSellingQuerySchema, CashDrawerCloseSchema, CashDrawerOpenSchema, CashDrawerQuerySchema, CashierPerformanceQuerySchema, CashMovementsQuerySchema (+62 more)
 
 ### Community 30 - "main/db/open.ts"
 Cohesion: 0.10
-Nodes (10): applyMigrations(), applySql(), AppOrm, countOf(), MIGRATIONS, normalizeLegacySchema(), renameColumnIfNeeded(), seedCatalog() (+2 more)
+Nodes (11): applyMigrations(), applySql(), AppOrm, connect(), countOf(), MIGRATIONS, normalizeLegacySchema(), renameColumnIfNeeded() (+3 more)
 
 ### Community 31 - "schema.ts"
 Cohesion: 0.05
 Nodes (37): cashDrawers, cashMovements, categories, customers, customerTransactions, deviceIdentity, expenseRecords, goodsReceiving (+29 more)
 
 ### Community 32 - "inventory.ts"
-Cohesion: 0.12
-Nodes (19): addOpnameItem(), completeStockOpname(), createStockOpname(), generateOpnameNumber(), getCurrentStock(), getOpnameItem(), getProductInventorySettings(), getStockOpname() (+11 more)
+Cohesion: 0.11
+Nodes (23): addOpnameItem(), applyStockMovement(), approveStockAdjustment(), completeStockOpname(), createStockAdjustment(), createStockOpname(), generateOpnameNumber(), getCurrentStock() (+15 more)
 
 ### Community 33 - "schemas.test.ts"
-Cohesion: 0.17
-Nodes (11): AuthLoginSchema, AuthSetupSchema, ipcFail(), ipcOk(), PaymentLineSchema, PERMISSIONS, ProductCreateSchema, ProductUpdateSchema (+3 more)
+Cohesion: 0.18
+Nodes (10): AuthLoginSchema, AuthSetupSchema, ipcFail(), ipcOk(), PaymentLineSchema, ProductCreateSchema, ProductUpdateSchema, ROLE_PERMISSIONS (+2 more)
 
 ### Community 34 - "procurement.ts"
 Cohesion: 0.10
-Nodes (26): recordStockMovement(), cancelPurchaseOrder(), createPurchaseOrder(), createPurchaseReturn(), getGoodsReceiving(), getPurchaseHistory(), getPurchaseOrder(), getPurchaseReturn() (+18 more)
+Nodes (25): cancelPurchaseOrder(), createPurchaseOrder(), createPurchaseReturn(), getGoodsReceiving(), getPurchaseHistory(), getPurchaseOrder(), getPurchaseReturn(), GoodsReceivingItemRecord (+17 more)
 
 ### Community 35 - "reports.ts"
 Cohesion: 0.13
@@ -279,25 +285,33 @@ Nodes (6): { _electron: electron }, fs, os, path, results, root
 Cohesion: 0.12
 Nodes (16): build, appId, directories, electronDist, electronVersion, files, npmRebuild, nsis (+8 more)
 
-### Community 38 - "package.json"
-Cohesion: 0.11
-Nodes (20): dependencies, react@^19.3.1, react-dom@^19.3.1, zustand@^5.1.0, eslint@^9.21.2, eslint-plugin-react@^7.37.4, @tailwindcss/vite@^4.3.5, @vitejs/plugin-react@^1.2.0 (+12 more)
+### Community 38 - "dependencies"
+Cohesion: 0.29
+Nodes (7): dependencies, react@^19.3.1, react-dom@^19.3.1, zustand@^5.1.0, react, react-dom, zustand
 
-### Community 39 - "transactions.ts"
-Cohesion: 0.13
-Nodes (22): transact(), getSettings(), readValue(), StoreSettings, updateSettings(), assertQuantity(), createTransaction(), listTransactions() (+14 more)
+### Community 39 - "pos.ts"
+Cohesion: 0.31
+Nodes (9): assertMoney(), PAYMENT_METHODS, PaymentLine, PaymentMethod, quoteSale(), SaleQuote, Settlement, settlePayments() (+1 more)
+
+### Community 41 - "ref_vitest"
+Cohesion: 0.07
+Nodes (6): download(), json(), makeEvent(), register(), salePayload(), upload()
 
 ### Community 43 - "e2e-debug-pos.cjs"
 Cohesion: 0.25
 Nodes (7): { _electron: electron }, fs, log, os, path, profile, root
 
 ### Community 46 - "e2e-shot-pos.cjs"
-Cohesion: 0.18
-Nodes (8): { chromium }, path, { _electron: electron }, fs, os, path, profile, root
+Cohesion: 0.29
+Nodes (6): { _electron: electron }, fs, os, path, profile, root
+
+### Community 47 - "customer.ts"
+Cohesion: 0.19
+Nodes (15): createCustomer(), customerCode(), CustomerRecord, CustomerRow, CustomerTransactionRecord, CustomerTxRow, deactivateCustomer(), getCustomer() (+7 more)
 
 ### Community 49 - "reports.ts"
-Cohesion: 0.19
-Nodes (24): BestSellingRow, CashierPerformanceRow, dateExpression(), ExpenseReportRow, getBestSellingProducts(), getCashierPerformance(), getExpenseReport(), getGrossProfit() (+16 more)
+Cohesion: 0.10
+Nodes (38): createDb(), seedContext(), BestSellingRow, CashierPerformanceRow, dateExpression(), ExpenseReportRow, getBestSellingProducts(), getCashierPerformance() (+30 more)
 
 ### Community 50 - "e2e-unpacked.cjs"
 Cohesion: 0.25
@@ -307,21 +321,21 @@ Nodes (6): { _electron: electron }, fs, os, path, results, root
 Cohesion: 0.25
 Nodes (7): { _electron: electron }, fs, os, path, profile, root, t0
 
-### Community 52 - "createSyncCoordinator"
-Cohesion: 0.20
-Nodes (17): createSyncCoordinator(), clearTimer(), ensureToken(), refreshCounts(), runCycle(), schedule(), setPhase(), startPeriodic() (+9 more)
+### Community 52 - "sync/credentials.ts"
+Cohesion: 0.26
+Nodes (6): clearSyncCredentials(), credsPath(), loadSyncCredentials(), saveSyncCredentials(), SyncCredentials, userDataDir
 
 ### Community 53 - "acceptance-4.2.test.ts"
 Cohesion: 0.13
 Nodes (14): SyncServerConfig, applyMigrations(), here, MIGRATIONS, openSyncServerDb(), require, SyncServerDb, createSyncServer() (+6 more)
 
 ### Community 54 - "AppError"
-Cohesion: 0.22
-Nodes (12): AppError, applyStockMovement(), approveStockAdjustment(), createStockAdjustment(), getStockAdjustment(), appendOutboxEvent(), validateOutboxEvent(), createSalesReturn() (+4 more)
+Cohesion: 0.28
+Nodes (8): recordStockMovement(), appendOutboxEvent(), validateOutboxEvent(), createSalesReturn(), SalesReturnItemRecord, SalesReturnRecord, TiRow, TrRow
 
-### Community 55 - "coordinator.ts"
-Cohesion: 0.17
-Nodes (22): SyncOutboxStatus, SyncOutboxStatusValue, getSyncState(), listUploadCandidates(), markOutboxAck(), markOutboxRetryable(), markOutboxSyncingBatch(), markOutboxTerminal() (+14 more)
+### Community 55 - "sync-engine.test.ts"
+Cohesion: 0.10
+Nodes (48): SyncOutboxStatusValue, createSyncCoordinator(), clearTimer(), ensureToken(), refreshCounts(), runCycle(), schedule(), setPhase() (+40 more)
 
 ### Community 56 - "products.ts"
 Cohesion: 0.19
@@ -332,36 +346,36 @@ Cohesion: 0.34
 Nodes (13): addHoursIso(), nowIso(), randomToken(), safeEqualHex(), sha256Hex(), authenticateBearerToken(), AuthenticatedDevice, DeviceAuthResult (+5 more)
 
 ### Community 58 - "services/sync.ts"
-Cohesion: 0.16
-Nodes (14): AuthScope, downloadEvents(), ExistingEventRow, ingestEventsBatch(), UploadEventInput, validateEventBusiness(), decodeCursor(), encodeCursor() (+6 more)
+Cohesion: 0.15
+Nodes (13): AuthScope, downloadEvents(), ExistingEventRow, ingestEventsBatch(), UploadEventInput, validateEventBusiness(), decodeCursor(), PerEventAck (+5 more)
 
-### Community 59 - "sync-server.test.ts"
-Cohesion: 0.48
-Nodes (6): download(), json(), makeEvent(), register(), salePayload(), upload()
+### Community 59 - "SupplierInvoices.tsx"
+Cohesion: 0.36
+Nodes (7): idr(), Invoice, Payables, statusCls(), statusLabel(), Supplier, SupplierInvoices()
 
 ### Community 60 - "App.tsx"
-Cohesion: 0.11
-Nodes (17): AlertRow, Dashboard(), dayKey(), fmtIDR(), fmtShort(), icons, idr, KpiCard() (+9 more)
+Cohesion: 0.13
+Nodes (14): AlertRow, Dashboard(), dayKey(), fmtIDR(), fmtShort(), icons, idr, KpiCard() (+6 more)
 
 ### Community 61 - "db.test.ts"
-Cohesion: 0.33
+Cohesion: 0.36
 Nodes (3): assertIntegrity(), backupDatabase(), restoreDatabase()
 
 ### Community 62 - "Products.tsx"
 Cohesion: 0.50
 Nodes (4): EMPTY_FORM, idr(), Product, ProductsPage()
 
-### Community 63 - "transport.ts"
-Cohesion: 0.14
-Nodes (21): DownloadRunResult, runDownloadOnce(), InboundEvent, getDownloadCursor(), setDownloadCursor(), makeEnvelope(), salePayload(), classifyHttpError() (+13 more)
+### Community 63 - "e2e-supplier-invoice.cjs"
+Cohesion: 0.25
+Nodes (6): { _electron: electron }, fs, os, path, results, root
 
 ### Community 64 - "Reports.tsx"
-Cohesion: 0.12
-Nodes (12): App(), rootElement, BestSellingRow, CashierRow, ExpenseRow, GrossProfitRow, PurchaseRow, Reports() (+4 more)
+Cohesion: 0.20
+Nodes (9): BestSellingRow, CashierRow, ExpenseRow, GrossProfitRow, PurchaseRow, SalesRow, SlowMovingRow, TransactionRow (+1 more)
 
-### Community 65 - "Procurement.tsx"
-Cohesion: 0.40
-Nodes (4): PoItem, Procurement(), PurchaseOrder, ReceiveItem
+### Community 65 - "App"
+Cohesion: 0.18
+Nodes (7): App(), rootElement, PoItem, Procurement(), PurchaseOrder, ReceiveItem, Reports()
 
 ### Community 66 - "ref_path"
 Cohesion: 0.40
@@ -376,7 +390,7 @@ Cohesion: 0.29
 Nodes (6): *.ico, *.jpeg, *.jpg, *.png, *.svg, *.webp
 
 ### Community 69 - "StockAdjustments.tsx"
-Cohesion: 0.50
+Cohesion: 0.24
 Nodes (3): Adjustment, Product, StockAdjustmentsPage()
 
 ### Community 70 - "Settings.tsx"
@@ -399,21 +413,25 @@ Nodes (11): author, description, drizzle-orm@^0.45.4, @types/react-dom@^19.3.0, 
 Cohesion: 0.25
 Nodes (5): fs, lines, replacement, content, fs
 
-### Community 75 - "workspaces"
-Cohesion: 0.67
-Nodes (3): workspaces, nohoist, packages
+### Community 75 - "package.json"
+Cohesion: 0.12
+Nodes (16): @fontsource/inter@^5.2.2, @types/better-sqlite3@^9.6.0, @types/react-dom@^19.3.0, typescript@^5.9.3, vite@^8.3.8, @fontsource/inter, @types/better-sqlite3, @types/react-dom (+8 more)
 
 ### Community 77 - "createWindow"
 Cohesion: 0.20
 Nodes (11): openAppDatabase(), createWindow(), getDb(), isOnline(), loadToken(), publicUser(), setActiveToken(), tokenFile() (+3 more)
 
-### Community 78 - "AppDatabase"
-Cohesion: 0.07
-Nodes (62): AppDatabase, createDb(), assertNotLocked(), assertPasswordPolicy(), assertPermission(), changePassword(), clearFailures(), failures (+54 more)
+### Community 78 - "auth.ts"
+Cohesion: 0.13
+Nodes (28): assertNotLocked(), assertPasswordPolicy(), assertPermission(), changePassword(), clearFailures(), failures, hashToken(), issueSession() (+20 more)
 
 ### Community 81 - "tsconfig.electron.json"
 Cohesion: 0.29
 Nodes (6): compilerOptions, moduleResolution, exclude, extends, include, ./tsconfig.json
+
+### Community 87 - "device-identity.ts"
+Cohesion: 0.53
+Nodes (5): DeviceIdentity, getOrCreateDeviceIdentity(), identityFilePath(), persist(), readPersisted()
 
 ### Community 88 - "admin.ts"
 Cohesion: 0.13
@@ -435,29 +453,29 @@ Nodes (4): idr(), ReturnRow, SalesReturnsPage(), TxnRow
 Cohesion: 0.29
 Nodes (5): { _electron: electron }, fs, os, path, root
 
-### Community 104 - "Supplier.tsx"
+### Community 104 - "Catalog.tsx"
 Cohesion: 0.50
-Nodes (3): Supplier(), SupplierRecord, SupplierTransaction
+Nodes (3): CatalogPage(), Category, Unit
 
 ## Knowledge Gaps
 - **1 isolated node(s):** `./tsconfig.json`
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 623 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 633 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `electron` connect `electron` to `ref_path`, `package.json`, `main.ts`, `createSyncCoordinator`, `credentials.ts`?**
-  _High betweenness centrality (0.087) - this node is a cross-community bridge._
+- **Why does `electron` connect `electron` to `ref_path`, `package.json`, `main.ts`, `sync/credentials.ts`, `credentials.ts`?**
+  _High betweenness centrality (0.077) - this node is a cross-community bridge._
 - **What connects `./tsconfig.json` to the rest of the system?**
   _1 weakly-connected nodes found - possible missing edges._
 - **Should `useAuth` be split into smaller, more focused modules?**
-  _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
-- **Why does `AppError` connect `AppError` to `inventory.ts`, `procurement.ts`, `reports.ts`, `transactions.ts`, `AppDatabase`, `reports.ts`, `inbound.ts`, `outbox.ts`, `AppError`, `admin.ts`, `products.ts`, `db.test.ts`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+  _Cohesion score 0.11586452762923351 - nodes in this community are weakly interconnected._
+- **Why does `AppError` connect `AppError` to `inventory.ts`, `procurement.ts`, `reports.ts`, `auth.ts`, `customer.ts`, `reports.ts`, `supplier.ts`, `outbox.ts`, `AppError`, `AppDatabase`, `admin.ts`, `stress-4.5.test.ts`, `products.ts`, `db.test.ts`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Should `web/package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.06423034330011074 - nodes in this community are weakly interconnected._
-- **Why does `devDependencies` connect `devDependencies` to `package.json`, `drizzle-orm@^0.45.4`, `@fontsource/inter@^5.2.2`, `electron-vite`, `typescript@^5.9.3`, `unbuild@^3.0.1`, `electron`, `tailwindcss@^4.3.5`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Why does `AppDatabase` connect `AppDatabase` to `supplier.ts`, `outbox.ts`, `AppError`, `stress-4.5.test.ts`, `main/db/open.ts`, `inventory.ts`, `procurement.ts`, `reports.ts`, `customer.ts`, `reports.ts`, `sync/credentials.ts`, `AppError`, `sync-engine.test.ts`, `products.ts`, `db.test.ts`, `createWindow`, `auth.ts`, `device-identity.ts`, `admin.ts`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
   _Cohesion score 0.08695652173913043 - nodes in this community are weakly interconnected._

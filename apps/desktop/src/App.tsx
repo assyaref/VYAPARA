@@ -14,6 +14,7 @@ import Products from './Products';
 import SalesReturns from './SalesReturns';
 import StockAdjustments from './StockAdjustments';
 import Catalog from './Catalog';
+import SupplierInvoices from './SupplierInvoices';
 import logo from './assets/logo.png';
 import './index.css';
 
@@ -26,6 +27,7 @@ type View =
   | 'reports'
   | 'settings'
   | 'pos'
+  | 'supplierInvoices'
   | 'offline'
   | 'products'
   | 'returns'
@@ -87,6 +89,12 @@ const icons = {
       <circle cx="17" cy="17.5" r="1.5" />
     </svg>
   ),
+  file: (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+    </svg>
+  ),
   settings: (
     <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" />
@@ -133,6 +141,7 @@ const navItems: { id: View; label: string; permission?: string; icon: React.Reac
   { id: 'customer', label: 'Pelanggan', icon: icons.customer, permission: 'customer:read' },
   { id: 'reports', label: 'Laporan & Analisis', icon: icons.reports, permission: 'reports:read' },
   { id: 'supplier', label: 'Pemasok', icon: icons.supplier, permission: 'supplier:read' },
+  { id: 'supplierInvoices', label: 'Faktur Pemasok', icon: icons.file, permission: 'supplier:read' },
   { id: 'offline', label: 'Offline Sync', icon: icons.sync },
   { id: 'products', label: 'Produk', icon: icons.products },
   { id: 'returns', label: 'Retur Penjualan', icon: icons.returns },
@@ -592,6 +601,7 @@ function App() {
         {currentView === 'catalog' && <Catalog />}
         {currentView === 'settings' && <Settings />}
         {currentView === 'supplier' && <Supplier />}
+        {currentView === 'supplierInvoices' && <SupplierInvoices />}
       </main>
     </div>
   );
