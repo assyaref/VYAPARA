@@ -1901,6 +1901,11 @@ app.whenReady().then(() => {
 
 app.on('before-quit', () => {
   void getSyncCoordinator()?.stop();
+  try {
+    if (appDb) appDb.close();
+  } catch (error) {
+    console.error('Failed to close database cleanly', error);
+  }
 });
 
 app.on('window-all-closed', () => {

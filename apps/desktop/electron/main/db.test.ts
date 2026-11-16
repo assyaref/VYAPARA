@@ -128,4 +128,35 @@ describe('database', () => {
       removeDb(backupPath);
     }
   });
+
+  it('restore from a corrupt backup fails safely and leaves live data intact', async () => {
+    const filePath = tempDbPath();
+    const corruptPath = path.join(os.tmpdir(), `vyapara-corrupt-${crypto.randomUUID()}.db`);
+    try {
+      const db = openAppDatabase(filePath);
+      setupAdmin(db, {
+        name: 'Administrator',
+        email: 'admin@vyapara.com',
+        password: 'rahasia123456',
+      });
+      db.sqlite
+        .prepare(`INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, ?)`)
+        .run('store_name', 'Toko Utama', new Date().toISOString());
+
+      // produce a corrupt backup: non-SQLite garbage
+      fs.writeFileSync(corruptPath, 'not-a-sqlite-file-' + 'x'.repeat(2048));
+      await expect(restoreDatabase(db, corruptPath)).rejects.toThrow();
+
+      // live database must still be readable with the original value
+      const row = db.sqlite
+        .prepare(`SELECT value FROM settings WHERE key = ?`)
+        .get('store_name') as { value: string };
+      expect(row.value).toBe('Toko Utama');
+      expect(integrityOk(filePath)).toBe(true);
+      db.close();
+    } finally {
+      removeDb(filePath);
+      removeDb(corruptPath);
+    }
+  });
 });

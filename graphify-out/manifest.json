@@ -205,9 +205,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/main.ts": {
-    "mtime": 1794790290.6980407,
-    "seen": 1794790912.5723095,
-    "ast_hash": "f5aa47956145a8ad0e436efcb706974c",
+    "mtime": 1794791094.587392,
+    "seen": 1794791292.971809,
+    "ast_hash": "ce37fa0b6e837c09fdda363322934164",
     "semantic_hash": ""
   },
   "apps/desktop/electron/preload/preload.ts": {
@@ -223,9 +223,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/db.test.ts": {
-    "mtime": 1794663644.955834,
-    "seen": 1794663711.4983008,
-    "ast_hash": "b043f60f585dccc461ae4f172dfa1173",
+    "mtime": 1794791111.5319617,
+    "seen": 1794791292.9715235,
+    "ast_hash": "a583df6845452485eaf6a5009f88b4a5",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/db/open.ts": {
@@ -1447,15 +1447,21 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794790359.0935247,
-    "seen": 1794790912.5985398,
-    "ast_hash": "89f10e1e19536f4a32fcbd12e4008e4e",
+    "mtime": 1794791206.883772,
+    "seen": 1794791293.0000799,
+    "ast_hash": "2eaae35d97072d5109f188090e175b3f",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794790360.1770518,
-    "seen": 1794790912.5985427,
-    "ast_hash": "d2cfd9457e0a05a5740abdb11344f4fe",
+    "mtime": 1794791207.8898573,
+    "seen": 1794791293.000083,
+    "ast_hash": "1614d148be2228bd487031e037490eef",
+    "semantic_hash": ""
+  },
+  "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
+    "mtime": 1794791223.9370763,
+    "seen": 1794791292.9908457,
+    "ast_hash": "677c961b491ebaa467877026a950c8b8",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {
