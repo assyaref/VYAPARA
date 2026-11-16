@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'feature/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install desktop dependencies
+        run: npm ci --prefix apps/desktop
+
+      - name: TypeScript — shared
+        run: npm run typecheck:shared
+
+      - name: TypeScript — desktop renderer+electron
+        run: npm run typecheck:desktop && npm run typecheck:electron
+
+      - name: TypeScript — root
+        run: npm run typecheck
+
+      - name: Unit + integration tests
+        run: npm test
+
+      - name: Electron production build
+        run: npm run electron:build
+
+      # Release packaging intentionally NOT automated yet:
+      # installer build requires Authenticode certificate and a clean-machine
+      # install test (see PHASE_9_WINDOWS_RELEASE_ENGINEERING.md).

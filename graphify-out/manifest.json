@@ -1488,6 +1488,54 @@
     "ast_hash": "1da013fe543316dca27b1435e547ae16",
     "semantic_hash": ""
   },
+  ".github/workflows/ci.yml": {
+    "mtime": 1794791725.170056,
+    "seen": 1794791925.720789,
+    "ast_hash": "98a7c927a7bdefb502e2930c53afebe3",
+    "semantic_hash": ""
+  },
+  "PHASE_10_SYNC_SERVER_PRODUCTION.md": {
+    "mtime": 1794791737.7924855,
+    "seen": 1794791925.7644475,
+    "ast_hash": "904292aba8218b9d8665637404774994",
+    "semantic_hash": ""
+  },
+  "PHASE_11_CI_CD.md": {
+    "mtime": 1794791748.914184,
+    "seen": 1794791925.7644606,
+    "ast_hash": "287db1ab09a44a6c6edc9712c44c7b2d",
+    "semantic_hash": ""
+  },
+  "PHASE_12_STAGING_ACCEPTANCE.md": {
+    "mtime": 1794791759.472988,
+    "seen": 1794791925.7644715,
+    "ast_hash": "ff3a152a5bfd09e057180b754402592d",
+    "semantic_hash": ""
+  },
+  "PHASE_13_GO_NOGO_ASSESSMENT.md": {
+    "mtime": 1794791771.043544,
+    "seen": 1794791925.764481,
+    "ast_hash": "c4e58b452d81eb22e2387a6f43289420",
+    "semantic_hash": ""
+  },
+  "PHASE_14_PRODUCTION_DEPLOYMENT.md": {
+    "mtime": 1794791782.3173952,
+    "seen": 1794791925.7644863,
+    "ast_hash": "7d937513d32aad5839022b267ade8a15",
+    "semantic_hash": ""
+  },
+  "PHASE_9_WINDOWS_RELEASE_ENGINEERING.md": {
+    "mtime": 1794791689.3730767,
+    "seen": 1794791925.7677941,
+    "ast_hash": "73f62588143d3b3fa52990552c783fa2",
+    "semantic_hash": ""
+  },
+  "PHASE_MASTER_STATUS.md": {
+    "mtime": 1794791817.7432218,
+    "seen": 1794791925.767798,
+    "ast_hash": "5d4dedd2b01497e08a04f2fff50c1c2a",
+    "semantic_hash": ""
+  },
   "apps/desktop/package-lock.json": {
     "mtime": 1794621249.4493258,
     "seen": 1794663711.5037882,
