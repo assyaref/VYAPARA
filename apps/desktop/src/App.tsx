@@ -9,6 +9,7 @@ import Customer from './Customer';
 import Reports from './Reports';
 import Settings from './Settings';
 import POS from './POS';
+import OfflineSync from './OfflineSync';
 import logo from './assets/logo.png';
 import './index.css';
 
@@ -20,7 +21,8 @@ type View =
   | 'customer'
   | 'reports'
   | 'settings'
-  | 'pos';
+  | 'pos'
+  | 'offline';
 
 const iconCls = 'w-5 h-5 shrink-0';
 const icons = {
@@ -80,7 +82,13 @@ const icons = {
   settings: (
     <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06-.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+    </svg>
+  ),
+  sync: (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12a9 9 0 10-3.2 6.9" />
+      <path d="M21 16v-5h-5" />
     </svg>
   ),
 };
@@ -93,6 +101,7 @@ const navItems: { id: View; label: string; permission?: string; icon: React.Reac
   { id: 'customer', label: 'Pelanggan', icon: icons.customer, permission: 'customer:read' },
   { id: 'reports', label: 'Laporan & Analisis', icon: icons.reports, permission: 'reports:read' },
   { id: 'supplier', label: 'Pemasok', icon: icons.supplier, permission: 'supplier:read' },
+  { id: 'offline', label: 'Offline Sync', icon: icons.sync },
   { id: 'settings', label: 'Pengaturan', icon: icons.settings, permission: 'settings:read' },
 ];
 
@@ -416,6 +425,7 @@ function App() {
         {currentView === 'finance' && <Finance />}
         {currentView === 'customer' && <Customer />}
         {currentView === 'reports' && <Reports />}
+        {currentView === 'offline' && <OfflineSync />}
         {currentView === 'settings' && <Settings />}
         {currentView === 'supplier' && <Supplier />}
       </main>
