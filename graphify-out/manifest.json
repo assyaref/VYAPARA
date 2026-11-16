@@ -1021,9 +1021,9 @@
     "semantic_hash": ""
   },
   "apps/sync-server/src/db/open.ts": {
-    "mtime": 1794685450.237029,
-    "seen": 1794685918.0201879,
-    "ast_hash": "d7e88bf535942dc31c1a562959b00075",
+    "mtime": 1794794646.4261034,
+    "seen": 1794795844.0728881,
+    "ast_hash": "2985b519a576e4da73e293751cf745bf",
     "semantic_hash": ""
   },
   "apps/sync-server/src/middleware/http.ts": {
@@ -1051,9 +1051,9 @@
     "semantic_hash": ""
   },
   "apps/sync-server/src/services/sync.ts": {
-    "mtime": 1794685548.5158072,
-    "seen": 1794685918.0205772,
-    "ast_hash": "de0791e297d52f528acbbcf6d7e616b5",
+    "mtime": 1794794912.9055965,
+    "seen": 1794795844.0734277,
+    "ast_hash": "243f63db0c1fd1faa7223c60096bdfa2",
     "semantic_hash": ""
   },
   "apps/sync-server/test/sync-server.test.ts": {
@@ -1153,9 +1153,9 @@
     "semantic_hash": ""
   },
   "apps/sync-server/test/acceptance-4.2.test.ts": {
-    "mtime": 1794686273.7146602,
-    "seen": 1794686342.176335,
-    "ast_hash": "d5fa6c983c7e289f5262cd83c04305c6",
+    "mtime": 1794794794.2059312,
+    "seen": 1794795844.0734317,
+    "ast_hash": "0b6d56a9deff09b7300ea7e4679ffdec",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/sync/coordinator.ts": {
@@ -1183,9 +1183,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/sync/inbound.ts": {
-    "mtime": 1794745145.7139313,
-    "seen": 1794745701.3156297,
-    "ast_hash": "5b07dd5fb86bb76a860d1de0698d2db1",
+    "mtime": 1794795466.556721,
+    "seen": 1794795844.06599,
+    "ast_hash": "5ab181c188cde8b58d1a9aff58058f9d",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/sync/index.ts": {
@@ -1399,15 +1399,15 @@
     "semantic_hash": ""
   },
   "PHASE_4_5_OFFLINE_STRESS_TEST_REPORT.md": {
-    "mtime": 1794748518.1329322,
-    "seen": 1794748558.0830572,
-    "ast_hash": "6a617b8208246bdb9f28f217f4b0a387",
+    "mtime": 1794795786.373254,
+    "seen": 1794795844.0807598,
+    "ast_hash": "ed1f1adb1c387b94f6cd9426950c3286",
     "semantic_hash": ""
   },
   "POST_4_4_ARCHITECTURE_RUNTIME_INVESTIGATION.md": {
-    "mtime": 1794745786.619974,
-    "seen": 1794748558.0830615,
-    "ast_hash": "8e24867cdd7d7b74f6b131247d84a788",
+    "mtime": 1794795786.361083,
+    "seen": 1794795844.081501,
+    "ast_hash": "db36a231dbd11ee22d871e5689abcbb3",
     "semantic_hash": ""
   },
   "apps/desktop/src/assets/logo-primary.png": {
@@ -1447,14 +1447,14 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794791399.5793607,
-    "seen": 1794791521.7476726,
-    "ast_hash": "794c033103438f2d162c93947c52ca4a",
+    "mtime": 1794795636.120964,
+    "seen": 1794795844.0936563,
+    "ast_hash": "b8f56e71310198ab0608404771021ad4",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794791400.6513085,
-    "seen": 1794791521.747679,
+    "mtime": 1794795637.1939352,
+    "seen": 1794795844.0936658,
     "ast_hash": "39185a8f0d1e58c510d9653cdfd079f9",
     "semantic_hash": ""
   },
@@ -1471,8 +1471,8 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794791398.4730446,
-    "seen": 1794791521.7476764,
+    "mtime": 1794795635.0225406,
+    "seen": 1794795844.0936623,
     "ast_hash": "0a30e10df21c3c05fd02f82ff528265e",
     "semantic_hash": ""
   },
@@ -1495,9 +1495,9 @@
     "semantic_hash": ""
   },
   "PHASE_10_SYNC_SERVER_PRODUCTION.md": {
-    "mtime": 1794791737.7924855,
-    "seen": 1794791925.7644475,
-    "ast_hash": "904292aba8218b9d8665637404774994",
+    "mtime": 1794795786.3870184,
+    "seen": 1794795844.0797415,
+    "ast_hash": "da68ff9a3d7ac6fdab5489680f368c92",
     "semantic_hash": ""
   },
   "PHASE_11_CI_CD.md": {
@@ -1531,9 +1531,15 @@
     "semantic_hash": ""
   },
   "PHASE_MASTER_STATUS.md": {
-    "mtime": 1794791817.7432218,
-    "seen": 1794791925.767798,
-    "ast_hash": "5d4dedd2b01497e08a04f2fff50c1c2a",
+    "mtime": 1794795786.4130278,
+    "seen": 1794795844.0814974,
+    "ast_hash": "be0a8ccd84eb9aee135d368fa36ea396",
+    "semantic_hash": ""
+  },
+  "apps/sync-server/test/remote-versioning.test.ts": {
+    "mtime": 1794795666.146061,
+    "seen": 1794795844.0734355,
+    "ast_hash": "b15c68b761fbb74207ea738cd4a1cba7",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

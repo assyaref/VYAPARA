@@ -65,7 +65,7 @@ describe('Phase 4.2 acceptance - migration verification', () => {
     const db = openSyncServerDb(dbPath);
     try {
       const migs = db.sqlite.prepare('SELECT name FROM _migrations ORDER BY id').all() as any[];
-      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation']);
+      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning']);
       const tables = db.sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all() as any[];
       expect(tables.map(t => t.name)).toEqual(expect.arrayContaining(['sync_organizations','sync_devices','sync_events','sync_event_ack_log','_migrations']));
       const fk = db.sqlite.prepare('PRAGMA foreign_keys').get() as any;
@@ -150,7 +150,7 @@ VALUES (8,'${DEV}','ev-25','idem-25','duplicate',25,'DUPLICATE','Event already i
     const migrated = openSyncServerDb(dbPath);
     try {
       const migs = migrated.sqlite.prepare('SELECT name FROM _migrations ORDER BY id').all() as any[];
-      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation']);
+      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning']);
       const orgs = migrated.sqlite.prepare('SELECT * FROM sync_organizations').all() as any[];
       expect(orgs).toHaveLength(1);
       expect(orgs[0].organization_id).toBe(LEGACY_DEFAULT_ORG);
@@ -178,7 +178,7 @@ VALUES (8,'${DEV}','ev-25','idem-25','duplicate',25,'DUPLICATE','Event already i
     const db2 = openSyncServerDb(dbPath);
     try {
       const migs = db2.sqlite.prepare('SELECT name FROM _migrations ORDER BY id').all() as any[];
-      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation']);
+      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning']);
       const orgs = db2.sqlite.prepare('SELECT organization_id FROM sync_organizations').all() as any[];
       expect(orgs.filter(o => o.organization_id === LEGACY_DEFAULT_ORG)).toHaveLength(1);
     } finally { db2.close(); }

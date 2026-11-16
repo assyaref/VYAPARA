@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { AppDatabase } from '../db/open.js';
 import { syncEventEnvelopeSchema, SYNC_SCHEMA_VERSION, SYNC_EVENT_TYPES } from 'vyapara-shared';
-import { nowIso } from './types';
+import { nowIso, safeErrorSummary } from './types';
 import { detectConflictForEvent, upsertEntityVersion } from './conflict-detector.js';
 import { classifyConflict, createConflictRecord, applyAutoResolution, updateConflictStatus } from './conflict-resolver.js';
 import type { EntityType } from './conflict-types.js';
@@ -303,7 +303,20 @@ export function applyInboundEventAtomically(
       return { kind: 'conflict_detected', conflictId, classification: classification.classificationReason };
     }
 
-    applyBusinessEvent(db, ev, organizationId ?? '', localDeviceId);
+    try {
+      // Nested savepoint: if the business handler throws after partial writes,
+      // the savepoint rolls those writes back; the outer transaction only ever
+      // commits the receipt + quarantine records.
+      db.sqlite.transaction(() => applyBusinessEvent(db, ev, organizationId ?? '', localDeviceId))();
+    } catch (applyErr) {
+      // Business handler failure (e.g. sale references a product that does not exist
+      // locally). Roll back any partial write and quarantine the event instead of
+      // throwing — one poisoned event must not wedge the whole page/drain.
+      const msg = safeErrorSummary(applyErr);
+      insertReceipt(db, ev, organizationId, 'quarantined', `BUSINESS_APPLY_FAILED: ${msg}`);
+      insertQuarantine(db, ev, organizationId, 'BUSINESS_APPLY_FAILED', msg);
+      return { kind: 'quarantined', code: 'BUSINESS_APPLY_FAILED', reason: msg };
+    }
     insertReceipt(db, ev, organizationId, 'applied', null);
     return { kind: 'applied' };
   });

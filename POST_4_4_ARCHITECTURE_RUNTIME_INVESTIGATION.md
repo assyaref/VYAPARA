@@ -1,3 +1,18 @@
+> **ADDENDUM 2026-11-16 — remoteVersion contract CLOSED (server-side versioning implemented).**
+> The sync server now assigns a monotonic, never-reused `remoteVersion` per
+> (organization_id, aggregate_type, aggregate_id) at ingest time (new migration
+> `003-remote-versioning.sql`; `db/open.ts` registered; `services/sync.ts`
+> stamps versions at ingest and returns them on download). `packages/shared`
+> already carried `remoteVersion` as optional on the download envelope — no
+> schema change. Desktop `inbound.ts` therefore accepts real events end-to-end;
+> the fail-closed `MISSING_REMOTE_VERSION` path remains for genuinely
+> non-conforming senders. Verified: `apps/sync-server/test/remote-versioning.test.ts`
+> (monotonic 1,2,3 per aggregate, returned on download); sync-server suite 33/33;
+> full suite 236/236 green; E2E 16/16 PASS. In addition, a poisoned-but-well-formed
+> inbound event (e.g., sale references a non-existent local product) is now
+> quarantined as `BUSINESS_APPLY_FAILED` instead of wedging the download cursor
+> (nested savepoint in `applyInboundEventAtomically`).
+
 # VYAPARA — Phase 4.4 Closure & Architecture/Runtime Investigation Report
 
 - **Branch:** `feature/phase-4.3-sync-engine` @ `fed354cc0e5d425a91d5136d2b36248d4728e339`

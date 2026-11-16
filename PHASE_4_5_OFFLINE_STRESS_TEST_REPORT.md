@@ -1,3 +1,11 @@
+> **ADDENDUM 2026-11-16 — remoteVersion now flows end-to-end (see Phase 12 path unblocked).**
+> Server-side per-aggregate versioning implemented (`003-remote-versioning.sql`).
+> Downloaded events now carry `remoteVersion`; inbound apply, conflict detection,
+> cursor advance and dedupe receipts all operate against real versions. §8 below
+> (fail-closed quarantine of every real inbound event) is therefore **superseded**:
+> real inter-device sync can now function once a staging endpoint exists. Poison
+> events are quarantined as `BUSINESS_APPLY_FAILED` — they no longer wedge the page.
+
 # VYAPARA — Phase 4.5 Offline & Synchronization Stress Test Report
 
 - **Date:** 2026-11-15

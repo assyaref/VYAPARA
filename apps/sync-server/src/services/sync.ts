@@ -87,9 +87,22 @@ export function ingestEventsBatch(
       'SELECT server_seq, event_id, idempotency_key, ingest_status, organization_id FROM sync_events WHERE device_id = ? AND idempotency_key = ?',
     );
     const insertEvent = db.sqlite.prepare(
-      `INSERT INTO sync_events (organization_id, event_id, device_id, idempotency_key, event_type, aggregate_type, aggregate_id, schema_version, created_at, payload_json, received_at, ingest_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'accepted')`,
+      `INSERT INTO sync_events (organization_id, event_id, device_id, idempotency_key, event_type, aggregate_type, aggregate_id, schema_version, created_at, payload_json, received_at, ingest_status, remote_version)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'accepted', ?)`,
     );
+    const versionCounters = new Map<string, number>();
+    const nextRemoteVersion = (orgId: string, aggregateType: string, aggregateId: string): number => {
+      const key = `${orgId}|${aggregateType}|${aggregateId}`;
+      let v = versionCounters.get(key);
+      if (v === undefined) {
+        const row = db.sqlite
+          .prepare(`SELECT MAX(remote_version) AS m FROM sync_events WHERE organization_id = ? AND aggregate_type = ? AND aggregate_id = ?`)
+          .get(orgId, aggregateType, aggregateId) as any;
+        v = (row?.m ?? 0) + 1;
+      }
+      versionCounters.set(key, v + 1);
+      return v;
+    };
     const insertAck = db.sqlite.prepare(
       `INSERT INTO sync_event_ack_log (organization_id, device_id, event_id, idempotency_key, outcome, server_seq, code, message, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -143,6 +156,7 @@ export function ingestEventsBatch(
       }
 
       try {
+        const remoteVersion = nextRemoteVersion(auth.organizationId, acceptedEvent.aggregateType, acceptedEvent.aggregateId);
         const info = insertEvent.run(
           auth.organizationId,
           acceptedEvent.eventId,
@@ -155,6 +169,7 @@ export function ingestEventsBatch(
           acceptedEvent.createdAt,
           JSON.stringify(acceptedEvent.payload),
           receivedAt,
+          remoteVersion,
         );
         const serverSeq = Number(info.lastInsertRowid);
         const ack: PerEventAck = {
@@ -211,7 +226,7 @@ export function downloadEvents(
   // Authorization scope is derived ONLY from trusted server-side device->organization binding.
   const rows = db.sqlite
     .prepare(
-      `SELECT server_seq, event_id, device_id, idempotency_key, event_type, aggregate_type, aggregate_id, schema_version, created_at, payload_json, received_at
+      `SELECT server_seq, event_id, device_id, idempotency_key, event_type, aggregate_type, aggregate_id, schema_version, created_at, payload_json, received_at, remote_version
        FROM sync_events
        WHERE organization_id = ? AND server_seq > ?
        ORDER BY server_seq ASC
@@ -229,6 +244,7 @@ export function downloadEvents(
     created_at: string;
     payload_json: string;
     received_at: string;
+    remote_version: number;
   }>;
   const hasMore = rows.length > limit;
   const page = hasMore ? rows.slice(0, limit) : rows;
@@ -244,6 +260,7 @@ export function downloadEvents(
     createdAt: r.created_at,
     payload: JSON.parse(r.payload_json) as Record<string, unknown>,
     receivedAt: r.received_at,
+    remoteVersion: r.remote_version,
   }));
   const last = page[page.length - 1];
   return {

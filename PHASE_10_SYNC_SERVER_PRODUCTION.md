@@ -1,3 +1,9 @@
+> **ADDENDUM 2026-11-16 — Phase 10 status: staging is unblocked technically; infra still absent.**
+> `remoteVersion` plumbing is implemented and tested (`apps/sync-server/test/remote-versioning.test.ts`).
+> The server can now be deployed against staging as-is; remaining blockers are
+> operational, not functional: TLS-terminated host, `SYNC_ENROLLMENT_SECRET`/`SYNC_ADMIN_TOKEN`,
+> health endpoint, rate limiter, monitored backup volume.
+
 # VYAPARA — Phase 10 Central Sync Server Production Readiness
 
 - **Status:** BLOCKED — no staging or production infrastructure exists for the sync server. Nothing may be deployed without owner authorization.
