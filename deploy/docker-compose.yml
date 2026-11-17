@@ -1,0 +1,32 @@
+# VYAPARA sync server — single-command deployment for a VPS.
+# Prereq: Docker + Docker Compose plugin, and a deploy/.env filled in.
+#
+#   cd deploy
+#   cp .env.example .env   # fill values
+#   docker compose up -d --build
+#   docker compose logs -f
+#   curl http://127.0.0.1:8787/v1/sync/health
+
+services:
+  sync:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: vyapara-sync:latest
+    container_name: vyapara-sync
+    restart: unless-stopped
+    ports:
+      - "8787:8787" # bind behind nginx for TLS; keep off the public interface otherwise
+    volumes:
+      - vyapara-sync-data:/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/v1/sync/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  vyapara-sync-data:

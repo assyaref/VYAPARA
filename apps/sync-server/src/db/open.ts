@@ -1,4 +1,4 @@
-﻿import { createRequire } from 'node:module';
+import { createRequire } from 'node:module';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,8 +21,9 @@ export type SyncServerDb = {
 const here = path.dirname(fileURLToPath(import.meta.url));
 function migrationSql(file: string): string {
   const candidates = [
-    path.resolve(here, '../../migrations', file),
-    path.resolve(process.cwd(), 'apps/sync-server/migrations', file),
+    path.resolve(here, 'migrations', file), // bundled single-file runtime (Docker image)
+    path.resolve(here, '../../migrations', file), // source tree: src/db/../../migrations
+    path.resolve(process.cwd(), 'apps/sync-server/migrations', file), // running from repo root
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');

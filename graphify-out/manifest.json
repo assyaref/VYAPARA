@@ -37,9 +37,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/package.json": {
-    "mtime": 1794796218.6489987,
-    "seen": 1794798759.7837226,
-    "ast_hash": "c7cd1819f980c5dac7b8d5d1dc57c2e9",
+    "mtime": 1794828387.0925937,
+    "seen": 1794877354.3067682,
+    "ast_hash": "ca00ce392e72c597fa4d36451949e4f4",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
@@ -121,9 +121,9 @@
     "semantic_hash": "4ca59d7e5030978a3879c76ca920e928"
   },
   "package.json": {
-    "mtime": 1794677115.7278197,
-    "seen": 1794680625.3424726,
-    "ast_hash": "8f58e7ef1ab642529e22bcda06143273",
+    "mtime": 1794828253.4439027,
+    "seen": 1794877354.3173819,
+    "ast_hash": "9a3c26cff2ab9c250fcc97e4837ee75a",
     "semantic_hash": ""
   },
   "packages/shared/package.json": {
@@ -949,21 +949,21 @@
     "semantic_hash": ""
   },
   "apps/sync-server/package.json": {
-    "mtime": 1794684544.5908096,
-    "seen": 1794685075.5802977,
-    "ast_hash": "0ac5d017c111be1bd0a212891ea52008",
+    "mtime": 1794876873.493639,
+    "seen": 1794877354.311177,
+    "ast_hash": "098e5f7e61a1060f10c9826e7120de2f",
     "semantic_hash": ""
   },
   "apps/sync-server/src/app.ts": {
-    "mtime": 1794685590.1199138,
-    "seen": 1794685918.020184,
-    "ast_hash": "1756e5e575883dff35a662c341f19f44",
+    "mtime": 1794829068.4690711,
+    "seen": 1794877354.3111947,
+    "ast_hash": "1f39eb353132ceb92c5ece1ffa072ada",
     "semantic_hash": ""
   },
   "apps/sync-server/src/db/open.ts": {
-    "mtime": 1794794646.4261034,
-    "seen": 1794795844.0728881,
-    "ast_hash": "2985b519a576e4da73e293751cf745bf",
+    "mtime": 1794876637.8009467,
+    "seen": 1794877354.3112006,
+    "ast_hash": "f91dfdfb380a462138447fd02e051d7a",
     "semantic_hash": ""
   },
   "apps/sync-server/src/middleware/http.ts": {
@@ -973,9 +973,9 @@
     "semantic_hash": ""
   },
   "apps/sync-server/src/server.ts": {
-    "mtime": 1794684707.4384198,
-    "seen": 1794685075.5803099,
-    "ast_hash": "5648c72131d2c9dfa00cb9127de98ffa",
+    "mtime": 1794876873.3781867,
+    "seen": 1794877354.3113768,
+    "ast_hash": "bd40543dcd75741ea15575ded46bcf67",
     "semantic_hash": ""
   },
   "apps/sync-server/src/services/crypto.ts": {
@@ -1810,6 +1810,66 @@
     "mtime": 1794824430.150113,
     "seen": 1794825395.43983,
     "ast_hash": "e8b168927074ffc7c0627251a82da9a0",
+    "semantic_hash": ""
+  },
+  "apps/sync-server/src/admin-dashboard.ts": {
+    "mtime": 1794828972.3494997,
+    "seen": 1794877354.3111808,
+    "ast_hash": "a313b9b25724ee4a9fa4ce67800dd561",
+    "semantic_hash": ""
+  },
+  "apps/sync-server/src/cli.ts": {
+    "mtime": 1794877253.131797,
+    "seen": 1794877354.3111978,
+    "ast_hash": "33957b70b2bded5e02dbf6c95ef07f25",
+    "semantic_hash": ""
+  },
+  "apps/sync-server/src/services/admin.ts": {
+    "mtime": 1794829002.739658,
+    "seen": 1794877354.3113797,
+    "ast_hash": "d4cd2a6cee5fe4e20a845ef19058c9c9",
+    "semantic_hash": ""
+  },
+  "deploy/docker-compose.yml": {
+    "mtime": 1794828915.6272328,
+    "seen": 1794877354.3136659,
+    "ast_hash": "283611158a4277a3762e82a0a64ef4af",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-admin-dashboard.cjs": {
+    "mtime": 1794829284.6697702,
+    "seen": 1794877354.3141682,
+    "ast_hash": "f19c61df31266961cb02e9c9e016aa5e",
+    "semantic_hash": ""
+  },
+  "scripts/build-installer.mjs": {
+    "mtime": 1794828327.5221868,
+    "seen": 1794877354.318418,
+    "ast_hash": "0de01cd0c87da5aeda673a8d40e20473",
+    "semantic_hash": ""
+  },
+  "SIGNING.md": {
+    "mtime": 1794828156.4375489,
+    "seen": 1794877354.3246346,
+    "ast_hash": "f0e88413a1dbd7c5cee1c9449ee0e365",
+    "semantic_hash": ""
+  },
+  "deploy/DEPLOY.md": {
+    "mtime": 1794876195.3945334,
+    "seen": 1794877354.3256807,
+    "ast_hash": "8c82f1141a4bdeea71e6dbe78154ee75",
+    "semantic_hash": ""
+  },
+  "evidence/admin-dashboard.png": {
+    "mtime": 1794875940.376553,
+    "seen": 1794877354.338944,
+    "ast_hash": "2bddcd8fa450dec31a32edf5105d061a",
+    "semantic_hash": ""
+  },
+  "evidence/admin-gate.png": {
+    "mtime": 1794875938.957142,
+    "seen": 1794877354.338947,
+    "ast_hash": "3cfc636a8f5f3a9562c03fe037aece04",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

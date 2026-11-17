@@ -1,4 +1,4 @@
-﻿import type { IncomingMessage, ServerResponse } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { URL } from 'node:url';
 import {
   deviceRegisterRequestSchema,
@@ -12,9 +12,35 @@ import {
   SYNC_LIMITS,
 } from 'vyapara-shared';
 import type { SyncServerDb } from './db/open.js';
-import { HttpError, readJsonBody, requireBearerDeviceAuth, sendError, sendOk } from './middleware/http.js';
+import { HttpError, readJsonBody, requireBearerDeviceAuth, sendError, sendJson, sendOk } from './middleware/http.js';
 import { authenticateBearerToken, registerDevice, renewDeviceToken, revokeDevice } from './services/devices.js';
 import { downloadEvents, ingestEventsBatch } from './services/sync.js';
+import { adminOverview } from './services/admin.js';
+import { ADMIN_DASHBOARD_HTML } from './admin-dashboard.js';
+import { sha256Hex, safeEqualHex } from './services/crypto.js';
+
+function requireAdminToken(req: { headers: Record<string, unknown> }, cfg: SyncServerConfig): void {
+  if (!cfg.adminToken) {
+    throw new HttpError(404, 'NOT_FOUND', 'Admin API is not enabled on this server');
+  }
+  const auth = (req.headers.authorization as string | undefined) ?? '';
+  const expected = sha256Hex(cfg.adminToken);
+  const provided = sha256Hex(auth.startsWith('Bearer ') ? auth.slice('Bearer '.length).trim() : '');
+  if (!safeEqualHex(expected, provided)) {
+    throw new HttpError(401, 'UNAUTHORIZED', 'Admin token required');
+  }
+}
+
+function sendHtml(res: import('node:http').ServerResponse, html: string): void {
+  const payload = Buffer.from(html, 'utf8');
+  res.statusCode = 200;
+  res.setHeader('content-type', 'text/html; charset=utf-8');
+  res.setHeader('cache-control', 'no-store');
+  res.setHeader('x-content-type-options', 'nosniff');
+  res.setHeader('x-frame-options', 'DENY');
+  res.setHeader('content-security-policy', "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'self'");
+  res.end(payload);
+}
 
 export type SyncServerConfig = {
   enrollmentSecret: string;
@@ -109,6 +135,17 @@ export async function handleRequest(
 
     if (method === 'GET' && url.pathname === '/v1/sync/health') {
       sendOk(res, { status: 'ok', time: new Date().toISOString() });
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/admin') {
+      sendHtml(res, ADMIN_DASHBOARD_HTML);
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/admin/api/overview') {
+      requireAdminToken(req as any, cfg);
+      sendOk(res, adminOverview(db));
       return;
     }
 
