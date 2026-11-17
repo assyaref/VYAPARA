@@ -137,6 +137,42 @@ const ProductsPage: React.FC = () => {
     }
   };
 
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+
+  const downloadTemplateCsv = async () => {
+    const template = [
+      'name,sku,barcode,category,unit,price,cost,stock',
+      'Kertas HVS A4 80gsm,SKU-A4-80,8991234567890,Kertas,Rim,55000,42000,100',
+      'Pulpen Standard AE7,SKU-AE7-01,8991234567891,ATK,Pcs,3500,1800,250',
+      'A4,sku-example,barcode-example,category-example,unit-example,price-example,cost-example,stock-example',
+    ].join('\r\n');
+    try {
+      const res = await vyapara.saveCsv({ token: '', filename: 'template-produk.csv', content: template });
+      if (res?.ok && res.data?.saved) {
+        setImportStatus('Template tersimpan. Isi dengan data Anda lalu klik Import CSV.');
+      }
+    } catch (err: any) {
+      setImportStatus(err?.message || 'Gagal menyimpan template');
+    }
+  };
+
+  const importCsv = async () => {
+    setImportStatus(null);
+    try {
+      const res = await vyapara.importProductsCsv({ token: '' });
+      if (res?.ok && res.data?.canceled) return;
+      if (!res?.ok) {
+        setImportStatus(res?.error?.message ?? 'Import gagal');
+        return;
+      }
+      const d = res.data;
+      setImportStatus(`Import selesai: ${d.imported} produk baru, ${d.skipped} dilewati (duplikat), ${d.errors?.length ?? 0} error.`);
+      await load();
+    } catch (err: any) {
+      setImportStatus(err.message || 'Import gagal');
+    }
+  };
+
   const inputCls = 'w-full px-3 py-2 text-sm border border-vyapara-border rounded-lg outline-none focus:ring-2 focus:ring-vyapara-blue';
   const labelCls = 'block text-xs font-semibold text-vyapara-secondary mb-1';
 
@@ -147,16 +183,33 @@ const ProductsPage: React.FC = () => {
           <h1 className="text-2xl font-extrabold text-vyapara-navy">Produk</h1>
           <p className="text-xs text-vyapara-secondary">Kelola katalog, harga, stok</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold bg-vyapara-navy text-white rounded-full px-4 py-2 hover:bg-vyapara-blue transition-colors"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-          Tambah Produk
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={downloadTemplateCsv}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold border border-vyapara-border text-vyapara-secondary rounded-full px-4 py-2 hover:bg-vyapara-surface transition-colors"
+            title="Unduh template CSV produk"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+            Template CSV
+          </button>
+          <button
+            onClick={importCsv}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold border border-vyapara-border text-vyapara-navy rounded-full px-4 py-2 hover:bg-vyapara-surface transition-colors"
+          >
+            Import CSV
+          </button>
+          <button
+            onClick={openCreate}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-vyapara-navy text-white rounded-full px-4 py-2 hover:bg-vyapara-blue transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+            Tambah Produk
+          </button>
+        </div>
       </div>
 
       {error && <div className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg px-4 py-2">{error}</div>}
+      {importStatus && <div className="text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2">{importStatus}</div>}
 
       <div className="bg-white rounded-2xl border border-vyapara-border shadow-sm">
         <div className="p-4 border-b border-vyapara-border flex flex-wrap items-center gap-3">

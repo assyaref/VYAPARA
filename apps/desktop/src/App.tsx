@@ -550,7 +550,12 @@ function App() {
   }
 
   if (!isAuthenticated) {
-    return <Login />;
+    return (
+      <>
+        <Login />
+        {portalOpen && <SuperAdminPortal onClose={() => setPortalOpen(false)} />}
+      </>
+    );
   }
 
   return (
