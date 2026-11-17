@@ -26,6 +26,19 @@ const api = {
   updateDownload: () => send('update:download', {}),
   updateInstall: () => send('update:install', {}),
   updateGetStatus: () => send('update:getStatus', {}),
+  getBranding: () => send('branding:get', {}),
+  getPrinterConfig: (input: unknown) => send('printer:getConfig', input),
+  setPrinterConfig: (input: unknown) => send('printer:setConfig', input),
+  listPrinters: (input: unknown) => send('printer:list', input),
+  printReceipt: (input: unknown) => send('printer:printReceipt', input),
+  printInvoice: (input: unknown) => send('printer:printInvoice', input),
+  setBranding: (input: unknown) => send('branding:set', input),
+  pickLogo: (input: unknown) => send('branding:pickLogo', input),
+  resetLogo: (input: unknown) => send('branding:resetLogo', input),
+  dangerWipeSessions: (input: unknown) => send('danger:wipeSessions', input),
+  dangerWipeAdminUsers: (input: unknown) => send('danger:wipeAdminUsers', input),
+  dangerFactoryReset: (input: unknown) => send('danger:factoryReset', input),
+
   onUpdateStatus: (callback: (status: unknown) => void) => {
     const listener = (_event: unknown, status: unknown) => callback(status);
     ipcRenderer.on('update:status', listener);

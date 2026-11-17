@@ -30,6 +30,18 @@ interface Window {
     updateDownload: () => Promise<any>;
     updateInstall: () => Promise<any>;
     updateGetStatus: () => Promise<any>;
+    getBranding: () => Promise<any>;
+    getPrinterConfig: (input: unknown) => Promise<any>;
+    setPrinterConfig: (input: unknown) => Promise<any>;
+    listPrinters: (input: unknown) => Promise<any>;
+    printReceipt: (input: unknown) => Promise<any>;
+    printInvoice: (input: unknown) => Promise<any>;
+    setBranding: (input: unknown) => Promise<any>;
+    pickLogo: (input: unknown) => Promise<any>;
+    resetLogo: (input: unknown) => Promise<any>;
+    dangerWipeSessions: (input: unknown) => Promise<any>;
+    dangerWipeAdminUsers: (input: unknown) => Promise<any>;
+    dangerFactoryReset: (input: unknown) => Promise<any>;
     onUpdateStatus: (callback: (status: any) => void) => (() => void);
     authNeedsSetup: () => Promise<any>;
     authSetup: (input: { name: string; email: string; password: string }) => Promise<any>;

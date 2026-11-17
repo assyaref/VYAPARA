@@ -14,7 +14,12 @@ const Settings: React.FC = () => {
   const canWrite = userPermissions.includes('settings:write');
   const canRead = userPermissions.includes('settings:read');
 
-  const [tab, setTab] = useState<'settings' | 'users' | 'roles' | 'permissions' | 'backup'>('settings');
+  const [tab, setTab] = useState<'settings' | 'users' | 'roles' | 'permissions' | 'backup' | 'printer'>('settings');
+  const [printerName, setPrinterName] = useState('');
+  const [printerPaperWidth, setPrinterPaperWidth] = useState<'58mm' | '80mm'>('80mm');
+  const [printerSilent, setPrinterSilent] = useState(false);
+  const [printerList, setPrinterList] = useState<string[]>([]);
+  const [printerStatus, setPrinterStatus] = useState<string | null>(null);
   const [backupBusy, setBackupBusy] = useState(false);
   const [restoreBusy, setRestoreBusy] = useState(false);
   const [backupStatus, setBackupStatus] = useState<{ type: 'ok' | 'err' | 'info'; message: string } | null>(null);
@@ -84,6 +89,20 @@ const Settings: React.FC = () => {
       if (res?.ok && res.data) setUpdateStatus(res.data);
     });
   }, [loadSettings, loadUsers, loadRoles, loadPermissions]);
+
+  useEffect(() => {
+    vyapara?.getPrinterConfig?.({ token: '' }).then((res: any) => {
+      if (res?.ok && res.data) {
+        setPrinterName(res.data.printerName ?? '');
+        setPrinterPaperWidth(res.data.paperWidth ?? '80mm');
+        setPrinterSilent(!!res.data.silent);
+      }
+    }).catch(() => {});
+    vyapara?.listPrinters?.({ token: '' }).then((res: any) => {
+      if (res?.ok && Array.isArray(res.data)) setPrinterList(res.data);
+    }).catch(() => {});
+  }, []);
+
 
   const handleUpsertSetting = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,6 +192,39 @@ const Settings: React.FC = () => {
     }
   };
 
+  const savePrinter = async () => {
+    setPrinterStatus(null);
+    try {
+      const res = await vyapara.setPrinterConfig({ token: '', printerName: printerName.trim(), paperWidth: printerPaperWidth, silent: printerSilent });
+      setPrinterStatus(res?.ok ? 'Pengaturan printer tersimpan.' : (res?.error?.message ?? 'Gagal menyimpan'));
+    } catch (err: any) {
+      setPrinterStatus(err.message || 'Gagal menyimpan');
+    }
+  };
+
+  const testPrint = async () => {
+    setPrinterStatus(null);
+    try {
+      const res = await vyapara.printReceipt({
+        token: '',
+        payload: {
+          storeName: 'VYAPARA', tagline: 'TEST PRINT', footer: 'Test print berhasil',
+          transactionNumber: 'TEST-001',
+          date: new Date().toLocaleString('id-ID'),
+          cashier: user?.name ?? 'Admin',
+          customerName: null,
+          items: [{ name: 'TEST ITEM', qty: 1, unitPrice: 10000, subtotal: 10000 }],
+          subtotal: 10000, discount: 0, total: 10000,
+          payments: [{ method: 'Tunai', amount: 10000 }],
+          change: 0,
+        },
+      });
+      setPrinterStatus(res?.ok ? 'Test print terkirim.' : (res?.error?.message ?? 'Gagal test print'));
+    } catch (err: any) {
+      setPrinterStatus(err.message || 'Gagal test print');
+    }
+  };
+
   const handleBackup = async () => {
     setBackupBusy(true);
     setBackupStatus(null);
@@ -252,6 +304,16 @@ const Settings: React.FC = () => {
           >
             Pengaturan Aplikasi
           </button>
+          {canWrite && (
+            <button
+              onClick={() => setTab('printer')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                tab === 'printer' ? 'bg-vyapara-blue text-white' : 'text-vyapara-text hover:bg-vyapara-surface'
+              }`}
+            >
+              Printer
+            </button>
+          )}
           {canWrite && (
             <button
               onClick={() => setTab('backup')}
@@ -384,6 +446,56 @@ const Settings: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'printer' && canWrite && (
+            <div className="max-w-2xl space-y-6">
+              <div>
+                <h3 className="text-lg font-bold text-vyapara-navy mb-1">Printer Thermal (ESC/POS)</h3>
+                <p className="text-sm text-vyapara-secondary">Cetak struk kasir langsung ke printer thermal melalui driver Windows (ESC/POS). Ukuran kertas 58mm / 80mm.</p>
+              </div>
+
+              {printerStatus && (
+                <div className="text-sm rounded-lg px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800">{printerStatus}</div>
+              )}
+
+              <div className="bg-vyapara-surface rounded-xl border border-vyapara-border p-5 space-y-4">
+                <div>
+                  <label className="block text-[11px] font-semibold text-vyapara-secondary mb-1 uppercase tracking-wide" htmlFor="printer-name">Nama Printer (Windows)</label>
+                  <select id="printer-name" value={printerName} onChange={(e) => setPrinterName(e.target.value)} className="w-full px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none bg-white">
+                    <option value="">-- Printer default Windows --</option>
+                    {printerList.map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  <p className="text-[10px] text-vyapara-secondary mt-1">Terdeteksi: {printerList.length} printer. Kosongkan untuk memakai printer default.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-vyapara-secondary mb-1 uppercase tracking-wide" htmlFor="printer-width">Lebar Kertas</label>
+                    <select id="printer-width" value={printerPaperWidth} onChange={(e) => setPrinterPaperWidth(e.target.value as any)} className="w-full px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none bg-white">
+                      <option value="80mm">80mm (standar kasir)</option>
+                      <option value="58mm">58mm (kasir mini)</option>
+                    </select>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm font-medium mt-6">
+                    <input type="checkbox" checked={printerSilent} onChange={(e) => setPrinterSilent(e.target.checked)} className="w-4 h-4 accent-vyapara-blue" />
+                    Tanpa dialog (silent print)
+                  </label>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={savePrinter} className="px-5 py-2.5 bg-vyapara-navy text-white text-sm font-semibold rounded-lg hover:bg-vyapara-blue">Simpan Pengaturan</button>
+                  <button onClick={testPrint} className="px-5 py-2.5 border border-vyapara-border text-sm font-semibold rounded-lg hover:bg-white">Test Print</button>
+                </div>
+              </div>
+
+              <div className="text-xs text-vyapara-secondary border border-vyapara-border rounded-lg p-4 bg-white">
+                <p className="font-semibold text-vyapara-navy mb-1">Cara pakai:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Instal driver printer thermal Anda di Windows (58/80mm).</li>
+                  <li>Pilih printer di atas, klik Test Print.</li>
+                  <li>Jika berhasil, tombol Cetak Nota di kasir mencetak langsung tanpa dialog.</li>
+                </ul>
               </div>
             </div>
           )}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import useAuth from './authStore';
-import logo from './assets/logo-primary.png';
+import { getBranding, loadBranding, subscribeBranding, logoSrc, type Branding } from './branding';
 import './index.css';
 
 const REMEMBER_FLAG = 'vyapara-remember';
@@ -16,6 +16,8 @@ const LoginPage: React.FC = () => {
     rememberInitially ? localStorage.getItem(REMEMBER_EMAIL) ?? '' : '',
   );
   const [password, setPassword] = useState('');
+  const [branding, setBranding] = useState<Branding>(getBranding());
+  useEffect(() => { void loadBranding(); return subscribeBranding(setBranding); }, []);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [remember, setRemember] = useState(rememberInitially);
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -106,9 +108,9 @@ const LoginPage: React.FC = () => {
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md px-8 py-7">
         <div className="flex flex-col items-center border-b border-vyapara-border pb-5 mb-5">
-          <img src={logo} alt="VYAPARA Business Management" className="h-16 w-auto object-contain" />
+          <img src={logoSrc(branding)} alt={branding.appName} className="h-16 w-auto object-contain" />
           <p className="text-[10px] tracking-[0.25em] uppercase text-vyapara-secondary mt-2">
-            Sistem Manajemen Usaha Terpadu
+            {branding.tagline}
           </p>
         </div>
 

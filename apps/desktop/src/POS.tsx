@@ -1,6 +1,7 @@
 /* src/POS.tsx */
 import React, { useState, useEffect, useCallback } from 'react';
 import useAuth from './authStore';
+import { getBranding } from './branding';
 
 const vyapara = (window as any).vyapara;
 
@@ -52,6 +53,7 @@ const POS: React.FC = () => {
   const [receipt, setReceipt] = useState<any | null>(null);
   const [doDoc, setDoDoc] = useState<any | null>(null);
   const [doLoading, setDoLoading] = useState(false);
+  const [invLoading, setInvLoading] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
   const discount = 0;
@@ -144,9 +146,57 @@ const POS: React.FC = () => {
     }
   };
 
-  const printReceipt = () => {
+  const buildReceiptPayload = () => {
+    if (!receipt) return null;
+    const b = getBranding();
+    const items = (receipt.items ?? []).map((i: any) => ({ name: i.productName ?? 'Item', qty: i.quantity ?? 1, unitPrice: i.price ?? Math.round((i.subtotal ?? 0) / (i.quantity ?? 1)), subtotal: i.subtotal ?? 0 }));
+    const subtotal = items.reduce((sum: number, i: any) => sum + Math.round(i.subtotal), 0);
+    return {
+      storeName: b.appName,
+      tagline: b.tagline,
+      footer: 'Terima kasih atas kunjungan Anda',
+      transactionNumber: receipt.transactionNumber,
+      date: new Date(receipt.createdAt).toLocaleString('id-ID'),
+      cashier: user?.name ?? '-',
+      customerName: receipt.customerName ?? null,
+      items,
+      subtotal,
+      discount: receipt.discountAmount ?? 0,
+      total: receipt.totalAmount,
+      payments: [{ method: paymentMethod ?? 'Tunai', amount: receipt.paymentAmount }],
+      change: receipt.changeAmount ?? 0,
+    };
+  };
+
+  const printReceipt = async () => {
     if (!receipt) return;
-    window.print();
+    try {
+      const payload = buildReceiptPayload();
+      const res = await vyapara.printReceipt({ token: '', payload });
+      if (res?.ok) return;
+      if (res?.error) console.warn('Thermal print gagal, fallback ke window.print:', res.error.message);
+      window.print();
+    } catch {
+      window.print();
+    }
+  };
+
+  const printInvoice = async () => {
+    if (!receipt) return;
+    setInvLoading(true);
+    setError(null);
+    try {
+      const payload = { ...buildReceiptPayload(), dueDate: null };
+      const res = await vyapara.printInvoice({ token: '', payload });
+      if (!res?.ok) {
+        setError(res?.error?.message ?? 'Gagal mencetak invoice — periksa printer di Pengaturan');
+        return;
+      }
+    } catch (err: any) {
+      setError(err.message || 'Gagal mencetak invoice');
+    } finally {
+      setInvLoading(false);
+    }
   };
 
   const printDeliveryOrder = async () => {
@@ -397,6 +447,7 @@ const POS: React.FC = () => {
             <p className="text-center text-[10px] text-vyapara-secondary mb-4">Terima kasih telah berbelanja</p>
             <div className="flex justify-end gap-2 pt-2 border-t border-vyapara-border">
               <button onClick={printReceipt} className="px-5 py-2 border border-vyapara-border rounded-lg text-vyapara-secondary hover:bg-vyapara-surface font-medium text-sm">Cetak Nota</button>
+              <button onClick={printInvoice} disabled={invLoading} className="px-5 py-2 border border-emerald-600 text-emerald-700 rounded-lg hover:bg-emerald-50 font-medium text-sm disabled:opacity-60">{invLoading ? 'Mencetak…' : 'Cetak Invoice'}</button>
               <button onClick={printDeliveryOrder} disabled={doLoading} className="px-5 py-2 border border-vyapara-blue text-vyapara-blue rounded-lg hover:bg-vyapara-light-blue font-medium text-sm disabled:opacity-60">{doLoading ? 'Memuat…' : 'Cetak DO'}</button>
               <button onClick={() => setReceipt(null)} className="px-5 py-2 bg-vyapara-navy hover:bg-vyapara-blue text-white rounded-lg font-medium transition-colors text-sm">Selesai</button>
             </div>

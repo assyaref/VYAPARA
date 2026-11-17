@@ -109,7 +109,15 @@ function issueSession(db: AppDatabase, user: PublicUser): { token: string; user:
 }
 
 export function needsSetup(db: AppDatabase): boolean {
-  const row = db.sqlite.prepare('SELECT COUNT(*) AS c FROM users').get() as { c: number };
+  // The seeded superadmin account does NOT count as 'configured' — the shop
+  // still needs its real admin account, otherwise the setup screen never shows.
+  const row = db.sqlite
+    .prepare(
+      `SELECT COUNT(*) AS c FROM users u
+       LEFT JOIN roles r ON r.id = u.role_id
+       WHERE r.name IS NULL OR r.name <> 'superadmin'`,
+    )
+    .get() as { c: number };
   return row.c === 0;
 }
 

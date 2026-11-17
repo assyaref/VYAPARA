@@ -17,7 +17,8 @@ import Catalog from './Catalog';
 import SupplierInvoices from './SupplierInvoices';
 import PurchaseReturns from './PurchaseReturns';
 import StockOpname from './StockOpname';
-import logo from './assets/logo.png';
+import SuperAdminPortal from './SuperAdminPortal';
+import { getBranding, loadBranding, subscribeBranding, logoSrc, type Branding } from './branding';
 import './index.css';
 
 type View =
@@ -495,6 +496,22 @@ function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const { user, isAuthenticated, isLoading: authIsLoading, checkSession, logout } = useAuth();
+  const [branding, setBranding] = useState<Branding>(getBranding());
+  const [portalOpen, setPortalOpen] = useState(false);
+
+  useEffect(() => {
+    void loadBranding();
+    return subscribeBranding(setBranding);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'F7') { e.preventDefault(); setPortalOpen((v) => !v); }
+      else if (e.key === 'Escape') setPortalOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     void checkSession();
@@ -525,7 +542,7 @@ function App() {
     return (
       <div className="min-h-screen bg-vyapara-surface flex items-center justify-center font-inter">
         <div className="flex flex-col items-center gap-3">
-          <img src={logo} alt="VYAPARA" className="h-14 w-auto opacity-90" />
+          <img src={logoSrc(branding)} alt="VYAPARA" className="h-14 w-auto opacity-90" />
           <p className="text-sm text-vyapara-secondary">Memuat sesi…</p>
         </div>
       </div>
@@ -537,13 +554,13 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] text-vyapara-text font-inter">
-      <aside className="fixed left-0 top-0 bottom-0 w-64 flex flex-col bg-gradient-to-b from-[#0D47A1] via-[#114E9C] to-[#0B3B73] text-white z-10">
+    <div className="min-h-screen bg-[#F5F7FA] text-vyapara-text font-inter" style={{ ['--brand-primary' as any]: branding.primaryColor, ['--brand-sidebar' as any]: branding.sidebarColor, ['--brand-accent' as any]: branding.accentColor }}>
+      <aside className="fixed left-0 top-0 bottom-0 w-64 flex flex-col text-white z-10" style={{ background: `linear-gradient(to bottom, ${branding.primaryColor} 0%, ${branding.sidebarColor} 100%)` }}>
         <div className="px-4 pt-5 pb-5">
           <div className="bg-white rounded-xl px-3 py-2.5 shadow-md">
-            <img src={logo} alt="VYAPARA Business Management" className="h-9 w-auto mx-auto object-contain" />
+            <img src={logoSrc(branding)} alt={branding.appName} className="h-9 w-auto mx-auto object-contain" />
           </div>
-          <p className="text-center text-[9px] uppercase tracking-[0.25em] text-white/55 mt-2">POS · ATK · Percetakan</p>
+          <p className="text-center text-[9px] uppercase tracking-[0.25em] text-white/55 mt-2">{branding.tagline}</p>
         </div>
 
         <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
@@ -553,7 +570,7 @@ function App() {
               onClick={() => setCurrentView(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 currentView === item.id
-                  ? 'bg-[#1976D2] text-white shadow-[inset_4px_0_0_#FF8F00]'
+                  ? 'bg-[var(--brand-primary)] text-white shadow-[inset_4px_0_0_var(--brand-accent)]'
                   : 'text-white/80 hover:bg-white/10 hover:text-white'
               }`}
             >
@@ -611,6 +628,7 @@ function App() {
         {currentView === 'purchaseReturns' && <PurchaseReturns />}
         {currentView === 'stockOpname' && <StockOpname />}
       </main>
+      {portalOpen && <SuperAdminPortal onClose={() => setPortalOpen(false)} />}
     </div>
   );
 }

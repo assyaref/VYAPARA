@@ -6,6 +6,8 @@ import * as fs from 'fs';
 import { openAppDatabase } from './db/open';
 import { getSyncCoordinator, initSyncCoordinator } from './sync';
 import { checkForUpdates, downloadUpdate, installUpdate, getUpdateStatus, onUpdateStatus } from './services/updater';
+import { ensureSuperadmin, getBranding, setBranding, copyLogo, brandLogoDataUrl, wipeSessions, wipeNonSuperadminUsers, factoryReset } from './services/superadmin';
+import { getPrinterConfig, setPrinterConfig, listPrinters, printReceipt, printInvoice, type ReceiptPayload } from './services/printer';
 import {
   CustomerCreateSchema,
   CustomerIdSchema,
@@ -155,12 +157,16 @@ function createWindow() {
 
   const preloadPath = path.join(__dirname, '..', 'preload', 'preload.mjs');
 
+  let windowTitle = APP_NAME;
+  try {
+    windowTitle = getBranding(getDb()).appName || APP_NAME;
+  } catch { /* branding optional at startup */ }
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
     minWidth: 1366,
     minHeight: 768,
-    title: APP_NAME,
+    title: windowTitle,
     icon: path.join(__dirname, '..', '..', 'assets', 'brand', 'vyapara-icon.png'),
     webPreferences: {
       contextIsolation: true,
@@ -1997,6 +2003,197 @@ function createWindow() {
     return { ok: true, success: true, data: getUpdateStatus() };
   });
 
+  // ===== Superadmin & Branding =====
+
+  ipcMain.handle('branding:get', async () => {
+    try {
+      const appDb = getDb();
+      const branding = getBranding(appDb);
+      const logoDataUrl = brandLogoDataUrl(appDb);
+      return { ok: true, success: true, data: { ...branding, logoDataUrl } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('branding:set', async (_event: any, input: { token: string; patch: Record<string, string | null> }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      if (user.role !== 'superadmin') {
+        return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin yang boleh mengubah branding' } };
+      }
+      const patch: any = {};
+      for (const [k, v] of Object.entries(input.patch || {})) {
+        if (v === null) continue;
+        patch[k] = v;
+      }
+      const branding = setBranding(appDb, patch);
+      const logoDataUrl = brandLogoDataUrl(appDb);
+      return { ok: true, success: true, data: { ...branding, logoDataUrl } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('branding:pickLogo', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const { dialog } = await import('electron');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      if (user.role !== 'superadmin') {
+        return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin yang boleh mengganti logo' } };
+      }
+      const result = await dialog.showOpenDialog({
+        title: 'Pilih Logo Aplikasi',
+        filters: [{ name: 'Gambar', extensions: ['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'] }],
+        properties: ['openFile'],
+      });
+      if (result.canceled || !result.filePaths[0]) {
+        return { ok: true, success: true, data: { canceled: true } };
+      }
+      const { logoPath } = copyLogo(appDb, result.filePaths[0], app.getPath('userData'));
+      const logoDataUrl = brandLogoDataUrl(appDb);
+      return { ok: true, success: true, data: { canceled: false, logoPath, logoDataUrl } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('branding:resetLogo', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      appDb.sqlite.prepare(`DELETE FROM settings WHERE key = 'brand_logo_path'`).run();
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('danger:wipeSessions', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      if (user.role !== 'superadmin') {
+        return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin' } };
+      }
+      const count = wipeSessions(appDb);
+      return { ok: true, success: true, data: { deleted: count } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('danger:wipeAdminUsers', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      if (user.role !== 'superadmin') {
+        return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin' } };
+      }
+      const count = wipeNonSuperadminUsers(appDb);
+      return { ok: true, success: true, data: { deleted: count } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('danger:factoryReset', async (_event: any, input: { token: string; confirm: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      if (user.role !== 'superadmin') {
+        return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin' } };
+      }
+      if ((input.confirm ?? '') !== 'HAPUS-SEMUA-DATA') {
+        return { ok: false, success: false, error: { code: 'CONFIRMATION_REQUIRED', message: 'Ketik HAPUS-SEMUA-DATA untuk konfirmasi' } };
+      }
+      factoryReset(appDb);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  // ===== Printer (thermal ESC/POS) =====
+
+  ipcMain.handle('printer:getConfig', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      const data = getPrinterConfig(appDb);
+      return { ok: true, success: true, data };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('printer:setConfig', async (_event: any, input: { token: string; printerName?: string; paperWidth?: '58mm' | '80mm'; silent?: boolean }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      const { token: _t, ...patch } = input;
+      const data = setPrinterConfig(appDb, patch);
+      return { ok: true, success: true, data };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('printer:list', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser } = await import('./services/auth');
+      const appDb = getDb();
+      requireUser(appDb, input.token);
+      const printers = await listPrinters();
+      return { ok: true, success: true, data: printers };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('printer:printReceipt', async (_event: any, input: { token: string; payload: ReceiptPayload }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'transaction:write');
+      await printReceipt(appDb, input.payload);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('printer:printInvoice', async (_event: any, input: { token: string; payload: ReceiptPayload & { dueDate?: string | null } }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'transaction:write');
+      await printInvoice(appDb, input.payload);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
   // ===== Delivery Orders =====
 
   ipcMain.handle('deliveryOrder:get', async (_event: any, input: { token: string; transactionId: string }) => {
@@ -2110,6 +2307,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   const db = getDb();
+  ensureSuperadmin(db);
   initSyncCoordinator(db).start();
   if (app.isPackaged) {
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
