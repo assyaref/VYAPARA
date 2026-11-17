@@ -26,6 +26,11 @@ interface Window {
     getEnvironmentStatus: () => Promise<{ online: boolean }>;
     syncGetStatus: () => Promise<VyaparaIpcResult<SyncStatusSnapshot>>;
     syncTrigger: () => Promise<VyaparaIpcResult<SyncStatusSnapshot>>;
+    updateCheck: () => Promise<any>;
+    updateDownload: () => Promise<any>;
+    updateInstall: () => Promise<any>;
+    updateGetStatus: () => Promise<any>;
+    onUpdateStatus: (callback: (status: any) => void) => (() => void);
     authNeedsSetup: () => Promise<any>;
     authSetup: (input: { name: string; email: string; password: string }) => Promise<any>;
     authLogin: (email: string, password: string) => Promise<any>;

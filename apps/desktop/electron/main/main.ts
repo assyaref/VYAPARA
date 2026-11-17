@@ -5,6 +5,7 @@ import { z } from 'zod';
 import * as fs from 'fs';
 import { openAppDatabase } from './db/open';
 import { getSyncCoordinator, initSyncCoordinator } from './sync';
+import { checkForUpdates, downloadUpdate, installUpdate, getUpdateStatus, onUpdateStatus } from './services/updater';
 import {
   CustomerCreateSchema,
   CustomerIdSchema,
@@ -1964,6 +1965,37 @@ function createWindow() {
     }
   });
 
+  ipcMain.handle('update:check', async () => {
+    try {
+      const status = await checkForUpdates();
+      return { ok: true, success: true, data: status };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('update:download', async () => {
+    try {
+      const status = await downloadUpdate();
+      return { ok: true, success: true, data: status };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('update:install', async () => {
+    try {
+      await installUpdate();
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('update:getStatus', async () => {
+    return { ok: true, success: true, data: getUpdateStatus() };
+  });
+
   // ===== Delivery Orders =====
 
   ipcMain.handle('deliveryOrder:get', async (_event: any, input: { token: string; transactionId: string }) => {
@@ -2090,6 +2122,11 @@ app.whenReady().then(() => {
       });
     });
   }
+  onUpdateStatus((s) => {
+    try {
+      mainWindow?.webContents.send('update:status', s);
+    } catch { /* window may be closing */ }
+  });
   createWindow();
 
   app.on('activate', () => {

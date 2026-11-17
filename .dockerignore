@@ -1,0 +1,12 @@
+.git
+node_modules
+apps/desktop/release
+apps/desktop/out
+apps/desktop/dist
+docs
+evidence
+graphify-out
+*.log
+*.pid
+**/.claude
+deploy/.env

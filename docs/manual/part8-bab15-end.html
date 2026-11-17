@@ -89,6 +89,47 @@
 <div class="warn"><strong>Penting:</strong> file backup di direktori root drive (mis. <code>E:\</code>) dapat gagal bila sistem tidak memberi izin tulis (EPERM). Gunakan folder yang bisa ditulis, mis. <code>D:\Backup\</code>.</div>
 
 
+<!-- BAB 18 -->
+<h1 class="section" id="bab18">Bab 18 — Pembaruan Aplikasi, Dashboard Pemilik &amp; Deployment Server</h1>
+
+<h2>18.1 Pembaruan Aplikasi (Auto-Update)</h2>
+<ol>
+<li>Instalasi rilis baru otomatis terdeteksi melalui <strong>GitHub Releases</strong> (<code>owner: assyaref / repo: VYAPARA</code>).</li>
+<li>Buka <strong>Pengaturan → Pembaruan Aplikasi</strong> untuk melihat versi terpasang dan memeriksa pembaruan baru.</li>
+<li>Klik <strong>Periksa Pembaruan</strong> — jika ada rilis baru, status berubah menjadi <em>Baru</em>.</li>
+<li>Klik <strong>Unduh &amp; Pasang</strong> — progress download tampil — lalu klik <strong>Restart &amp; Pasang</strong>; aplikasi tertutup &amp; membuka versi baru.</li>
+<li>Tanpa jaringan, periksa pembaruan menampilkan pesan “Update check gagal …” — aplikasi tetap berjalan normal.</li>
+</ol>
+<div class="warn"><strong>Catatan rilis:</strong> pemilik membuat rilis di GitHub dengan file <code>VYAPARA-Setup-&lt;versi&gt;.exe</code> (nama file harus cocok dengan <code>artifactName</code> di package.json). Auto-update hanya bekerja pada aplikasi terinstal (production), bukan <code>electron:dev</code>.</div>
+
+<h2>18.2 Installer Distribution Pipeline</h2>
+<ol>
+<li>Jalankan <code>node scripts/build-installer.mjs</code> — pipeline selalu menjalankan: vite build → electron-builder (NSIS) → checksum SHA-256 ke <code>release/SHA256SUMS.txt</code>.</li>
+<li>Mode default <em>unsigned</em> — Windows menampilkan SmartScreen untuk pengguna baru.</li>
+<li>Bila sudah memiliki sertifikat Authenticode: set <code>CSC_LINK</code> &amp; <code>CSC_KEY_PASSWORD</code>, lalu jalankan ulang — installer ditandatangani otomatis. Set <code>SIGNING_REQUIRED=true</code> untuk menolak build unsigned. Lihat <code>SIGNING.md</code>.</li>
+</ol>
+
+<h2>18.3 Owner Web Dashboard — Multi-Outlet</h2>
+<ol>
+<li>Owner dashboard tersedia di <code>https://&lt;host-sync&gt;/admin</code> — self-contained, tanpa aset eksternal.</li>
+<li>Gambar: token <code>SYNC_ADMIN_TOKEN</code> (dari <code>.env</code> server) → halaman menampilkan: total outlet, perangkat aktif, event diterima, konflik/duplikat, detail per outlet, jenis event teratas, daftar perangkat terdaftar.</li>
+<li>Refresh otomatis tiap 10 detik; token hanya disimpan di memori (hilang saat tab ditutup).</li>
+<li>Semua endpoint <code>/admin/api/*</code> dilindungi Bearer token; tanpa token → 401.</li>
+</ol>
+<div class="warn"><strong>Penting:</strong> dashboard tidak bisa menghitung omzet rupiah toko (server sync tidak menyimpan data penjualan, hanya metadata sync). Dashboard memantau kesehatan &amp; aktivitas replikasi — omzet &amp; laporan finansial tetap dari aplikasi desktop tiap outlet.</div>
+
+<h2>18.4 Mendeploy Sync Server (Staging/Production)</h2>
+<ol>
+<li>Siapkan VPS Linux + Docker. Salin repo ke server (atau gunakan image bawaan).</li>
+<li><code>docker build -f deploy/Dockerfile -t vyapara-sync .</code> — image self-contained; bundle dibangun dari source di dalam build (esbuild alias, tanpa npm workspaces).</li>
+<li>Salin <code>deploy/.env.example</code> → <code>.env</code> → isi <code>SYNC_ENROLLMENT_SECRET</code> &amp; <code>SYNC_ADMIN_TOKEN</code> (openssl rand -hex 32) &amp; <code>SYNC_DB_PATH=/data/sync-server.db</code> &amp; <code>PORT=8787</code>.</li>
+<li><code>docker compose up -d --build</code> → verifikasi: <code>curl http://127.0.0.1:8787/v1/sync/health</code> → <code>{"ok":true}</code>.</li>
+<li>TLS via nginx — template <code>deploy/nginx.conf</code> + certbot; jangan buka port 8787 ke publik.</li>
+<li>Jalankan <strong>staging acceptance</strong> sesuai DEPLOY.md §6 sebelum produksi; catat hasilnya di laporan phase Anda.</li>
+</ol>
+<div class="warn"><strong>Batasan:</strong> Docker image yang dibuat di mesin ini hanya diuji lokal — <em>smoke test</em> health + /admin + /admin/api/overview LOLOS, tetapi belum diuji pada VPS sungguhan. Deployment &amp; monitoring publik tetap menjadi tugas Anda; lihat <code>deploy/DEPLOY.md</code>.</div>
+
+
 <!-- LAMPIRAN -->
 <h1 class="section" id="lampiran">Lampiran A — Glossary &amp; FAQ</h1>
 

@@ -18,6 +18,13 @@ const Settings: React.FC = () => {
   const [backupBusy, setBackupBusy] = useState(false);
   const [restoreBusy, setRestoreBusy] = useState(false);
   const [backupStatus, setBackupStatus] = useState<{ type: 'ok' | 'err' | 'info'; message: string } | null>(null);
+  const [updateStatus, setUpdateStatus] = useState<{ phase: string; currentVersion: string; latestVersion?: string; message?: string; downloadPercent?: number } | null>(null);
+  const [updateBusy, setUpdateBusy] = useState(false);
+
+  useEffect(() => {
+    const off = vyapara?.onUpdateStatus?.((s: any) => setUpdateStatus(s));
+    return () => { if (typeof off === 'function') off(); };
+  }, []);
   const [settings, setSettings] = useState<Setting[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -70,6 +77,12 @@ const Settings: React.FC = () => {
     loadUsers();
     loadRoles();
     loadPermissions();
+    vyapara?.getAppInfo?.().then((info: any) => {
+      if (info?.version) setUpdateStatus((prev) => prev ?? { phase: 'idle', currentVersion: info.version });
+    });
+    vyapara?.updateGetStatus?.().then((res: any) => {
+      if (res?.ok && res.data) setUpdateStatus(res.data);
+    });
   }, [loadSettings, loadUsers, loadRoles, loadPermissions]);
 
   const handleUpsertSetting = async (e: React.FormEvent) => {
@@ -128,6 +141,35 @@ const Settings: React.FC = () => {
       }
     } catch (err: any) {
       setError(err.message || 'Gagal membuat peran');
+    }
+  };
+
+  const checkUpdate = async () => {
+    setUpdateBusy(true);
+    try {
+      const res = await vyapara.updateCheck();
+      if (res?.ok && res.data) setUpdateStatus(res.data);
+    } finally {
+      setUpdateBusy(false);
+    }
+  };
+
+  const downloadUpdate = async () => {
+    setUpdateBusy(true);
+    try {
+      const res = await vyapara.updateDownload();
+      if (res?.ok && res.data) setUpdateStatus(res.data);
+    } finally {
+      setUpdateBusy(false);
+    }
+  };
+
+  const installUpdate = async () => {
+    setUpdateBusy(true);
+    try {
+      await vyapara.updateInstall();
+    } finally {
+      setUpdateBusy(false);
     }
   };
 
@@ -255,6 +297,33 @@ const Settings: React.FC = () => {
         <div className="p-6">
           {tab === 'settings' && (
             <div className="max-w-lg">
+              <div className="mb-6 p-4 rounded-xl border border-vyapara-border bg-vyapara-light-blue/40">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-vyapara-navy">Pembaruan Aplikasi</h3>
+                    <p className="text-xs text-vyapara-secondary mt-0.5">Versi terpasang: <strong>{updateStatus?.currentVersion ?? '…'}</strong>{updateStatus?.latestVersion ? <> • tersedia: <strong>{updateStatus.latestVersion}</strong></> : null}</p>
+                  </div>
+                  {(updateStatus?.phase === 'available') && <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-amber-100 text-amber-800">Baru</span>}
+                  {(updateStatus?.phase === 'downloaded') && <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-emerald-100 text-emerald-800">Siap pasang</span>}
+                </div>
+                {updateStatus?.message && <p className="text-xs mt-2 text-amber-800">{updateStatus.message}</p>}
+                {updateStatus?.phase === 'downloading' && (
+                  <div className="mt-3">
+                    <div className="h-2 rounded bg-vyapara-border overflow-hidden"><div className="h-full bg-vyapara-blue transition-all" style={{ width: `${updateStatus.downloadPercent ?? 0}%` }} /></div>
+                    <p className="text-[11px] text-vyapara-secondary mt-1">Mengunduh… {updateStatus.downloadPercent ?? 0}%</p>
+                  </div>
+                )}
+                <div className="flex gap-2 mt-3">
+                  {(updateStatus?.phase === 'available' || updateStatus?.phase === 'error') && (
+                    <button onClick={downloadUpdate} disabled={updateBusy} className="px-4 py-2 text-xs font-bold bg-vyapara-navy text-white rounded-lg hover:bg-vyapara-blue disabled:opacity-60">Unduh &amp; Pasang</button>
+                  )}
+                  {updateStatus?.phase === 'downloaded' && (
+                    <button onClick={installUpdate} disabled={updateBusy} className="px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-60">Restart &amp; Pasang</button>
+                  )}
+                  <button onClick={checkUpdate} disabled={updateBusy} className="px-4 py-2 text-xs font-semibold border border-vyapara-border rounded-lg text-vyapara-secondary hover:bg-vyapara-surface disabled:opacity-60">{updateBusy ? 'Memeriksa…' : 'Periksa Pembaruan'}</button>
+                </div>
+              </div>
+
               <h3 className="text-lg font-bold text-vyapara-navy mb-4">Konfigurasi Aplikasi</h3>
               <form onSubmit={handleUpsertSetting} className="space-y-4">
                 <div>

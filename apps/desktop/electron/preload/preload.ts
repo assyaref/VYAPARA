@@ -22,6 +22,15 @@ const api = {
   getEnvironmentStatus: () => ipcRenderer.invoke('app:getEnvironmentStatus'),
   syncGetStatus: () => send('sync:getStatus', {}),
   syncTrigger: () => send('sync:trigger', {}),
+  updateCheck: () => send('update:check', {}),
+  updateDownload: () => send('update:download', {}),
+  updateInstall: () => send('update:install', {}),
+  updateGetStatus: () => send('update:getStatus', {}),
+  onUpdateStatus: (callback: (status: unknown) => void) => {
+    const listener = (_event: unknown, status: unknown) => callback(status);
+    ipcRenderer.on('update:status', listener);
+    return () => ipcRenderer.removeListener('update:status', listener);
+  },
 
   authNeedsSetup: () => ipcRenderer.invoke('auth:needsSetup'),
   authSetup: async (input: { name: string; email: string; password: string }) => {
@@ -145,8 +154,6 @@ const api = {
   getDeliveryOrder: (input: unknown) => send('deliveryOrder:get', input),
   pickBackupSavePath: (input?: unknown) => send('dialog:pickSavePath', input ?? {}),
   pickRestoreFile: (input?: unknown) => send('dialog:pickRestoreFile', input ?? {}),
-  backupDatabase: (input: unknown) => send('database:backup', input),
-  restoreDatabase: (input: unknown) => send('database:restore', input),
   createCategory: (input: unknown) => send('category:create', input),
   updateCategory: (input: unknown) => send('category:update', input),
   deleteCategory: (input: unknown) => send('category:delete', input),
