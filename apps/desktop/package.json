@@ -63,7 +63,8 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "assets/brand/vyapara-icon.png"
+      "icon": "assets/brand/vyapara-icon.png",
+      "artifactName": "VYAPARA-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,

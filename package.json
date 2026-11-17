@@ -25,11 +25,12 @@
     "build": "npm run build:web && npm run build:electron",
     "build:web": "cd apps/desktop && npm run build",
     "build:electron": "cd apps/desktop && npm run electron:build",
-    "build:installer": "node scripts/build-installer.js",
+    "build:installer": "node scripts/build-installer.mjs",
     "preview": "cd apps/desktop && npm run preview",
     "dev": "cd apps/desktop && npm run dev",
     "electron:dev": "cd apps/desktop && npm run electron:dev",
-    "electron:build": "cd apps/desktop && npm run electron:build"
+    "electron:build": "cd apps/desktop && npm run electron:build",
+    "verify:installer": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Get-AuthenticodeSignature (Get-ChildItem apps/desktop/release/*.exe).FullName | Format-List; Get-FileHash apps/desktop/release/*.exe -Algorithm SHA256 | Format-List\""
   },
   "dependencies": {
     "react": "^19.3.1",
