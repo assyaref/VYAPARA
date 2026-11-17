@@ -150,7 +150,8 @@ const isOnline = () => {
 };
 
 function createWindow() {
-  const isDev = process.env.NODE_ENV !== 'production';
+  // electron-vite sets ELECTRON_RENDERER_URL only in dev; packaged apps never have it
+  const isDev = !!process.env.ELECTRON_RENDERER_URL;
 
   const preloadPath = path.join(__dirname, '..', 'preload', 'preload.mjs');
 
@@ -2110,7 +2111,7 @@ function createWindow() {
 app.whenReady().then(() => {
   const db = getDb();
   initSyncCoordinator(db).start();
-  if (process.env.NODE_ENV === 'production') {
+  if (app.isPackaged) {
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
       callback({
         responseHeaders: {
