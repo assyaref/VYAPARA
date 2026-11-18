@@ -87,6 +87,9 @@ export type Branding = {
   sidebarColor: string;
   accentColor: string;
   logoPath: string | null;
+  iconPath: string | null;
+  fontFamily: string;
+  receiptFooter: string;
 };
 
 const DEFAULT_BRANDING: Branding = {
@@ -96,6 +99,9 @@ const DEFAULT_BRANDING: Branding = {
   sidebarColor: '#0B3B73',
   accentColor: '#FF8F00',
   logoPath: null,
+  iconPath: null,
+  fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
+  receiptFooter: 'Terima kasih atas kunjungan Anda',
 };
 
 export function getBranding(appDb: AppDatabase): Branding {
@@ -110,10 +116,24 @@ export function getBranding(appDb: AppDatabase): Branding {
     sidebarColor: map.get('brand_sidebar_color') ?? DEFAULT_BRANDING.sidebarColor,
     accentColor: map.get('brand_accent_color') ?? DEFAULT_BRANDING.accentColor,
     logoPath: map.get('brand_logo_path') ?? DEFAULT_BRANDING.logoPath,
+    iconPath: map.get('brand_icon_path') ?? DEFAULT_BRANDING.iconPath,
+    fontFamily: map.get('brand_font_family') ?? DEFAULT_BRANDING.fontFamily,
+    receiptFooter: map.get('brand_receipt_footer') ?? DEFAULT_BRANDING.receiptFooter,
   };
 }
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+
+export const FONT_WHITELIST = [
+  "'Inter', ui-sans-serif, system-ui, sans-serif",
+  "'Segoe UI', system-ui, sans-serif",
+  "'Poppins', ui-sans-serif, system-ui, sans-serif",
+  "'Roboto', ui-sans-serif, system-ui, sans-serif",
+  "Georgia, 'Times New Roman', serif",
+  "'Courier New', Courier, monospace",
+  "ui-monospace, 'Cascadia Mono', Consolas, monospace",
+] as const;
+
 
 export function setBranding(appDb: AppDatabase, patch: Partial<Branding>): Branding {
   const current = getBranding(appDb);
@@ -133,6 +153,15 @@ export function setBranding(appDb: AppDatabase, patch: Partial<Branding>): Brand
   if (patch.tagline !== undefined) {
     const v = String(patch.tagline).trim().slice(0, 80);
     next.tagline = v; set('brand_tagline', v);
+  }
+  if (patch.fontFamily !== undefined) {
+    const v = String(patch.fontFamily).trim();
+    if (!(FONT_WHITELIST as readonly string[]).includes(v)) throw new AppError('VALIDATION', 'Font tidak dikenal — pilih dari daftar');
+    next.fontFamily = v; set('brand_font_family', v);
+  }
+  if (patch.receiptFooter !== undefined) {
+    const v = String(patch.receiptFooter).trim().slice(0, 120);
+    next.receiptFooter = v; set('brand_receipt_footer', v);
   }
   for (const [field, key] of [['primaryColor', 'brand_primary_color'], ['sidebarColor', 'brand_sidebar_color'], ['accentColor', 'brand_accent_color']] as const) {
     const v = patch[field];
@@ -166,6 +195,37 @@ export function copyLogo(appDb: AppDatabase, srcPath: string, userDataDir: strin
     )
     .run(dest, now);
   return { logoPath: dest };
+}
+
+export function isKnownIcon(p: string): boolean {
+  return ['.png', '.jpg', '.jpeg', '.ico', '.webp'].includes(path.extname(p).toLowerCase());
+}
+
+export function copyIcon(appDb: AppDatabase, srcPath: string, userDataDir: string): { iconPath: string } {
+  if (!isKnownIcon(srcPath)) {
+    throw new AppError('VALIDATION', 'Ikon harus PNG/JPG/ICO/WEBP');
+  }
+  const stat = fs.statSync(srcPath);
+  if (stat.size > 5 * 1024 * 1024) {
+    throw new AppError('VALIDATION', 'Ikon maksimal 5 MB');
+  }
+  const destDir = path.join(userDataDir, 'branding');
+  fs.mkdirSync(destDir, { recursive: true });
+  const ext = path.extname(srcPath).toLowerCase();
+  const dest = path.join(destDir, `icon${ext}`);
+  fs.copyFileSync(srcPath, dest);
+  const now = new Date().toISOString();
+  appDb.sqlite
+    .prepare(
+      `INSERT INTO settings (key, value, updated_at) VALUES ('brand_icon_path', ?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+    )
+    .run(dest, now);
+  return { iconPath: dest };
+}
+
+export function resetIcon(appDb: AppDatabase): void {
+  appDb.sqlite.prepare(`DELETE FROM settings WHERE key = 'brand_icon_path'`).run();
 }
 
 export function brandLogoDataUrl(appDb: AppDatabase): string | null {

@@ -49,6 +49,8 @@ interface Window {
     getTransactionInvoicePayload: (input: unknown) => Promise<any>;
     setBranding: (input: unknown) => Promise<any>;
     pickLogo: (input: unknown) => Promise<any>;
+    pickIcon: (input: unknown) => Promise<any>;
+    resetIcon: (input: unknown) => Promise<any>;
     resetLogo: (input: unknown) => Promise<any>;
     dangerWipeSessions: (input: unknown) => Promise<any>;
     dangerWipeAdminUsers: (input: unknown) => Promise<any>;

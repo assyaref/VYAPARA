@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, shell, session, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell, session, dialog, nativeImage } from 'electron';
 import * as path from 'path';
 import * as os from 'os';
 import { z } from 'zod';
@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import { openAppDatabase } from './db/open';
 import { getSyncCoordinator, initSyncCoordinator } from './sync';
 import { checkForUpdates, downloadUpdate, installUpdate, getUpdateStatus, onUpdateStatus } from './services/updater';
-import { ensureSuperadmin, getBranding, setBranding, copyLogo, brandLogoDataUrl, wipeSessions, wipeNonSuperadminUsers, factoryReset } from './services/superadmin';
+import { ensureSuperadmin, getBranding, setBranding, copyLogo, copyIcon, resetIcon, brandLogoDataUrl, wipeSessions, wipeNonSuperadminUsers, factoryReset } from './services/superadmin';
 import { logAudit, listAuditLogs } from './services/audit';
 import { getLicenseStatus, activateLicense, verifyLicense } from './services/license';
 import { getPrinterConfig, setPrinterConfig, listPrinters, printReceipt, printInvoice, printDeliveryOrder, type ReceiptPayload, type DeliveryOrderPayload } from './services/printer';
@@ -171,16 +171,28 @@ function createWindow() {
   const preloadPath = path.join(__dirname, '..', 'preload', 'preload.mjs');
 
   let windowTitle = APP_NAME;
+  let windowIcon: string | null = null;
   try {
-    windowTitle = getBranding(getDb()).appName || APP_NAME;
+    const b = getBranding(getDb());
+    windowTitle = b.appName || APP_NAME;
+    windowIcon = b.iconPath ?? null;
   } catch { /* branding optional at startup */ }
+  const defaultIcon = path.join(__dirname, '..', '..', 'assets', 'brand', 'vyapara-icon.png');
+  const iconNative = (() => {
+    try {
+      if (windowIcon && fs.existsSync(windowIcon)) {
+        return nativeImage.createFromPath(windowIcon);
+      }
+    } catch { /* fall back */ }
+    return nativeImage.createFromPath(defaultIcon);
+  })();
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
     minWidth: 1366,
     minHeight: 768,
     title: windowTitle,
-    icon: path.join(__dirname, '..', '..', 'assets', 'brand', 'vyapara-icon.png'),
+    icon: iconNative,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -2085,6 +2097,51 @@ function createWindow() {
       const user = requireUser(appDb, input.token);
       assertPermission(user, 'settings:write');
       appDb.sqlite.prepare(`DELETE FROM settings WHERE key = 'brand_logo_path'`).run();
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('branding:pickIcon', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      if (user.role !== 'superadmin') {
+        return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin yang boleh mengganti ikon' } };
+      }
+      const result = await dialog.showOpenDialog({
+        title: 'Pilih Ikon Aplikasi',
+        filters: [{ name: 'Gambar', extensions: ['png', 'jpg', 'jpeg', 'ico', 'webp'] }],
+        properties: ['openFile'],
+      });
+      if (result.canceled || !result.filePaths[0]) {
+        return { ok: true, success: true, data: { canceled: true } };
+      }
+      const { iconPath } = copyIcon(appDb, result.filePaths[0], app.getPath('userData'));
+      const image = nativeImage.createFromPath(iconPath);
+      BrowserWindow.getAllWindows().forEach((w) => w.setIcon(image));
+      return { ok: true, success: true, data: { canceled: false, iconPath } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('branding:resetIcon', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'settings:write');
+      if (user.role !== 'superadmin') {
+        return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin yang boleh mereset ikon' } };
+      }
+      resetIcon(appDb);
+      const defaultIcon = path.join(__dirname, '..', '..', 'assets', 'brand', 'vyapara-icon.png');
+      const image = nativeImage.createFromPath(defaultIcon);
+      BrowserWindow.getAllWindows().forEach((w) => w.setIcon(image));
       return { ok: true, success: true };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };

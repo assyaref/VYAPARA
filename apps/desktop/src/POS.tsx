@@ -206,7 +206,7 @@ const POS: React.FC = () => {
     return {
       storeName: b.appName,
       tagline: b.tagline,
-      footer: 'Terima kasih atas kunjungan Anda',
+      footer: b.receiptFooter,
       transactionNumber: receipt.transactionNumber,
       date: new Date(receipt.createdAt).toLocaleString('id-ID'),
       cashier: user?.name ?? '-',
@@ -263,7 +263,7 @@ const POS: React.FC = () => {
       const payload = {
         storeName: b.appName,
         tagline: b.tagline,
-        footer: 'Terima kasih atas kepercayaan Anda',
+        footer: b.receiptFooter,
         transactionNumber: d.transactionNumber,
         date: new Date(d.createdAt).toLocaleString('id-ID'),
         cashier: user?.name ?? '-',
