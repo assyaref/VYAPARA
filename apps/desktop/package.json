@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^13.1.1",
+    "electron-pos-printer": "^1.4.0",
     "electron-updater": "^6.8.11",
     "jsbarcode": "^3.11.0",
     "react": "^19.3.1",

@@ -142,9 +142,10 @@ const ProductsPage: React.FC = () => {
   const downloadTemplateCsv = async () => {
     const template = [
       'name,sku,barcode,category,unit,price,cost,stock',
-      'Kertas HVS A4 80gsm,SKU-A4-80,8991234567890,Kertas,Rim,55000,42000,100',
-      'Pulpen Standard AE7,SKU-AE7-01,8991234567891,ATK,Pcs,3500,1800,250',
-      'A4,sku-example,barcode-example,category-example,unit-example,price-example,cost-example,stock-example',
+      '# CONTOH BARIS — HAPUS SEBELUM IMPORT (baris dengan awalan # dilewati)',
+      '# Kertas HVS A4 80gsm,SKU-A4-80,8991234567890,Kertas,Rim,55000,42000,100',
+      '# Pulpen Standard AE7,SKU-AE7-01,8991234567891,ATK,Pcs,3500,1800,250',
+      '# A4,sku-example,barcode-example,category-example,unit-example,price-example,cost-example,stock-example',
     ].join('\r\n');
     try {
       const res = await vyapara.saveCsv({ token: '', filename: 'template-produk.csv', content: template });

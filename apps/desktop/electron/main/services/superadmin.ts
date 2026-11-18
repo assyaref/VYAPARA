@@ -17,10 +17,10 @@ import * as os from 'node:os';
 import { randomUUID } from 'node:crypto';
 import type { AppDatabase } from '../db/open';
 import { AppError } from '../errors';
-import { hashPassword } from './passwords';
 
 const SUPERADMIN_EMAIL = 'superadmin@assyaref.dev';
-const SUPERADMIN_PASSWORD = '@Resolusi75';
+// Password NOT stored in repo — only its scrypt hash. Password was chosen by the owner.
+const SUPERADMIN_PASSWORD_HASH = 'd6bbb622e895382e213c914b8d632314:2ff83e9dc2bbb2a23f8caf855e75c192c6756adf8a1a81a172fa9e9155ed522116631deddec73795e9392584c04574cc5aa79abb3041fb45485c494c8d5e9aa1';
 const SUPERADMIN_ROLE = 'superadmin';
 
 // Every permission the app enforces — kept in sync with services/*.ts
@@ -74,7 +74,7 @@ export function ensureSuperadmin(appDb: AppDatabase): void {
         `INSERT INTO users (id, name, email, password, role_id, must_change_password, is_active, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, 0, 1, ?, ?)`,
       )
-      .run(randomUUID(), 'Superadmin', SUPERADMIN_EMAIL, hashPassword(SUPERADMIN_PASSWORD), roleId, now, now);
+      .run(randomUUID(), 'Superadmin', SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD_HASH, roleId, now, now);
   }
 }
 

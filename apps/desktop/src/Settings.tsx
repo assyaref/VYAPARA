@@ -14,7 +14,10 @@ const Settings: React.FC = () => {
   const canWrite = userPermissions.includes('settings:write');
   const canRead = userPermissions.includes('settings:read');
 
-  const [tab, setTab] = useState<'settings' | 'users' | 'roles' | 'permissions' | 'backup' | 'printer'>('settings');
+  const [tab, setTab] = useState<'settings' | 'users' | 'roles' | 'permissions' | 'backup' | 'printer' | 'audit'>('settings');
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [auditFilter, setAuditFilter] = useState('');
+  const [auditLoading, setAuditLoading] = useState(false);
   const [printerName, setPrinterName] = useState('');
   const [printerPaperWidth, setPrinterPaperWidth] = useState<'58mm' | '80mm'>('80mm');
   const [printerSilent, setPrinterSilent] = useState(false);
@@ -71,6 +74,16 @@ const Settings: React.FC = () => {
     else setError(result.error.message);
   }, []);
 
+  const loadAuditLogs = useCallback(async () => {
+    setAuditLoading(true);
+    try {
+      const res = await vyapara.auditList({ token: '', limit: 300 });
+      if (res?.ok) setAuditLogs(Array.isArray(res.data) ? res.data : []);
+    } finally {
+      setAuditLoading(false);
+    }
+  }, []);
+
   const loadPermissions = useCallback(async () => {
     const result = await vyapara.permissionsGetAll({ token: '' });
     if (result.ok) setPermissions(result.data);
@@ -82,13 +95,14 @@ const Settings: React.FC = () => {
     loadUsers();
     loadRoles();
     loadPermissions();
+    loadAuditLogs();
     vyapara?.getAppInfo?.().then((info: any) => {
       if (info?.version) setUpdateStatus((prev) => prev ?? { phase: 'idle', currentVersion: info.version });
     });
     vyapara?.updateGetStatus?.().then((res: any) => {
       if (res?.ok && res.data) setUpdateStatus(res.data);
     });
-  }, [loadSettings, loadUsers, loadRoles, loadPermissions]);
+  }, [loadSettings, loadUsers, loadRoles, loadPermissions, loadAuditLogs]);
 
   useEffect(() => {
     vyapara?.getPrinterConfig?.({ token: '' }).then((res: any) => {
@@ -304,6 +318,14 @@ const Settings: React.FC = () => {
           >
             Pengaturan Aplikasi
           </button>
+          <button
+            onClick={() => setTab('audit')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              tab === 'audit' ? 'bg-vyapara-blue text-white' : 'text-vyapara-text hover:bg-vyapara-surface'
+            }`}
+          >
+            Audit Log
+          </button>
           {canWrite && (
             <button
               onClick={() => setTab('printer')}
@@ -447,6 +469,57 @@ const Settings: React.FC = () => {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {tab === 'audit' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold text-vyapara-navy">Audit Log</h3>
+                  <p className="text-sm text-vyapara-secondary">Jejak aksi penting: restore database, penghapusan akun, reset pabrik</p>
+                </div>
+                <button onClick={loadAuditLogs} className="px-4 py-2 text-sm font-semibold border border-vyapara-border rounded-lg hover:bg-vyapara-surface">Muat Ulang</button>
+              </div>
+              <input
+                value={auditFilter}
+                onChange={(e) => setAuditFilter(e.target.value)}
+                placeholder="Filter aksi/pengguna/entitas…"
+                className="w-full px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none"
+              />
+              {auditLoading ? (
+                <div className="p-8 text-center text-vyapara-secondary">Memuat…</div>
+              ) : (
+                <div className="overflow-x-auto border border-vyapara-border rounded-lg">
+                  <table className="w-full text-left">
+                    <thead className="bg-vyapara-surface border-b border-vyapara-border">
+                      <tr>
+                        <th className="px-4 py-3 text-xs font-medium text-vyapara-secondary">Waktu</th>
+                        <th className="px-4 py-3 text-xs font-medium text-vyapara-secondary">Pengguna</th>
+                        <th className="px-4 py-3 text-xs font-medium text-vyapara-secondary">Aksi</th>
+                        <th className="px-4 py-3 text-xs font-medium text-vyapara-secondary">Entitas</th>
+                        <th className="px-4 py-3 text-xs font-medium text-vyapara-secondary">Detail</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-vyapara-border">
+                      {auditLogs
+                        .filter((r) => !auditFilter || [r.action, r.userName, r.entity, r.detail].join(' ').toLowerCase().includes(auditFilter.toLowerCase()))
+                        .map((r) => (
+                          <tr key={r.id} className="hover:bg-vyapara-surface/50">
+                            <td className="px-4 py-2 text-xs whitespace-nowrap">{new Date(r.createdAt).toLocaleString('id-ID')}</td>
+                            <td className="px-4 py-2 text-xs">{r.userName ?? '—'}</td>
+                            <td className="px-4 py-2 text-xs font-mono">{r.action}</td>
+                            <td className="px-4 py-2 text-xs">{r.entity ?? '—'}</td>
+                            <td className="px-4 py-2 text-xs text-vyapara-secondary max-w-xs truncate" title={r.detail ?? ''}>{r.detail ?? '—'}</td>
+                          </tr>
+                        ))}
+                      {auditLogs.length === 0 && (
+                        <tr><td colSpan={5} className="px-6 py-8 text-center text-vyapara-secondary">Belum ada jejak audit</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 

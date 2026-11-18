@@ -246,3 +246,88 @@ export async function listPrinters(): Promise<string[]> {
       });
   });
 }
+
+export type DeliveryOrderPayload = {
+  storeName: string;
+  tagline?: string;
+  footer?: string;
+  transactionNumber: string;
+  date: string;
+  cashier?: string;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  customerAddress?: string | null;
+  customerCity?: string | null;
+  items: { productName: string; quantity: number; unitPrice: number; subtotal: number }[];
+  subtotal: number;
+  notes?: string | null;
+};
+
+export function buildDeliveryOrderDotMatrixHtml(payload: DeliveryOrderPayload): string {
+  const idr = (n: number) => Math.round(Math.abs(n)).toLocaleString('id-ID');
+  const itemsRows = payload.items
+    .map((i, idx) => `<tr><td>${idx + 1}.</td><td>${escapeHtml(i.productName)}</td><td style="text-align:center">${i.quantity}</td><td style="text-align:right">${idr(i.unitPrice)}</td><td style="text-align:right">${idr(i.subtotal)}</td></tr>`)
+    .join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>DO</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #000; }
+  .ctr { text-align: center; }
+  .store { font-size: 15px; font-weight: 700; letter-spacing: .04em; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 2px; }
+  .do-title { font-size: 11px; letter-spacing: .2em; }
+  .divider { border-top: 1px dashed #000; margin: 6px 0; }
+  .meta { font-size: 10px; }
+  .meta p { margin: 1px 0; }
+  .cust { border: 1px solid #000; padding: 6px 8px; margin: 6px 0; font-size: 10px; }
+  .cust-title { font-size: 9px; letter-spacing: .15em; }
+  .cust-name { font-weight: 700; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  th, td { border-bottom: 1px solid #000; padding: 3px 6px; }
+  th { border-top: 2px solid #000; border-bottom: 2px solid #000; text-align: left; font-size: 9px; letter-spacing: .1em; }
+  .totals { margin-left: auto; width: 45%; margin-top: 6px; font-size: 11px; }
+  .row { display: flex; justify-content: space-between; }
+  .grand { border-top: 2px solid #000; padding-top: 4px; font-weight: 700; font-size: 12px; }
+  .notes { border: 1px solid #000; padding: 5px 8px; margin: 6px 0; font-size: 10px; }
+  .sig { display: flex; gap: 60px; margin-top: 40px; }
+  .sig-box { width: 170px; border-top: 1px solid #000; padding-top: 3px; text-align: center; font-size: 9px; letter-spacing: .1em; }
+  .foot { font-size: 8px; margin-top: 14px; border-top: 1px dashed #000; padding-top: 6px; }
+</style></head>
+<body>
+<div class="ctr"><div class="store">${escapeHtml(payload.storeName || 'VYAPARA')}</div><div class="do-title">DELIVERY ORDER — SURAT JALAN</div></div>
+<div class="divider"></div>
+<div class="meta">
+  <p>No.      : <strong>${escapeHtml(payload.transactionNumber)}</strong></p>
+  <p>Tanggal  : ${escapeHtml(payload.date)}</p>
+  <p>Kasir    : ${escapeHtml(payload.cashier ?? '-')}</p>
+</div>
+<div class="cust">
+  <div class="cust-title">KEPADA YTH.</div>
+  <div class="cust-name">${escapeHtml(payload.customerName || 'Pelanggan Umum / Walk-in')}</div>
+  ${payload.customerPhone ? `<div>${escapeHtml(payload.customerPhone)}</div>` : ''}
+  ${payload.customerAddress ? `<div>${escapeHtml(payload.customerAddress)}${payload.customerCity ? `, ${escapeHtml(payload.customerCity)}` : ''}</div>` : ''}
+</div>
+<table>
+<thead><tr><th>#</th><th>Produk / Layanan</th><th style="text-align:center">Qty</th><th style="text-align:right">HARGA</th><th style="text-align:right">SUBTOTAL</th></tr></thead>
+<tbody>${itemsRows}</tbody>
+</table>
+<div class="totals">
+  <div class="row"><span>Subtotal</span><span>${idr(payload.subtotal)}</span></div>
+  <div class="row grand"><span>TOTAL</span><span>${idr(payload.subtotal)}</span></div>
+</div>
+${payload.notes ? `<div class="notes"><strong>Catatan:</strong> ${escapeHtml(payload.notes)}</div>` : ''}
+<p style="font-size:9px;margin-top:8px">Barang yang tercantum di atas telah diserahkan dalam kondisi baik.</p>
+<div class="sig">
+  <div class="sig-box">Penerima</div>
+  <div class="sig-box">Kasir / Pengirim</div>
+</div>
+<div class="foot">${escapeHtml(payload.footer ?? '')}</div>
+</body></html>`;
+}
+
+export async function printDeliveryOrder(appDb: AppDatabase, payload: DeliveryOrderPayload): Promise<void> {
+  const cfg = getPrinterConfig(appDb);
+  const html = buildDeliveryOrderDotMatrixHtml(payload);
+  await printHtml(html, cfg, 210, 1100);
+}

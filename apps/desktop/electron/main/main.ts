@@ -7,7 +7,9 @@ import { openAppDatabase } from './db/open';
 import { getSyncCoordinator, initSyncCoordinator } from './sync';
 import { checkForUpdates, downloadUpdate, installUpdate, getUpdateStatus, onUpdateStatus } from './services/updater';
 import { ensureSuperadmin, getBranding, setBranding, copyLogo, brandLogoDataUrl, wipeSessions, wipeNonSuperadminUsers, factoryReset } from './services/superadmin';
-import { getPrinterConfig, setPrinterConfig, listPrinters, printReceipt, printInvoice, type ReceiptPayload } from './services/printer';
+import { logAudit, listAuditLogs } from './services/audit';
+import { getPrinterConfig, setPrinterConfig, listPrinters, printReceipt, printInvoice, printDeliveryOrder, type ReceiptPayload, type DeliveryOrderPayload } from './services/printer';
+import { importProductsCsv, importCustomersCsv } from './services/import-export';
 import {
   CustomerCreateSchema,
   CustomerIdSchema,
@@ -490,6 +492,7 @@ function createWindow() {
       const user = requireUser(appDb, input.token);
       assertPermission(user, 'settings:write');
       await restoreDatabase(appDb, input.backupPath);
+      logAudit(appDb, { userId: user.id, userName: user.name, action: 'database.restore', entity: 'database', detail: `Restore dari ${input.backupPath}` });
       return { ok: true, success: true };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
@@ -2087,6 +2090,7 @@ function createWindow() {
         return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin' } };
       }
       const count = wipeSessions(appDb);
+      logAudit(appDb, { userId: user.id, userName: user.name, action: 'danger.wipeSessions', entity: 'sessions', detail: `${count} sesi dihapus` });
       return { ok: true, success: true, data: { deleted: count } };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
@@ -2103,6 +2107,7 @@ function createWindow() {
         return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin' } };
       }
       const count = wipeNonSuperadminUsers(appDb);
+      logAudit(appDb, { userId: user.id, userName: user.name, action: 'danger.wipeAdminUsers', entity: 'users', detail: `${count} akun dihapus` });
       return { ok: true, success: true, data: { deleted: count } };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
@@ -2122,6 +2127,7 @@ function createWindow() {
         return { ok: false, success: false, error: { code: 'CONFIRMATION_REQUIRED', message: 'Ketik HAPUS-SEMUA-DATA untuk konfirmasi' } };
       }
       factoryReset(appDb);
+      logAudit(appDb, { userId: user.id, userName: user.name, action: 'danger.factoryReset', entity: 'appdata', detail: 'Factory reset executed by superadmin' });
       return { ok: true, success: true };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
@@ -2188,6 +2194,102 @@ function createWindow() {
       const user = requireUser(appDb, input.token);
       assertPermission(user, 'transaction:write');
       await printInvoice(appDb, input.payload);
+      return { ok: true, success: true };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  // ===== Import / Export (CSV) =====
+
+  ipcMain.handle('import:productsCsv', async (_event: any, input: { token: string }) => {
+    try {
+      const { dialog } = await import('electron');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'product:write');
+      const result = await dialog.showOpenDialog({
+        title: 'Import Produk dari CSV',
+        filters: [{ name: 'CSV', extensions: ['csv'] }],
+        properties: ['openFile'],
+      });
+      if (result.canceled || !result.filePaths[0]) return { ok: true, success: true, data: { canceled: true } };
+      const text = fs.readFileSync(result.filePaths[0], 'utf8');
+      const report = importProductsCsv(appDb, text, user.id);
+      return { ok: true, success: true, data: { canceled: false, ...report } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('import:customersCsv', async (_event: any, input: { token: string }) => {
+    try {
+      const { dialog } = await import('electron');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'customer:write');
+      const result = await dialog.showOpenDialog({
+        title: 'Import Pelanggan dari CSV',
+        filters: [{ name: 'CSV', extensions: ['csv'] }],
+        properties: ['openFile'],
+      });
+      if (result.canceled || !result.filePaths[0]) return { ok: true, success: true, data: { canceled: true } };
+      const text = fs.readFileSync(result.filePaths[0], 'utf8');
+      const report = importCustomersCsv(appDb, text, user.id);
+      return { ok: true, success: true, data: { canceled: false, ...report } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('file:saveCsv', async (_event: any, input: { token: string; filename?: string; content: string }) => {
+    try {
+      const { dialog } = await import('electron');
+      const { requireUser } = await import('./services/auth');
+      const appDb = getDb();
+      requireUser(appDb, input.token);
+      if (typeof input.content !== 'string' || input.content.length > 50 * 1024 * 1024) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: 'Konten CSV tidak valid' } };
+      }
+      const result = await dialog.showSaveDialog({
+        title: 'Simpan Laporan CSV',
+        defaultPath: input.filename ?? 'laporan.csv',
+        filters: [{ name: 'CSV', extensions: ['csv'] }],
+      });
+      if (result.canceled || !result.filePath) return { ok: true, success: true, data: { saved: false } };
+      fs.writeFileSync(result.filePath, input.content, 'utf8');
+      return { ok: true, success: true, data: { saved: true, path: result.filePath } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  // ===== Audit Log =====
+
+  ipcMain.handle('audit:list', async (_event: any, input: { token: string; limit?: number }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'reports:read');
+      const limit = Math.min(Math.max(Number(input?.limit) || 200, 1), 500);
+      return { ok: true, success: true, data: listAuditLogs(appDb, limit) };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  // ===== Delivery Orders (print dot matrix) =====
+
+  ipcMain.handle('printer:printDeliveryOrder', async (_event: any, input: { token: string; payload: DeliveryOrderPayload }) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'transaction:write');
+      await printDeliveryOrder(appDb, input.payload);
       return { ok: true, success: true };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };

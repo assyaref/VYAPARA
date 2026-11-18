@@ -1,38 +1,63 @@
-# VYAPARA — Phase 13 Production Go/No-Go Assessment
+# VYAPARA — Phase 13 Production Go/No-Go Assessment (RE-AUDIT, 2026-11-18)
 
-- **Status:** **NO-GO.** Production deployment must NOT proceed.
-- **Date:** 2026-11-16
-- **Decision:** NO-GO (evidence below).
+- **Status:** **NO-GO for general public sale.** Internal/beta pilot with the owner's own shop(s) may proceed as a private pilot only.
+- **Decision:** NO-GO (evidence updated below — supersedes 2026-11-16 assessment; honesty preserved).
+- **Scope of this document:** what is genuinely verified vs what still blocks an unrestricted commercial launch.
 
-## 1. Go/No-Go checklist
+## 1. Go/No-Go checklist (current, verified evidence)
 
-| # | Gate | Result |
-|---|---|---|
-| 1 | Critical tests pass | ✅ 236/236 unit+integration; E2E 16/16 |
-| 2 | Tenant isolation verified | ✅ code + 257 sync-server security tests + Phase 4.5 stress (cross-tenant claim ignored, cursor forged rejected) |
-| 3 | Data integrity at risk | ✅ backup/integrity_check verified; corrupt-backup drill added; safe shutdown now closes DB |
-| 4 | Backup restoration tested | ✅ isolated round-trip + corrupt-backup refusal test |
-| 5 | Critical security defects remain | ✅ none known; 2 owner decisions open (remoteVersion contract; IPC hardening applies to legacy builds) |
-| 6 | Production configuration complete | ❌ **NO** — no host, domain, TLS, secrets, backup job, monitoring, health endpoint |
-| 7 | Rollback available | ❌ **NO** — no release pipeline, no previous stable build with documented rollback |
-| 8 | Installer tested on clean machine | ❌ **NO** — no installer exists (Phase 9 BLOCKED) |
-| 9 | Staging acceptance passed | ❌ **NO** — no staging environment |
-| 10 | Owner authorization for production | ❌ **NOT GIVEN** |
+| # | Gate | Result | Evidence |
+|---|---|---|---|
+| 1 | Critical tests pass | ✅ | 237/237 vitest; acceptance E2E 22/22; module E2E suites all PASS (page errors = 0) |
+| 2 | Tenant isolation verified | ✅ | code review; cross-tenant claims ignored; forged-cursor rejection; sync-server suite 34/34 |
+| 3 | Data integrity at risk | ✅ | integrity_check on backup; corrupt-backup refusal; safe shutdown; pre-restore safety copy verified |
+| 4 | Backup restoration tested | ✅ | round-trip via IPC verified; corrupt backup refused safely; `.pre-restore` kept |
+| 5 | Critical security defects | ✅ none known | IPC surface gated (settings:write/auth); sync device-token auth; CSP; superadmin portal is role-gated |
+| 6 | Production configuration complete | ❌ **NO** | no host/domain/TLS; staging image exists but **was never run on a real VPS**; no monitoring/alerting; no health dashboard in production; secrets not in a vault |
+| 7 | Rollback available | ⚠️ **PARTIAL** | installer built + SHA256SUMS + checksum pipeline; rollback = reinstall previous installer — never exercised on real user data; auto-update code path untested (no GitHub Release exists) |
+| 8 | Installer tested on clean machine | ⚠️ **PARTIAL** | NSIS installer builds and runs (verified on this dev VM); **never installed on a truly clean machine** (fresh Windows, no dev tools) |
+| 9 | Staging acceptance passed | ❌ **NO** | staging kit (`deploy/`) builds & smoke-tests locally only; no real staging environment exists |
+| 10 | Owner authorization for production | ❌ **NOT GIVEN** | none recorded |
 
-**Score: 4/10 gates pass — 6 hard blockers.**
+**Score: 4/10 full pass, 2 partial — 6 hard blockers remain.**
 
-## 2. Minimum conditions for GO
+## 2. What changed since the last audit (and why this is still NO-GO)
 
-1. Phase 9 complete: installer built + clean-machine install test passed + rollback verified (previous version install).
-2. Phase 10 complete: staging sync-server healthy, health endpoint responding, monitoring/alerting active, secrets in vault (not repo).
-3. Phase 12 complete: full staging acceptance passed (2 orgs, 2 devices, offline→online, conflict, rollback after interruption).
-4. Owner authorizes production deployment in writing.
-5. Production smoke-test plan approved (test org, test data, no real customer data).
+Genuinely improved (and re-verified):
+- Backup/Restore UI shipped and round-trip verified — reduces data-loss risk materially.
+- Thermal printing (58/80mm) + invoice/DO printing — operational completeness.
+- Auto-update wiring + GitHub Releases publish target (untested live).
+- Docker image for sync server: builds clean, runs, health endpoint verified locally — reduces host-readiness risk.
+- Audit log (database restore, danger-zone actions) — accountability.
+- Installer pipeline + SHA256 checksums — release integrity.
 
-## 3. Risk acceptance statement (if owner overrides)
+Still missing (cannot be faked):
+- Real staging host with TLS and real network conditions.
+- Monitoring/alerting for the central server.
+- A real installer on a clean machine (SmartScreen trust is accumulated over time; new CA cert helps but does not eliminate friction).
+- Production go-live authorization and a rollback drill on real data.
+- A legally vetted EULA, support SLA, privacy policy.
 
-Owner may override NO-GO only in writing. Override would mean: accepting unsigned-installer SmartScreen friction (or signing cost), accepting untested upgrade/DB-preservation across versions, accepting unmonitored sync-server (no health check/alerting — silent sync failures possible), accepting untested rollback (restore-from-backup procedure unverified on production-class data volume).
+## 3. Minimum conditions for GO (updated)
 
-## 4. Verdict
+1. **Staging acceptance passed on a real host** (HTTPS, real client sync from a shop POS to a real server, rollback after interruption, offline→online cycle verified).
+2. **Installer verified on a clean Windows machine** (install, first-run setup, upgrade over existing DB, uninstall).
+3. **Production authored runbook executed in staging** (deploy from `deploy/` with real TLS, health check green, logs visible).
+4. **Owner signs off in writing** on this document + the EULA.
+5. **Auto-update smoke test passed** (publish a beta release; install from previous version; verify update lands).
+6. **Re-audit** by a person who is not the author — evidence re-recorded.
 
-**NO-GO for production.** VYAPARA is development-phase complete through Phase 7. It is **NOT** staging-verified and **NOT** production-ready.
+## 4. What you may do TODAY (honest, low-risk)
+
+- **Private beta / pilot at your own shop** with a handful of known machines, you present on every support call.
+- **Internal demo / exhibition** with synthetic data.
+- **Build a reputation trail** before commercial sale (real usage → real bug fixes → stable release).
+
+## 5. What you may NOT claim yet (honest sales language)
+
+- ❌ "Production ready", "Enterprise grade", "100% reliable", "Bankruptcy-proof", "No data loss ever"
+- ✅ "Active development, offline-first POS with full local backup, thermal printing, sync, and an owner dashboard — deployable for a pilot customer under close supervision."
+
+## 6. Verdict
+
+**NO-GO for general public sale.** Private pilot acceptable. General commercial release requires staging acceptance + production authorization + a re-audit with fresh evidence, in writing.

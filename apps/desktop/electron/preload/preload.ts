@@ -27,11 +27,15 @@ const api = {
   updateInstall: () => send('update:install', {}),
   updateGetStatus: () => send('update:getStatus', {}),
   getBranding: () => send('branding:get', {}),
+  importProductsCsv: (input: unknown) => send('import:productsCsv', input),
+  importCustomersCsv: (input: unknown) => send('import:customersCsv', input),
+  saveCsv: (input: unknown) => send('file:saveCsv', input),
   getPrinterConfig: (input: unknown) => send('printer:getConfig', input),
   setPrinterConfig: (input: unknown) => send('printer:setConfig', input),
   listPrinters: (input: unknown) => send('printer:list', input),
   printReceipt: (input: unknown) => send('printer:printReceipt', input),
   printInvoice: (input: unknown) => send('printer:printInvoice', input),
+  printDeliveryOrder: (input: unknown) => send('printer:printDeliveryOrder', input),
   setBranding: (input: unknown) => send('branding:set', input),
   pickLogo: (input: unknown) => send('branding:pickLogo', input),
   resetLogo: (input: unknown) => send('branding:resetLogo', input),
@@ -39,6 +43,7 @@ const api = {
   dangerWipeAdminUsers: (input: unknown) => send('danger:wipeAdminUsers', input),
   dangerFactoryReset: (input: unknown) => send('danger:factoryReset', input),
 
+  auditList: (input: unknown) => send('audit:list', input),
   onUpdateStatus: (callback: (status: unknown) => void) => {
     const listener = (_event: unknown, status: unknown) => callback(status);
     ipcRenderer.on('update:status', listener);

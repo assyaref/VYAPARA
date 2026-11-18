@@ -54,11 +54,17 @@ const POS: React.FC = () => {
   const [doDoc, setDoDoc] = useState<any | null>(null);
   const [doLoading, setDoLoading] = useState(false);
   const [invLoading, setInvLoading] = useState(false);
+  const [doDmLoading, setDoDmLoading] = useState(false);
+  const [discountPct, setDiscountPct] = useState(0);
+  const [discountManual, setDiscountManual] = useState('');
+  const [taxRateBps, setTaxRateBps] = useState(0);
 
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  const discount = 0;
-  const taxAmount = 0;
-  const total = subtotal - discount + taxAmount;
+  const discountFromPct = Math.round((subtotal * discountPct) / 100);
+  const discountFromManual = parseInt(discountManual, 10) || 0;
+  const discountAmount = Math.min(subtotal, discountPct > 0 ? discountFromPct : discountFromManual);
+  const taxAmount = Math.round(((subtotal - discountAmount) * taxRateBps) / 10_000);
+  const total = subtotal - discountAmount + taxAmount;
   const paid = paymentMethod === 'cash' ? (parseInt(paymentAmount, 10) || 0) : total;
   const change = Math.max(0, paid - total);
   const cartQty = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -70,6 +76,12 @@ const POS: React.FC = () => {
     } else {
       setError(result.error.message);
     }
+  }, []);
+
+  useEffect(() => {
+    vyapara.getSettings?.({ token: '' }).then((res: any) => {
+      if (res?.ok && res.data) setTaxRateBps(Number(res.data.taxRateBps) || 0);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -128,7 +140,7 @@ const POS: React.FC = () => {
         token: '',
         idempotencyKey,
         items: cart.map((item) => ({ productId: item.productId, quantity: item.quantity })),
-        discountAmount: 0,
+        discountAmount,
         payments,
         notes: '',
       });
@@ -196,6 +208,42 @@ const POS: React.FC = () => {
       setError(err.message || 'Gagal mencetak invoice');
     } finally {
       setInvLoading(false);
+    }
+  };
+
+  const printDeliveryOrderDotMatrix = async () => {
+    if (!receipt) return;
+    setDoDmLoading(true);
+    setError(null);
+    try {
+      const b = getBranding();
+      const res = await vyapara.getDeliveryOrder({ token: '', transactionId: receipt.id });
+      if (!res?.ok || !res.data) { setError(res?.error?.message ?? 'Gagal memuat delivery order'); return; }
+      const d = res.data;
+      const payload = {
+        storeName: b.appName,
+        tagline: b.tagline,
+        footer: 'Terima kasih atas kepercayaan Anda',
+        transactionNumber: d.transactionNumber,
+        date: new Date(d.createdAt).toLocaleString('id-ID'),
+        cashier: user?.name ?? '-',
+        customerName: d.customerName ?? null,
+        customerPhone: d.customerPhone ?? null,
+        customerAddress: d.customerAddress ?? null,
+        customerCity: d.customerCity ?? null,
+        items: d.items.map((i: any) => ({ productName: i.productName, quantity: i.quantity, unitPrice: i.unitPrice, subtotal: i.subtotal })),
+        subtotal: d.subtotal,
+        notes: d.notes ?? null,
+      };
+      const send = await vyapara.printDeliveryOrder({ token: '', payload });
+      if (!send?.ok) {
+        setError(send?.error?.message ?? 'Gagal mencetak DO — periksa printer di Pengaturan');
+        return;
+      }
+    } catch (err: any) {
+      setError(err.message || 'Gagal mencetak DO');
+    } finally {
+      setDoDmLoading(false);
     }
   };
 
@@ -361,9 +409,36 @@ const POS: React.FC = () => {
             </div>
 
             {/* totals */}
-            <div className="px-4 py-3 border-t border-vyapara-border space-y-1 text-[12px]">
+            <div className="px-4 py-3 border-t border-vyapara-border space-y-1.5 text-[12px]">
               <div className="flex justify-between"><span className="text-vyapara-secondary">Subtotal</span><span className="font-medium">{idr(subtotal)}</span></div>
-              <div className="flex justify-between"><span className="text-vyapara-secondary">Diskon</span><span className="font-medium">− Rp 0</span></div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-vyapara-secondary whitespace-nowrap">Diskon</span>
+                <div className="flex items-center gap-1.5">
+                  {[0, 5, 10, 15].map((pct) => (
+                    <button
+                      key={pct}
+                      onClick={() => { setDiscountPct(pct); if (pct === 0) setDiscountManual(''); }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold border ${discountPct === pct && discountManual === '' ? 'bg-vyapara-navy text-white border-vyapara-navy' : 'text-vyapara-text border-vyapara-border hover:border-vyapara-blue'}`}
+                    >
+                      {pct}%
+                    </button>
+                  ))}
+                  <input
+                    type="number"
+                    value={discountManual}
+                    onChange={(e) => { setDiscountManual(e.target.value); setDiscountPct(0); }}
+                    placeholder="Rp"
+                    min={0}
+                    className="w-20 px-2 py-0.5 text-right text-[11px] border border-vyapara-border rounded outline-none focus:ring-1 focus:ring-vyapara-blue"
+                  />
+                </div>
+              </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-emerald-700"><span>Diskon diterapkan</span><span className="font-semibold">− {idr(discountAmount)}</span></div>
+              )}
+              {taxRateBps > 0 && (
+                <div className="flex justify-between"><span className="text-vyapara-secondary">PPN {taxRateBps / 100}%</span><span className="font-medium">+ {idr(taxAmount)}</span></div>
+              )}
               <div className="flex justify-between pt-1 border-t border-vyapara-border"><span className="font-extrabold text-vyapara-navy">Total</span><span className="font-extrabold text-2xl text-vyapara-navy">{idr(total)}</span></div>
             </div>
 
@@ -449,6 +524,7 @@ const POS: React.FC = () => {
               <button onClick={printReceipt} className="px-5 py-2 border border-vyapara-border rounded-lg text-vyapara-secondary hover:bg-vyapara-surface font-medium text-sm">Cetak Nota</button>
               <button onClick={printInvoice} disabled={invLoading} className="px-5 py-2 border border-emerald-600 text-emerald-700 rounded-lg hover:bg-emerald-50 font-medium text-sm disabled:opacity-60">{invLoading ? 'Mencetak…' : 'Cetak Invoice'}</button>
               <button onClick={printDeliveryOrder} disabled={doLoading} className="px-5 py-2 border border-vyapara-blue text-vyapara-blue rounded-lg hover:bg-vyapara-light-blue font-medium text-sm disabled:opacity-60">{doLoading ? 'Memuat…' : 'Cetak DO'}</button>
+              <button onClick={printDeliveryOrderDotMatrix} disabled={doDmLoading} className="px-5 py-2 border border-amber-600 text-amber-800 rounded-lg hover:bg-amber-50 font-medium text-sm disabled:opacity-60">{doDmLoading ? 'Memuat…' : 'Cetak DO (Dot Matrix)'}</button>
               <button onClick={() => setReceipt(null)} className="px-5 py-2 bg-vyapara-navy hover:bg-vyapara-blue text-white rounded-lg font-medium transition-colors text-sm">Selesai</button>
             </div>
           </div>

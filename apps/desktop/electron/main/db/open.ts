@@ -16,6 +16,7 @@ import syncOutboxSql from '../../../drizzle/010-sync-outbox.sql?raw';
 import customerPaymentIdempotencySql from '../../../drizzle/011-customer-payment-idempotency.sql?raw';
 import syncEngineSql from '../../../drizzle/012-sync-engine.sql?raw';
 import conflictResolutionSql from '../../../drizzle/013-conflict-resolution-engine.sql?raw';
+import auditLogSql from '../../../drizzle/014-audit-log.sql?raw';
 import { ROLE_PERMISSIONS } from 'vyapara-shared';
 import { remediateKnownPassword } from '../services/passwords';
 
@@ -36,6 +37,7 @@ const MIGRATIONS: { name: string; sql: string }[] = [
   { name: '011-customer-payment-idempotency', sql: customerPaymentIdempotencySql },
   { name: '012-sync-engine', sql: syncEngineSql },
   { name: '013-conflict-resolution-engine', sql: conflictResolutionSql },
+  { name: '014-audit-log', sql: auditLogSql },
 ];
 
 export function splitSql(source: string): string[] {

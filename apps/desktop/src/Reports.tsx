@@ -117,6 +117,45 @@ const Reports: React.FC = () => {
     fetchReport();
   }, [fetchReport]);
 
+  const csvCell = (v: unknown) => {
+    const str = String(v ?? '');
+    return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  };
+  const toCsv = (rows: Record<string, unknown>[]) => {
+    if (rows.length === 0) return '';
+    const headers = Object.keys(rows[0] ?? {});
+    const lines = [headers.map(csvCell).join(',')];
+    for (const row of rows) lines.push(headers.map((h) => csvCell(row[h])).join(','));
+    return lines.join('\r\n');
+  };
+  const tabData: Record<string, () => Record<string, unknown>[]> = {
+    sales: () => sales.map((r) => ({ tanggal: r.date, jumlah_transaksi: r.count, total: r.total })),
+    bestselling: () => bestSelling.map((r) => ({ produk: r.productName, terjual: r.quantity, pendapatan: r.revenue })),
+    slowmoving: () => slowMoving.map((r) => ({ produk: r.productName, stok: r.stock, terakhir_terjual: r.lastSold ?? '' })),
+    grossprofit: () => grossProfit.map((r) => ({ periode: r.period, pendapatan: r.revenue, hpp: r.cogs, laba_kotor: r.grossProfit })),
+    valuation: () => valuation.map((r) => ({ produk: r.productName, qty: r.quantity, hpp: r.unitCost, nilai_hpp: r.costValue, harga_jual: r.unitRetail, nilai_jual: r.retailValue })),
+    purchase: () => purchases.map((r) => ({ tanggal: r.date, no_po: r.poNumber, pemasok: r.supplierName, total: r.totalAmount })),
+    expense: () => expenses.map((r) => ({ tanggal: r.date, kategori: r.category, jumlah: r.amount })),
+    cashier: () => cashiers.map((r) => ({ kasir: r.userName, jumlah_transaksi: r.count, total: r.total })),
+    transactions: () => transactions.map((r) => ({ no: r.transactionNumber, kasir: r.userName, total: r.totalAmount, metode: r.paymentMethod, tanggal: r.createdAt })),
+  };
+
+  const exportCsv = async () => {
+    const rows = tabData[tab]?.() ?? [];
+    if (rows.length === 0) {
+      setError('Tidak ada data untuk diekspor');
+      return;
+    }
+    const content = toCsv(rows);
+    setError(null);
+    try {
+      const res = await vyapara.saveCsv({ token: '', filename: `laporan-${tab}.csv`, content });
+      if (!res?.ok) setError(res?.error?.message ?? 'Gagal menyimpan CSV');
+    } catch (err: any) {
+      setError(err?.message || 'Gagal menyimpan CSV');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-vyapara-surface text-vyapara-text font-inter">
       <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -148,6 +187,11 @@ const Reports: React.FC = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-vyapara-border overflow-hidden">
         <div className="p-4 border-b border-vyapara-border flex flex-wrap gap-2">
+          <div className="ml-auto">
+            <button onClick={exportCsv} className="px-4 py-2 rounded-md text-sm font-semibold border border-vyapara-border text-vyapara-navy hover:bg-vyapara-surface">
+              Export CSV
+            </button>
+          </div>
           {['sales', 'bestselling', 'slowmoving', 'grossprofit', 'valuation', 'purchase', 'expense', 'cashier', 'transactions'].map((key) => (
             <button
               key={key}

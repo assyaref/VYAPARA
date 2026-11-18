@@ -36,6 +36,42 @@ const Customer: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerRecord | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [txLoading, setTxLoading] = useState(false);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+
+  const downloadTemplateCsv = async () => {
+    const template = [
+      'name,email,phone,address,city',
+      '# CONTOH BARIS — HAPUS SEBELUM IMPORT (baris dengan awalan # dilewati)',
+      '# Toko Sejahtera,toko@sejahtera.com,081234567890,Jl. Merdeka 12,Jakarta',
+      '# Budi Santoso,budis@example.com,081234567891,Jl. Melati 4,Bandung',
+      '# name-example,email-example,phone-example,address-example,city-example',
+    ].join('\r\n');
+    try {
+      const res = await vyapara.saveCsv({ token: '', filename: 'template-pelanggan.csv', content: template });
+      if (res?.ok && res.data?.saved) {
+        setImportStatus('Template tersimpan. Isi dengan data Anda lalu klik Import CSV.');
+      }
+    } catch (err: any) {
+      setImportStatus(err?.message || 'Gagal menyimpan template');
+    }
+  };
+
+  const importCsv = async () => {
+    setImportStatus(null);
+    try {
+      const res = await vyapara.importCustomersCsv({ token: '' });
+      if (res?.ok && res.data?.canceled) return;
+      if (!res?.ok) {
+        setImportStatus(res?.error?.message ?? 'Import gagal');
+        return;
+      }
+      const d = res.data;
+      setImportStatus(`Import selesai: ${d.imported} pelanggan baru, ${d.skipped} dilewati (duplikat), ${d.errors?.length ?? 0} error.`);
+      await loadCustomers();
+    } catch (err: any) {
+      setImportStatus(err.message || 'Import gagal');
+    }
+  };
   const [payOpen, setPayOpen] = useState(false);
   const [payAmount, setPayAmount] = useState('');
   const [formData, setFormData] = useState({
@@ -223,19 +259,39 @@ const Customer: React.FC = () => {
           <p className="text-vyapara-secondary">Data pelanggan, riwayat pembelian, dan piutang</p>
         </div>
         {canWrite && (
-          <button
-            onClick={handleNew}
-            className="bg-vyapara-navy hover:bg-vyapara-blue text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-          >
+          <div className="flex gap-2">
+            <button
+              onClick={downloadTemplateCsv}
+              className="border border-vyapara-border text-vyapara-secondary px-5 py-2 rounded-lg font-medium hover:bg-vyapara-surface transition-colors"
+              title="Unduh template CSV pelanggan"
+            >
+              Template CSV
+            </button>
+            <button
+              onClick={importCsv}
+              className="border border-vyapara-border text-vyapara-navy px-5 py-2 rounded-lg font-medium hover:bg-vyapara-surface transition-colors"
+            >
+              Import CSV
+            </button>
+            <button
+              onClick={handleNew}
+              className="bg-vyapara-navy hover:bg-vyapara-blue text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             Tambah Pelanggan
-          </button>
+            </button>
+          </div>
         )}
       </header>
 
+      {importStatus && (
+        <div className="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
+          {importStatus}
+        </div>
+      )}
       {error && (
         <div className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
           {error}
