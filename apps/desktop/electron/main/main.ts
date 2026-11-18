@@ -8,6 +8,7 @@ import { getSyncCoordinator, initSyncCoordinator } from './sync';
 import { checkForUpdates, downloadUpdate, installUpdate, getUpdateStatus, onUpdateStatus } from './services/updater';
 import { ensureSuperadmin, getBranding, setBranding, copyLogo, brandLogoDataUrl, wipeSessions, wipeNonSuperadminUsers, factoryReset } from './services/superadmin';
 import { logAudit, listAuditLogs } from './services/audit';
+import { getLicenseStatus, activateLicense, verifyLicense } from './services/license';
 import { getPrinterConfig, setPrinterConfig, listPrinters, printReceipt, printInvoice, printDeliveryOrder, type ReceiptPayload, type DeliveryOrderPayload } from './services/printer';
 import { importProductsCsv, importCustomersCsv } from './services/import-export';
 import {
@@ -2392,6 +2393,56 @@ function createWindow() {
     }
   });
 
+  // ===== License =====
+
+  ipcMain.handle('license:status', async () => {
+    try {
+      const appDb = getDb();
+      const status = getLicenseStatus(appDb);
+      return { ok: true, success: true, data: status };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('license:enforce', async () => {
+    try {
+      const appDb = getDb();
+      // Enforcement is ON for real installs (packaged app) or when forced via env var.
+      // Dev/test runs bypass the gate so E2E can drive the UI directly.
+      const enforced = app.isPackaged || process.env.VYAPARA_FORCE_LICENSE === '1';
+      if (!enforced) {
+        return { ok: true, success: true, data: { enforced: false, status: { state: 'licensed', organizationId: 'dev-mode', organizationName: 'Development (license gate skipped)', activatedAt: new Date().toISOString(), serverUrl: '', lastVerifyAt: new Date().toISOString() } } };
+      }
+      const status = getLicenseStatus(appDb);
+      return { ok: true, success: true, data: { enforced: true, status } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('license:activate', async (_event: any, input: { licenseKey: string; serverUrl: string; organizationName?: string }) => {
+    try {
+      const appDb = getDb();
+      const result = await activateLicense(appDb, input ?? { licenseKey: '', serverUrl: '' });
+      return result.ok
+        ? { ok: true, success: true, data: { organizationId: result.organizationId, organizationName: result.organizationName } }
+        : { ok: false, success: false, error: { code: 'ACTIVATION_FAILED', message: result.error } };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('license:verify', async () => {
+    try {
+      const appDb = getDb();
+      const status = await verifyLicense(appDb);
+      return { ok: true, success: true, data: status };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
   // ===== Delivery Orders =====
 
   ipcMain.handle('deliveryOrder:get', async (_event: any, input: { token: string; transactionId: string }) => {
@@ -2506,6 +2557,7 @@ function createWindow() {
 app.whenReady().then(() => {
   const db = getDb();
   ensureSuperadmin(db);
+  void verifyLicense(db).catch(() => { /* verified lazily at next launch */ });
   initSyncCoordinator(db).start();
   if (app.isPackaged) {
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {

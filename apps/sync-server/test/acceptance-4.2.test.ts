@@ -65,9 +65,9 @@ describe('Phase 4.2 acceptance - migration verification', () => {
     const db = openSyncServerDb(dbPath);
     try {
       const migs = db.sqlite.prepare('SELECT name FROM _migrations ORDER BY id').all() as any[];
-      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning']);
+      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning', '004-licensing']);
       const tables = db.sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all() as any[];
-      expect(tables.map(t => t.name)).toEqual(expect.arrayContaining(['sync_organizations','sync_devices','sync_events','sync_event_ack_log','_migrations']));
+      expect(tables.map(t => t.name)).toEqual(expect.arrayContaining(['sync_organizations','sync_devices','sync_events','sync_event_ack_log','_migrations','licenses']));
       const fk = db.sqlite.prepare('PRAGMA foreign_keys').get() as any;
       expect((fk as any).foreign_keys ?? Object.values(fk as any)[0]).toBe(1);
       const devCols = db.sqlite.prepare('PRAGMA table_info(sync_devices)').all() as any[];
@@ -150,7 +150,7 @@ VALUES (8,'${DEV}','ev-25','idem-25','duplicate',25,'DUPLICATE','Event already i
     const migrated = openSyncServerDb(dbPath);
     try {
       const migs = migrated.sqlite.prepare('SELECT name FROM _migrations ORDER BY id').all() as any[];
-      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning']);
+      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning', '004-licensing']);
       const orgs = migrated.sqlite.prepare('SELECT * FROM sync_organizations').all() as any[];
       expect(orgs).toHaveLength(1);
       expect(orgs[0].organization_id).toBe(LEGACY_DEFAULT_ORG);
@@ -178,7 +178,7 @@ VALUES (8,'${DEV}','ev-25','idem-25','duplicate',25,'DUPLICATE','Event already i
     const db2 = openSyncServerDb(dbPath);
     try {
       const migs = db2.sqlite.prepare('SELECT name FROM _migrations ORDER BY id').all() as any[];
-      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning']);
+      expect(migs.map(m => m.name)).toEqual(['001-sync-server-core', '002-tenant-isolation', '003-remote-versioning', '004-licensing']);
       const orgs = db2.sqlite.prepare('SELECT organization_id FROM sync_organizations').all() as any[];
       expect(orgs.filter(o => o.organization_id === LEGACY_DEFAULT_ORG)).toHaveLength(1);
     } finally { db2.close(); }

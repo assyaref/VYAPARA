@@ -240,8 +240,20 @@ const LoginPage: React.FC = () => {
           </>
         )}
 
-        <p className="text-center text-[10px] text-vyapara-secondary mt-5">
-          © 2026 VYAPARA Business Management · v1.0.0
+        <p className="text-center text-[10px] text-vyapara-secondary mt-5 leading-relaxed">
+          © 2026{' '}
+          <span className="text-vyapara-secondary/60">|</span>
+          <span className="font-semibold">{' '}&lt;/&gt; Developed by{' '}</span>
+          <a
+            href="https://api.whatsapp.com/send?phone=6282167472765&text=Haii%20..%F0%9F%91%8B"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-extrabold text-vyapara-blue hover:underline transition-colors"
+          >
+            Assyaref.dev
+          </a>
+          <span className="text-vyapara-secondary/60">{' '}|{' '}</span>
+          <span role="img" aria-label="diamond">💎</span>
         </p>
       </div>
     </div>

@@ -31,6 +31,10 @@ interface Window {
     updateInstall: () => Promise<any>;
     updateGetStatus: () => Promise<any>;
     getBranding: () => Promise<any>;
+    getLicenseStatus: () => Promise<any>;
+    enforceLicense: () => Promise<any>;
+    activateLicense: (input: unknown) => Promise<any>;
+    verifyLicense: () => Promise<any>;
     importProductsCsv: (input: unknown) => Promise<any>;
     importCustomersCsv: (input: unknown) => Promise<any>;
     saveCsv: (input: unknown) => Promise<any>;

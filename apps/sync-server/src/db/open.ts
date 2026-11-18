@@ -44,6 +44,10 @@ const MIGRATIONS: { name: string; sql: string }[] = [
     name: '003-remote-versioning',
     sql: migrationSql('003-remote-versioning.sql'),
   },
+  {
+    name: '004-licensing',
+    sql: migrationSql('004-licensing.sql'),
+  },
 ];
 
 function applyMigrations(db: any): void {

@@ -18,6 +18,7 @@ import SupplierInvoices from './SupplierInvoices';
 import PurchaseReturns from './PurchaseReturns';
 import StockOpname from './StockOpname';
 import SuperAdminPortal from './SuperAdminPortal';
+import LicenseScreen from './LicenseScreen';
 import { getBranding, loadBranding, subscribeBranding, logoSrc, type Branding } from './branding';
 import './index.css';
 
@@ -498,6 +499,9 @@ function App() {
   const { user, isAuthenticated, isLoading: authIsLoading, checkSession, logout } = useAuth();
   const [branding, setBranding] = useState<Branding>(getBranding());
   const [portalOpen, setPortalOpen] = useState(false);
+  const [licenseChecked, setLicenseChecked] = useState(false);
+  const [licenseStatus, setLicenseStatus] = useState<'unknown' | 'licensed' | 'unlicensed' | 'revoked'>('unknown');
+  const [licenseReason, setLicenseReason] = useState<string | null>(null);
 
   useEffect(() => {
     void loadBranding();
@@ -516,6 +520,30 @@ function App() {
   useEffect(() => {
     void checkSession();
   }, [checkSession]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await (window as any).vyapara?.enforceLicense?.();
+        const enforced = res?.data?.enforced === true;
+        const status = res?.data?.status;
+        if (!enforced) {
+          setLicenseStatus('licensed');
+        } else if (status?.state === 'licensed') {
+          setLicenseStatus('licensed');
+        } else if (status?.state === 'revoked') {
+          setLicenseStatus('revoked');
+          setLicenseReason(status.reason ?? 'Lisensi dicabut');
+        } else {
+          setLicenseStatus('unlicensed');
+        }
+      } catch {
+        setLicenseStatus('unlicensed');
+      } finally {
+        setLicenseChecked(true);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -537,6 +565,22 @@ function App() {
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? '')
     .join('');
+
+  if (!licenseChecked) {
+    return (
+      <div className="min-h-screen bg-vyapara-surface flex items-center justify-center font-inter">
+        <p className="text-sm text-vyapara-secondary">Memuat lisensi…</p>
+      </div>
+    );
+  }
+
+  if (licenseStatus === 'unlicensed') {
+    return <LicenseScreen onLicensed={() => setLicenseStatus('licensed')} />;
+  }
+
+  if (licenseStatus === 'revoked') {
+    return <LicenseScreen revokedReason={licenseReason} />;
+  }
 
   if (authIsLoading) {
     return (

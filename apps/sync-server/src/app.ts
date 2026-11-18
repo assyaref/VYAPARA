@@ -18,6 +18,7 @@ import { downloadEvents, ingestEventsBatch } from './services/sync.js';
 import { adminOverview } from './services/admin.js';
 import { ADMIN_DASHBOARD_HTML } from './admin-dashboard.js';
 import { sha256Hex, safeEqualHex } from './services/crypto.js';
+import { createLicense, listLicenses, revokeLicense, activateLicense, verifyLicense } from './services/licenses.js';
 
 function requireAdminToken(req: { headers: Record<string, unknown> }, cfg: SyncServerConfig): void {
   if (!cfg.adminToken) {
@@ -135,6 +136,52 @@ export async function handleRequest(
 
     if (method === 'GET' && url.pathname === '/v1/sync/health') {
       sendOk(res, { status: 'ok', time: new Date().toISOString() });
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/admin/licenses') {
+      requireAdminToken(req as any, cfg);
+      const body = (await readJsonBody(req)) as any;
+      const data = createLicense(db, {
+        organizationName: body.organizationName,
+        maxActivations: body.maxActivations,
+        expiresAt: body.expiresAt ?? null,
+        notes: body.notes ?? null,
+      });
+      sendOk(res, data, 201);
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/admin/licenses') {
+      requireAdminToken(req as any, cfg);
+      sendOk(res, listLicenses(db));
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/admin/licenses/revoke') {
+      requireAdminToken(req as any, cfg);
+      const body = (await readJsonBody(req)) as any;
+      if (typeof body.licenseId !== 'string' || !body.licenseId) {
+        throw new HttpError(400, 'VALIDATION', 'licenseId wajib diisi');
+      }
+      sendOk(res, revokeLicense(db, body.licenseId));
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/v1/licenses/activate') {
+      const body = (await readJsonBody(req)) as any;
+      const data = activateLicense(db, {
+        licenseKey: body.licenseKey,
+        deviceId: body.deviceId,
+        organizationName: body.organizationName,
+      });
+      sendOk(res, data);
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/v1/licenses/verify') {
+      const body = (await readJsonBody(req)) as any;
+      sendOk(res, verifyLicense(db, { licenseKey: body.licenseKey, deviceId: body.deviceId }));
       return;
     }
 
