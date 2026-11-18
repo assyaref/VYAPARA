@@ -1,0 +1,76 @@
+<!-- BAB 21 -->
+<h1 class="section" id="bab21">Bab 21 — Portal Superadmin: Kustomisasi Brand</h1>
+
+<p class="lede">Portal tersembunyi untuk pemilik/penerbit aplikasi — mengubah tampilan (brand) sepenuhnya lewat UI, tanpa mengedit kode. Akses dengan <kbd>F7</kbd> dari mana pun di aplikasi.</p>
+
+<div class="warn"><strong>Akses terbatas:</strong> hanya peran <code>superadmin</code>. Pengguna biasa — termasuk admin — tidak dapat membuka portal meski menekan F7.</div>
+
+<h2>21.1 Membuka portal</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body">Tekan <kbd>F7</kbd> di layar mana pun (saat login / setelah login).</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body">Masukkan kredensial superadmin: <code>superadmin@assyaref.dev</code> / kata sandi yang dibagikan oleh penerbit.</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body">Portal terbuka — dua tab: <strong>Branding</strong> dan <strong>Danger Zone</strong>.</div></div>
+
+<h2>21.2 Tab Branding — identitas &amp; logo</h2>
+<p>Gunakan kartu <strong>Identitas &amp; Logo</strong> untuk mengganti dua aset berbeda:</p>
+<table>
+<thead><tr><th>Elemen</th><th>Digunakan di</th><th>Format</th></tr></thead>
+<tbody>
+<tr><td><strong>Logo</strong> (kotak putih login/sidebar)</td><td>Layar login, sidebar, preview, dokumen cetak</td><td>PNG/JPG/WEBP/SVG/GIF (≤ 2 MB)</td></tr>
+<tr><td><strong>Ikon</strong> (ikon aplikasi di jendela/taskbar)</td><td>Ikon jendela &amp; taskbar (native image), installer baru</td><td>PNG/JPG/ICO/WEBP (≤ 5 MB)</td></tr>
+</tbody>
+</table>
+<div class="step"><div class="step-num">4</div><div class="step-body">Klik <strong>Ganti Logo…</strong> atau <strong>Ganti Ikon…</strong> → pilih file → jendela langsung menampilkan ikon baru (semua jendela yang sedang terbuka berubah seketika).</div></div>
+<div class="step"><div class="step-num">5</div><div class="step-body">Klik <strong>Reset Logo</strong> / <strong>Reset Ikon</strong> untuk kembali ke bawaan.</div></div>
+
+<h2>21.3 Tab Branding — nama, tagline, font</h2>
+<ul>
+<li><strong>Nama Aplikasi</strong> — tampil di title bar, sidebar, login, nota cetak, dan header invoice.</li>
+<li><strong>Tagline / Subjudul</strong> — muncul di bawah logo di login, sidebar, dan struk.</li>
+<li><strong>Font Aplikasi</strong> — 7 pilihan: Inter, Segoe UI, Poppins, Roboto, Georgia, Courier New, Monospace. Dipilih dari dropdown; seluruh tampilan berubah font seketika setelah simpan &amp; terapkan.</li>
+</ul>
+
+<h2>21.4 Tab Branding — warna</h2>
+<table>
+<thead><tr><th>Warna</th><th>Dipakai untuk</th></tr></thead>
+<tbody>
+<tr><td>Warna Utama</td><td>Gradien sidebar atas, tombol utama (Simpan), aksen judul</td></tr>
+<tr><td>Warna Sidebar</td><td>Gradien sidebar bawah, menu aktif</td></tr>
+<tr><td>Warna Aksen</td><td>Highlight kasir aktif di sidebar, langkan iklan</td></tr>
+</tbody>
+</table>
+<p>Ketik langsung kode hex (<code>#0D47A1</code>) atau klik kotak warna untuk memilih.</p>
+
+<h2>21.5 Tab Branding — footer nota</h2>
+<p>Kolom <strong>Footer di nota</strong> (maks 120 karakter) mengisi teks paling bawah pada:</p>
+<ul>
+<li>Struk thermal (kasir)</li>
+<li>Invoice A4 (laporan transaksi &amp; POS)</li>
+</ul>
+<p>Contoh: <em>“Terima kasih sudah berbelanja di Toko Sinar — 0812-3456-7890”</em></p>
+
+<h2>21.6 Pratinjau Langsung</h2>
+<p>Kartu di kolom kanan menunjukkan <strong>pratinjau mini aplikasi</strong> — title bar, sidebar, KPI tiles, grafik bar, dan footer nota — yang berubah real-time saat Anda mengutak-atik nama/tagline/warna/font, bahkan sebelum klik Simpan.</p>
+<img src="img-superadmin-branding.png" alt="Portal superadmin — tab Branding" style="width:100%;border:1px solid #E2E8F0;border-radius:4mm;margin:4mm 0" />
+
+<h2>21.7 Tab Danger Zone — aksi penghancur (hati-hati)</h2>
+<table>
+<thead><tr><th>Aksi</th><th>Efek</th></tr></thead>
+<tbody>
+<tr><td>Hapus Semua Sesi</td><td>Memaksa semua pengguna login ulang di semua perangkat.</td></tr>
+<tr><td>Hapus Semua Akun Admin</td><td>Menghapus SEMUA akun (kasir, admin, viewer) — kecuali superadmin. Data transaksi/produk/pelanggan tetap ada.</td></tr>
+<tr><td>Factory Reset</td><td>Menghapus SELURUH data toko: produk, transaksi, pelanggan, pemasok, keuangan — kecuali superadmin dan konfigurasi bawaan. Wajib ketik <code>HAPUS-SEMUA-DATA</code>.</td></tr>
+</tbody>
+</table>
+<div class="warn"><strong>Tidak dapat dibatalkan.</strong> Semua aksi di Danger Zone tidak memiliki undo. Backup dulu (Bab 12) bila masih ragu.</div>
+
+<h2>21.8 Keyboard shortcuts</h2>
+<table>
+<thead><tr><th>Tombol</th><th>Fungsi</th></tr></thead>
+<tbody>
+<tr><td><kbd>F7</kbd></td><td>Buka/tutup portal superadmin</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>Tutup portal</td></tr>
+</tbody>
+</table>
+
+<h2>21.9 Siapa yang boleh mengakses?</h2>
+<p>Hanya akun dengan peran <code>superadmin</code> — saat ini satu akun yang disediakan penerbit. Admin biasa tidak dapat membuka portal; Danger Zone ditolak oleh main-process meski UI dimanipulasi.</p>

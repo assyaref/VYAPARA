@@ -93,6 +93,9 @@ pre { background: #172033; color: #E3F2FD; border-radius: 2mm; padding: 3mm 4mm;
   <a class="l2" href="#bab17">Bab 17 — Faktur Pemasok, Retur Pembelian, Opname &amp; Amankan Data</a>
   <a class="l2" href="#bab18">Bab 18 — Pembaruan Aplikasi, Dashboard Pemilik &amp; Deployment Server</a>
   <a class="l2" href="#bab19">Bab 19 — Kasir Profesional: Diskon, PPN, Grosir, Invoice &amp; Shift</a>
+  <a class="l2" href="#bab20">Bab 20 — Aktivasi Lisensi &amp; Serial Number</a>
+  <a class="l2" href="#bab21">Bab 21 — Portal Superadmin: Kustomisasi Brand</a>
+  <a class="l2" href="#bab22">Bab 22 — Loyalty Points &amp; Piutang Pelanggan</a>
   <a class="l2" href="#lampiran">Lampiran A — Glossary &amp; FAQ</a>
 </nav>
 
@@ -844,6 +847,207 @@ pre { background: #172033; color: #E3F2FD; border-radius: 2mm; padding: 3mm 4mm;
 <li>Harga grosir tetap otomatis (lihat 19.3) saat qty ≥ min — pelanggan mendapat manfaat grosir + loyalti sekaligus.</li>
 </ol>
 <p class="small">Catatan: poin tidak hangus; tidak ada kebijakan kedaluwarsa saat ini. Penghapusan data pelanggan menghapus poinnya juga.</p>
+
+<!-- BAB 20 -->
+<h1 class="section" id="bab20">Bab 20 — Aktivasi Lisensi &amp; Serial Number</h1>
+
+<p class="lede">Instalasi yang sudah terpasang penuh tetap <strong>tidak dapat dipakai sebelum diaktivasi</strong> dengan Serial Number yang sah. Pembatasan ini mencegah penggunaan salinan aplikasi di luar lisensi yang disetujui.</p>
+
+<h2>20.1 Mengapa perlu aktivasi?</h2>
+<ul>
+<li>Setiap instalasi terkait ke <strong>satu serial number</strong> yang diterbitkan oleh pemilik/penjual aplikasi.</li>
+<li>Serial tersebut tercatat di server lisensi — termasuk perangkat mana yang sudah memakainya.</li>
+<li>Pemilik dapat <strong>mencabut (revoke)</strong> serial kapan pun, sehingga instalasi yang bersangkutan tidak dapat dipakai lagi.</li>
+</ul>
+
+<h2>20.2 Layar aktivasi — pertama kali menjalankan</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body"><strong>Pasang aplikasi</strong> dari installer resmi (<code>VYAPARA-Setup-1.0.0.exe</code>). Jalankan aplikasi seperti biasa.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body"><strong>Muncul layar “Aktivasi Lisensi”</strong> — bukan layar login dan bukan layar setup admin. Isi Dua kolom wajib: <em>URL Server Lisensi</em> dan <em>Serial Number</em>; nama toko opsional.</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body"><strong>Klik “Aktivasi Sekarang”.</strong> Aplikasi mengirim serial ke server lisensi; server memverifikasi dan mengikat serial ke perangkat ini.</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-body">Setelah berhasil, layar berubah menjadi <strong>“Siapkan Administrator”</strong> — buat akun pemilik seperti biasa (nama, email, kata sandi ≥ 10 karakter).</div></div>
+<img src="img-setup.png" alt="Layar setup setelah aktivasi berhasil" style="width:100%;border:1px solid #E2E8F0;border-radius:4mm;margin:4mm 0" />
+
+<h2>20.3 Kapan aplikasi meminta aktivasi lagi?</h2>
+<ul>
+<li><strong>Instansi pertama kali</strong> di perangkat ini — wajib ada serial.</li>
+<li><strong>Setelah factory reset</strong> (Danger Zone → Reset Pabrik) — serial dapat dipakai kembali (selama belum habis kuota aktivasi).</li>
+<li><strong>Jika serial dicabut pemilik</strong> — aplikasi kembali ke layar aktivasi dengan pesan “Lisensi Dinonaktifkan” pada kunjungan berikutnya.</li>
+<li><strong>Offline terlalu lama (30+ hari sejak verifikasi terakhir)</strong> — dianggap tidak valid; aplikasi menolak masuk sampai terhubung ke server lisensi lagi.</li>
+</ul>
+<div class="warn"><strong>Penting:</strong> Saat toko offline dalam jangka waktu lama (mis. libur panjang), aplikasi tetap berjalan — lisensi tidak kadaluarsa setelah sekian hari; yang 30 hari adalah batas <em>belum pernah verifikasi ulang</em>, bukan kadaluarsa.</div>
+
+<h2>20.4 Bagi Pembeli: cara mendapatkan serial</h2>
+<ol>
+<li>Hubungi <strong>Assyaref.dev</strong> (tautan WhatsApp di layar login) — sertakan nama toko dan jumlah perangkat yang akan dipakai.</li>
+<li>Anda akan menerima <strong>URL server lisensi</strong> + <strong>Serial Number</strong> (format <code>VYPR-XXXX-XXXX-XXXX</code>).</li>
+<li>Masukkan keduanya di layar aktivasi saat pertama kali menjalankan.</li>
+</ol>
+
+<h2>20.5 Bagi Pemilik Aplikasi (Publisher): menerbitkan serial</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body"><strong>Pilih organizer:</strong> tunggu permintaan pembeli → catat nama toko + jumlah perangkat.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body"><strong>Generate serial</strong> via <code>POST /admin/licenses</code> ke server sinkronisasi Anda (dengan header <code>Authorization: Bearer &lt;SYNC_ADMIN_TOKEN&gt;</code>), body: <code>{"organizationName":"Toko X","maxActivations":2}</code>.</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body"><strong>Respons berisi serial sekali saja</strong> (<code>VYPR-…</code>) — salin dan kirim ke pembeli beserta URL server.</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-body">Invoice dikirim serial + URL. Pembeli menginstall dan aktivasi di komputernya masing-masing.</div></div>
+<div class="step"><div class="step-num">5</div><div class="step-body">Untuk <strong>mencabut</strong> serial (mis. berhenti bayar/salah perangkat): <code>POST /admin/licenses/revoke</code> dengan <code>licenseId</code> atau gunakan owner dashboard → Licenses → Revoke.</div></div>
+
+<h2>20.6 Batas penggunaan serial</h2>
+<table>
+<thead><tr><th>Aturan</th><th>Default</th><th>Dapat diubah</th></tr></thead>
+<tbody>
+<tr><td>Aktivasi per serial</td><td>1 (dapat dibuat 1–999 saat generate)</td><td>Ya, saat generate</td></tr>
+<tr><td>Masa berlaku sejak aktivasi</td><td>Selamanya (selama tidak dicabut)</td><td>Ya, <code>expiresAt</code> saat generate</td></tr>
+<tr><td>Perangkat per organisasi</td><td>Tidak dibatasi</td><td>Gunakan serial terpisah per cabang</td></tr>
+</tbody>
+</table>
+
+<h2>20.7 Troubleshooting aktivasi</h2>
+<table>
+<thead><tr><th>Masalah</th><th>Solusi</th></tr></thead>
+<tbody>
+<tr><td>“Format serial tidak valid”</td><td>Pastikan awalan <code>VYPR-</code> dan huruf besar (bukan kecil), serta 14 karakter kunci setelahnya.</td></tr>
+<tr><td>“Serial number tidak dikenal”</td><td>Serial belum pernah di-generate / salah ketik. Mintalah penerbitan ulang.</td></tr>
+<tr><td>“Serial sudah dipakai di perangkat lain”</td><td>Serial sudah mencapai kuota aktivasi. Minta penerbit menaikkan <code>maxActivations</code> atau terbitkan serial baru.</td></tr>
+<tr><td>“Tidak dapat menghubungi server lisensi”</td><td>Periksa URL (harus <code>https://…</code>), koneksi internet, dan firewall toko mengizinkan akses keluar.</td></tr>
+<tr><td>“Lisensi Dinonaktifkan”</td><td>Serial dicabut oleh penerbit; hubungi penerbit untuk verifikasi pembayaran/dukungan.</td></tr>
+</tbody>
+</table>
+
+<!-- BAB 21 -->
+<h1 class="section" id="bab21">Bab 21 — Portal Superadmin: Kustomisasi Brand</h1>
+
+<p class="lede">Portal tersembunyi untuk pemilik/penerbit aplikasi — mengubah tampilan (brand) sepenuhnya lewat UI, tanpa mengedit kode. Akses dengan <kbd>F7</kbd> dari mana pun di aplikasi.</p>
+
+<div class="warn"><strong>Akses terbatas:</strong> hanya peran <code>superadmin</code>. Pengguna biasa — termasuk admin — tidak dapat membuka portal meski menekan F7.</div>
+
+<h2>21.1 Membuka portal</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body">Tekan <kbd>F7</kbd> di layar mana pun (saat login / setelah login).</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body">Masukkan kredensial superadmin: <code>superadmin@assyaref.dev</code> / kata sandi yang dibagikan oleh penerbit.</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body">Portal terbuka — dua tab: <strong>Branding</strong> dan <strong>Danger Zone</strong>.</div></div>
+
+<h2>21.2 Tab Branding — identitas &amp; logo</h2>
+<p>Gunakan kartu <strong>Identitas &amp; Logo</strong> untuk mengganti dua aset berbeda:</p>
+<table>
+<thead><tr><th>Elemen</th><th>Digunakan di</th><th>Format</th></tr></thead>
+<tbody>
+<tr><td><strong>Logo</strong> (kotak putih login/sidebar)</td><td>Layar login, sidebar, preview, dokumen cetak</td><td>PNG/JPG/WEBP/SVG/GIF (≤ 2 MB)</td></tr>
+<tr><td><strong>Ikon</strong> (ikon aplikasi di jendela/taskbar)</td><td>Ikon jendela &amp; taskbar (native image), installer baru</td><td>PNG/JPG/ICO/WEBP (≤ 5 MB)</td></tr>
+</tbody>
+</table>
+<div class="step"><div class="step-num">4</div><div class="step-body">Klik <strong>Ganti Logo…</strong> atau <strong>Ganti Ikon…</strong> → pilih file → jendela langsung menampilkan ikon baru (semua jendela yang sedang terbuka berubah seketika).</div></div>
+<div class="step"><div class="step-num">5</div><div class="step-body">Klik <strong>Reset Logo</strong> / <strong>Reset Ikon</strong> untuk kembali ke bawaan.</div></div>
+
+<h2>21.3 Tab Branding — nama, tagline, font</h2>
+<ul>
+<li><strong>Nama Aplikasi</strong> — tampil di title bar, sidebar, login, nota cetak, dan header invoice.</li>
+<li><strong>Tagline / Subjudul</strong> — muncul di bawah logo di login, sidebar, dan struk.</li>
+<li><strong>Font Aplikasi</strong> — 7 pilihan: Inter, Segoe UI, Poppins, Roboto, Georgia, Courier New, Monospace. Dipilih dari dropdown; seluruh tampilan berubah font seketika setelah simpan &amp; terapkan.</li>
+</ul>
+
+<h2>21.4 Tab Branding — warna</h2>
+<table>
+<thead><tr><th>Warna</th><th>Dipakai untuk</th></tr></thead>
+<tbody>
+<tr><td>Warna Utama</td><td>Gradien sidebar atas, tombol utama (Simpan), aksen judul</td></tr>
+<tr><td>Warna Sidebar</td><td>Gradien sidebar bawah, menu aktif</td></tr>
+<tr><td>Warna Aksen</td><td>Highlight kasir aktif di sidebar, langkan iklan</td></tr>
+</tbody>
+</table>
+<p>Ketik langsung kode hex (<code>#0D47A1</code>) atau klik kotak warna untuk memilih.</p>
+
+<h2>21.5 Tab Branding — footer nota</h2>
+<p>Kolom <strong>Footer di nota</strong> (maks 120 karakter) mengisi teks paling bawah pada:</p>
+<ul>
+<li>Struk thermal (kasir)</li>
+<li>Invoice A4 (laporan transaksi &amp; POS)</li>
+</ul>
+<p>Contoh: <em>“Terima kasih sudah berbelanja di Toko Sinar — 0812-3456-7890”</em></p>
+
+<h2>21.6 Pratinjau Langsung</h2>
+<p>Kartu di kolom kanan menunjukkan <strong>pratinjau mini aplikasi</strong> — title bar, sidebar, KPI tiles, grafik bar, dan footer nota — yang berubah real-time saat Anda mengutak-atik nama/tagline/warna/font, bahkan sebelum klik Simpan.</p>
+<img src="img-superadmin-branding.png" alt="Portal superadmin — tab Branding" style="width:100%;border:1px solid #E2E8F0;border-radius:4mm;margin:4mm 0" />
+
+<h2>21.7 Tab Danger Zone — aksi penghancur (hati-hati)</h2>
+<table>
+<thead><tr><th>Aksi</th><th>Efek</th></tr></thead>
+<tbody>
+<tr><td>Hapus Semua Sesi</td><td>Memaksa semua pengguna login ulang di semua perangkat.</td></tr>
+<tr><td>Hapus Semua Akun Admin</td><td>Menghapus SEMUA akun (kasir, admin, viewer) — kecuali superadmin. Data transaksi/produk/pelanggan tetap ada.</td></tr>
+<tr><td>Factory Reset</td><td>Menghapus SELURUH data toko: produk, transaksi, pelanggan, pemasok, keuangan — kecuali superadmin dan konfigurasi bawaan. Wajib ketik <code>HAPUS-SEMUA-DATA</code>.</td></tr>
+</tbody>
+</table>
+<div class="warn"><strong>Tidak dapat dibatalkan.</strong> Semua aksi di Danger Zone tidak memiliki undo. Backup dulu (Bab 12) bila masih ragu.</div>
+
+<h2>21.8 Keyboard shortcuts</h2>
+<table>
+<thead><tr><th>Tombol</th><th>Fungsi</th></tr></thead>
+<tbody>
+<tr><td><kbd>F7</kbd></td><td>Buka/tutup portal superadmin</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>Tutup portal</td></tr>
+</tbody>
+</table>
+
+<h2>21.9 Siapa yang boleh mengakses?</h2>
+<p>Hanya akun dengan peran <code>superadmin</code> — saat ini satu akun yang disediakan penerbit. Admin biasa tidak dapat membuka portal; Danger Zone ditolak oleh main-process meski UI dimanipulasi.</p>
+
+<!-- BAB 22 -->
+<h1 class="section" id="bab22">Bab 22 — Loyalty Points &amp; Piutang Pelanggan</h1>
+
+<h2>22.1 Loyalty Points — cara kerja</h2>
+<ul>
+<li>Setiap pelanggan memiliki saldo <strong>poin</strong> yang bertambah otomatis pada setiap transaksi selesai.</li>
+<li>Default: <strong>Rp 10.000 = 1 poin</strong> (dapat diubah di Pengaturan dengan kunci <code>loyalty_earn_amount</code>).</li>
+<li>Saldo poin tidak hangus; tidak ada kedaluwarsa.</li>
+</ul>
+
+<h2>22.2 Mendapatkan poin di kasir</h2>
+<ol>
+<li>Di layar kasir, bagian bawah → <strong>Pelanggan (opsional)</strong>.</li>
+<li>Ketik nama/telepon/kode — daftar pelanggan muncul; klik salah satu.</li>
+<li>Pelanggan terpilih menampilkan: nama, saldo piutang, dan <strong>poin</strong> di kanan bawah picker.</li>
+<li>Checkout seperti biasa — poin otomatis ditambahkan berdasarkan total (setelah diskon, sebelum/sesudah PPN? → dihitung dari total akhir).</li>
+<li>Lihat laporan: menu <strong>Pelanggan</strong> → detail pelanggan → jumlah poin.</li>
+</ol>
+
+<h2>22.3 Menggunakan poin sebagai diskon</h2>
+<ol>
+<li>Pilih pelanggan di kasir — centang <em>“Pakai N poin (− Rp X)”</em>.</li>
+<li>Diskon poin diterapkan sebelum PPN dihitung.</li>
+<li>Aktif hanya jika saldo poin &gt; 0.</li>
+</ol>
+
+<h2>22.4 Metode pembayaran Kredit (piutang)</h2>
+<ol>
+<li>Pilih pelanggan → tombol pembayaran berubah menjadi empat pilihan + <strong>Kredit</strong>.</li>
+<li>Pilih <strong>Kredit</strong> → Klik <strong>Bayar (F10)</strong> — transaksi tercatat sebagai penjualan kredit; saldo piutang pelanggan bertambah sebesar total.</li>
+<li>Piutang muncul di menu <strong>Pelanggan</strong> → badge piutang merah.</li>
+<li>Pelanggan dapat membayar sebagian/lunas di menu Pelanggan → tombol <strong>Terima Pembayaran Piutang</strong>.</li>
+</ol>
+
+<h2>22.5 Laporan Piutang (AR Aging)</h2>
+<p>Menu <strong>Laporan &amp; Analisis</strong> → tab <strong>Piutang</strong> — tabel semua pelanggan dengan saldo &gt; 0:</p>
+<table>
+<thead><tr><th>Kolom</th><th>Keterangan</th></tr></thead>
+<tbody>
+<tr><td>Kode / Nama</td><td>Identitas pelanggan</td></tr>
+<tr><td>Total Piutang</td><td>Sisa piutang berjalan</td></tr>
+<tr><td>Hari Belum Bayar</td><td>Selisih hari sejak transaksi kredit pertama yang masih belum lunas</td></tr>
+<tr><td>Aging</td><td><span class="tag" style="background:#2E7D32">0-30</span> <span class="tag" style="background:#E65100">31-60</span> <span class="tag" style="background:#B71C1C">61-90</span> <span class="tag" style="background:#7F0000">&gt;90</span> — semakin tua semakin berbahaya</td></tr>
+<tr><td>Aktivitas Terakhir</td><td>Tanggal transaksi terakhir</td></tr>
+</tbody>
+</table>
+<p>Total baris di footer; dapat di-export CSV dengan tombol <strong>Export CSV</strong>.</p>
+
+<h2>22.6 Contoh alur piutang</h2>
+<ol>
+<li>Budi membeli total Rp 80.000 secara <strong>Kredit</strong>.</li>
+<li>Menu <strong>Pelanggan</strong> → Budi → piutang Rp 80.000.</li>
+<li>Satu bulan kemudian Budi membayar Rp 50.000 (Pelanggan → Terima Pembayaran).</li>
+<li>Sisa piutang = Rp 30.000 — aging berubah menjadi <strong>31-60</strong> sejak transaksi itu.</li>
+</ol>
+<div class="callout"><strong>Tip pasar ATK:</strong> pelanggan langganan sering “titip bayar” — gunakan piutang untuk mencatat hutang, bukan “uang masuk/kasir”.</div>
+
+<h2>22.7 Memastikan poin &amp; piutang sinkron antar perangkat</h2>
+<p>Poin dan piutang adalah bagian dari data pelanggan — disinkronkan via <strong>Offline Sync</strong> seperti semua data lain (lihat Bab 10). Transaksi penjualan kredit dan pembayaran piutang keduanya menghasilkan event yang dikirim ke server.</p>
 
 <!-- LAMPIRAN -->
 <h1 class="section" id="lampiran">Lampiran A — Glossary &amp; FAQ</h1>

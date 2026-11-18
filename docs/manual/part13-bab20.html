@@ -1,0 +1,63 @@
+<!-- BAB 20 -->
+<h1 class="section" id="bab20">Bab 20 — Aktivasi Lisensi &amp; Serial Number</h1>
+
+<p class="lede">Instalasi yang sudah terpasang penuh tetap <strong>tidak dapat dipakai sebelum diaktivasi</strong> dengan Serial Number yang sah. Pembatasan ini mencegah penggunaan salinan aplikasi di luar lisensi yang disetujui.</p>
+
+<h2>20.1 Mengapa perlu aktivasi?</h2>
+<ul>
+<li>Setiap instalasi terkait ke <strong>satu serial number</strong> yang diterbitkan oleh pemilik/penjual aplikasi.</li>
+<li>Serial tersebut tercatat di server lisensi — termasuk perangkat mana yang sudah memakainya.</li>
+<li>Pemilik dapat <strong>mencabut (revoke)</strong> serial kapan pun, sehingga instalasi yang bersangkutan tidak dapat dipakai lagi.</li>
+</ul>
+
+<h2>20.2 Layar aktivasi — pertama kali menjalankan</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body"><strong>Pasang aplikasi</strong> dari installer resmi (<code>VYAPARA-Setup-1.0.0.exe</code>). Jalankan aplikasi seperti biasa.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body"><strong>Muncul layar “Aktivasi Lisensi”</strong> — bukan layar login dan bukan layar setup admin. Isi Dua kolom wajib: <em>URL Server Lisensi</em> dan <em>Serial Number</em>; nama toko opsional.</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body"><strong>Klik “Aktivasi Sekarang”.</strong> Aplikasi mengirim serial ke server lisensi; server memverifikasi dan mengikat serial ke perangkat ini.</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-body">Setelah berhasil, layar berubah menjadi <strong>“Siapkan Administrator”</strong> — buat akun pemilik seperti biasa (nama, email, kata sandi ≥ 10 karakter).</div></div>
+<img src="img-setup.png" alt="Layar setup setelah aktivasi berhasil" style="width:100%;border:1px solid #E2E8F0;border-radius:4mm;margin:4mm 0" />
+
+<h2>20.3 Kapan aplikasi meminta aktivasi lagi?</h2>
+<ul>
+<li><strong>Instansi pertama kali</strong> di perangkat ini — wajib ada serial.</li>
+<li><strong>Setelah factory reset</strong> (Danger Zone → Reset Pabrik) — serial dapat dipakai kembali (selama belum habis kuota aktivasi).</li>
+<li><strong>Jika serial dicabut pemilik</strong> — aplikasi kembali ke layar aktivasi dengan pesan “Lisensi Dinonaktifkan” pada kunjungan berikutnya.</li>
+<li><strong>Offline terlalu lama (30+ hari sejak verifikasi terakhir)</strong> — dianggap tidak valid; aplikasi menolak masuk sampai terhubung ke server lisensi lagi.</li>
+</ul>
+<div class="warn"><strong>Penting:</strong> Saat toko offline dalam jangka waktu lama (mis. libur panjang), aplikasi tetap berjalan — lisensi tidak kadaluarsa setelah sekian hari; yang 30 hari adalah batas <em>belum pernah verifikasi ulang</em>, bukan kadaluarsa.</div>
+
+<h2>20.4 Bagi Pembeli: cara mendapatkan serial</h2>
+<ol>
+<li>Hubungi <strong>Assyaref.dev</strong> (tautan WhatsApp di layar login) — sertakan nama toko dan jumlah perangkat yang akan dipakai.</li>
+<li>Anda akan menerima <strong>URL server lisensi</strong> + <strong>Serial Number</strong> (format <code>VYPR-XXXX-XXXX-XXXX</code>).</li>
+<li>Masukkan keduanya di layar aktivasi saat pertama kali menjalankan.</li>
+</ol>
+
+<h2>20.5 Bagi Pemilik Aplikasi (Publisher): menerbitkan serial</h2>
+<div class="step"><div class="step-num">1</div><div class="step-body"><strong>Pilih organizer:</strong> tunggu permintaan pembeli → catat nama toko + jumlah perangkat.</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-body"><strong>Generate serial</strong> via <code>POST /admin/licenses</code> ke server sinkronisasi Anda (dengan header <code>Authorization: Bearer &lt;SYNC_ADMIN_TOKEN&gt;</code>), body: <code>{"organizationName":"Toko X","maxActivations":2}</code>.</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-body"><strong>Respons berisi serial sekali saja</strong> (<code>VYPR-…</code>) — salin dan kirim ke pembeli beserta URL server.</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-body">Invoice dikirim serial + URL. Pembeli menginstall dan aktivasi di komputernya masing-masing.</div></div>
+<div class="step"><div class="step-num">5</div><div class="step-body">Untuk <strong>mencabut</strong> serial (mis. berhenti bayar/salah perangkat): <code>POST /admin/licenses/revoke</code> dengan <code>licenseId</code> atau gunakan owner dashboard → Licenses → Revoke.</div></div>
+
+<h2>20.6 Batas penggunaan serial</h2>
+<table>
+<thead><tr><th>Aturan</th><th>Default</th><th>Dapat diubah</th></tr></thead>
+<tbody>
+<tr><td>Aktivasi per serial</td><td>1 (dapat dibuat 1–999 saat generate)</td><td>Ya, saat generate</td></tr>
+<tr><td>Masa berlaku sejak aktivasi</td><td>Selamanya (selama tidak dicabut)</td><td>Ya, <code>expiresAt</code> saat generate</td></tr>
+<tr><td>Perangkat per organisasi</td><td>Tidak dibatasi</td><td>Gunakan serial terpisah per cabang</td></tr>
+</tbody>
+</table>
+
+<h2>20.7 Troubleshooting aktivasi</h2>
+<table>
+<thead><tr><th>Masalah</th><th>Solusi</th></tr></thead>
+<tbody>
+<tr><td>“Format serial tidak valid”</td><td>Pastikan awalan <code>VYPR-</code> dan huruf besar (bukan kecil), serta 14 karakter kunci setelahnya.</td></tr>
+<tr><td>“Serial number tidak dikenal”</td><td>Serial belum pernah di-generate / salah ketik. Mintalah penerbitan ulang.</td></tr>
+<tr><td>“Serial sudah dipakai di perangkat lain”</td><td>Serial sudah mencapai kuota aktivasi. Minta penerbit menaikkan <code>maxActivations</code> atau terbitkan serial baru.</td></tr>
+<tr><td>“Tidak dapat menghubungi server lisensi”</td><td>Periksa URL (harus <code>https://…</code>), koneksi internet, dan firewall toko mengizinkan akses keluar.</td></tr>
+<tr><td>“Lisensi Dinonaktifkan”</td><td>Serial dicabut oleh penerbit; hubungi penerbit untuk verifikasi pembayaran/dukungan.</td></tr>
+</tbody>
+</table>

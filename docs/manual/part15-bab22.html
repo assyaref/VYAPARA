@@ -1,0 +1,59 @@
+<!-- BAB 22 -->
+<h1 class="section" id="bab22">Bab 22 — Loyalty Points &amp; Piutang Pelanggan</h1>
+
+<h2>22.1 Loyalty Points — cara kerja</h2>
+<ul>
+<li>Setiap pelanggan memiliki saldo <strong>poin</strong> yang bertambah otomatis pada setiap transaksi selesai.</li>
+<li>Default: <strong>Rp 10.000 = 1 poin</strong> (dapat diubah di Pengaturan dengan kunci <code>loyalty_earn_amount</code>).</li>
+<li>Saldo poin tidak hangus; tidak ada kedaluwarsa.</li>
+</ul>
+
+<h2>22.2 Mendapatkan poin di kasir</h2>
+<ol>
+<li>Di layar kasir, bagian bawah → <strong>Pelanggan (opsional)</strong>.</li>
+<li>Ketik nama/telepon/kode — daftar pelanggan muncul; klik salah satu.</li>
+<li>Pelanggan terpilih menampilkan: nama, saldo piutang, dan <strong>poin</strong> di kanan bawah picker.</li>
+<li>Checkout seperti biasa — poin otomatis ditambahkan berdasarkan total (setelah diskon, sebelum/sesudah PPN? → dihitung dari total akhir).</li>
+<li>Lihat laporan: menu <strong>Pelanggan</strong> → detail pelanggan → jumlah poin.</li>
+</ol>
+
+<h2>22.3 Menggunakan poin sebagai diskon</h2>
+<ol>
+<li>Pilih pelanggan di kasir — centang <em>“Pakai N poin (− Rp X)”</em>.</li>
+<li>Diskon poin diterapkan sebelum PPN dihitung.</li>
+<li>Aktif hanya jika saldo poin &gt; 0.</li>
+</ol>
+
+<h2>22.4 Metode pembayaran Kredit (piutang)</h2>
+<ol>
+<li>Pilih pelanggan → tombol pembayaran berubah menjadi empat pilihan + <strong>Kredit</strong>.</li>
+<li>Pilih <strong>Kredit</strong> → Klik <strong>Bayar (F10)</strong> — transaksi tercatat sebagai penjualan kredit; saldo piutang pelanggan bertambah sebesar total.</li>
+<li>Piutang muncul di menu <strong>Pelanggan</strong> → badge piutang merah.</li>
+<li>Pelanggan dapat membayar sebagian/lunas di menu Pelanggan → tombol <strong>Terima Pembayaran Piutang</strong>.</li>
+</ol>
+
+<h2>22.5 Laporan Piutang (AR Aging)</h2>
+<p>Menu <strong>Laporan &amp; Analisis</strong> → tab <strong>Piutang</strong> — tabel semua pelanggan dengan saldo &gt; 0:</p>
+<table>
+<thead><tr><th>Kolom</th><th>Keterangan</th></tr></thead>
+<tbody>
+<tr><td>Kode / Nama</td><td>Identitas pelanggan</td></tr>
+<tr><td>Total Piutang</td><td>Sisa piutang berjalan</td></tr>
+<tr><td>Hari Belum Bayar</td><td>Selisih hari sejak transaksi kredit pertama yang masih belum lunas</td></tr>
+<tr><td>Aging</td><td><span class="tag" style="background:#2E7D32">0-30</span> <span class="tag" style="background:#E65100">31-60</span> <span class="tag" style="background:#B71C1C">61-90</span> <span class="tag" style="background:#7F0000">&gt;90</span> — semakin tua semakin berbahaya</td></tr>
+<tr><td>Aktivitas Terakhir</td><td>Tanggal transaksi terakhir</td></tr>
+</tbody>
+</table>
+<p>Total baris di footer; dapat di-export CSV dengan tombol <strong>Export CSV</strong>.</p>
+
+<h2>22.6 Contoh alur piutang</h2>
+<ol>
+<li>Budi membeli total Rp 80.000 secara <strong>Kredit</strong>.</li>
+<li>Menu <strong>Pelanggan</strong> → Budi → piutang Rp 80.000.</li>
+<li>Satu bulan kemudian Budi membayar Rp 50.000 (Pelanggan → Terima Pembayaran).</li>
+<li>Sisa piutang = Rp 30.000 — aging berubah menjadi <strong>31-60</strong> sejak transaksi itu.</li>
+</ol>
+<div class="callout"><strong>Tip pasar ATK:</strong> pelanggan langganan sering “titip bayar” — gunakan piutang untuk mencatat hutang, bukan “uang masuk/kasir”.</div>
+
+<h2>22.7 Memastikan poin &amp; piutang sinkron antar perangkat</h2>
+<p>Poin dan piutang adalah bagian dari data pelanggan — disinkronkan via <strong>Offline Sync</strong> seperti semua data lain (lihat Bab 10). Transaksi penjualan kredit dan pembayaran piutang keduanya menghasilkan event yang dikirim ke server.</p>
