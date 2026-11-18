@@ -17,6 +17,8 @@ export type ProductRecord = {
   cost: number | null;
   stock: number;
   isActive: boolean;
+  wholesalePrice: number;
+  wholesaleMinQty: number;
 };
 
 type ProductRow = {
@@ -33,6 +35,8 @@ type ProductRow = {
   cost: number;
   stock: number;
   is_active: number;
+  wholesale_price: number;
+  wholesale_min_qty: number;
 };
 
 function mapProduct(row: ProductRow, includeCost: boolean): ProductRecord {
@@ -50,13 +54,15 @@ function mapProduct(row: ProductRow, includeCost: boolean): ProductRecord {
     cost: includeCost ? Math.round(row.cost) : null,
     stock: row.stock,
     isActive: row.is_active === 1,
+    wholesalePrice: Math.round(row.wholesale_price ?? 0),
+    wholesaleMinQty: row.wholesale_min_qty ?? 10,
   };
 }
 
 const PRODUCT_SELECT = `
   SELECT p.id, p.name, p.description, p.category_id, c.name AS category_name,
          p.unit_id, u.name AS unit_name, p.barcode, p.sku, p.price, p.cost,
-         p.stock, p.is_active
+         p.stock, p.is_active, p.wholesale_price, p.wholesale_min_qty
   FROM products p
   LEFT JOIN categories c ON c.id = p.category_id
   LEFT JOIN units u ON u.id = p.unit_id
@@ -118,6 +124,8 @@ export type ProductWrite = {
   price: number;
   cost: number;
   stock: number;
+  wholesalePrice?: number;
+  wholesaleMinQty?: number;
 };
 
 export function createProduct(db: AppDatabase, input: ProductWrite & { userId: string }): ProductRecord {
@@ -133,8 +141,8 @@ export function createProduct(db: AppDatabase, input: ProductWrite & { userId: s
     db.sqlite
       .prepare(
         `INSERT INTO products (
-          id, name, description, category_id, unit_id, barcode, sku, price, cost, stock, is_active, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+          id, name, description, category_id, unit_id, barcode, sku, price, cost, stock, wholesale_price, wholesale_min_qty, is_active, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       )
       .run(
         id,
@@ -147,6 +155,8 @@ export function createProduct(db: AppDatabase, input: ProductWrite & { userId: s
         input.price,
         input.cost,
         0,
+        Math.round(input.wholesalePrice ?? 0),
+        input.wholesaleMinQty ?? 10,
         now,
         now,
       );
@@ -193,6 +203,8 @@ export function updateProduct(
     cost?: number;
     stock?: number;
     isActive?: boolean;
+    wholesalePrice?: number;
+    wholesaleMinQty?: number;
     userId: string;
   },
 ): ProductRecord {
@@ -223,6 +235,8 @@ export function updateProduct(
   if (input.barcode !== undefined) set('barcode', input.barcode);
   if (input.sku !== undefined) set('sku', input.sku);
   if (input.price !== undefined) set('price', input.price);
+  if (input.wholesalePrice !== undefined) set('wholesale_price', Math.round(input.wholesalePrice));
+  if (input.wholesaleMinQty !== undefined) set('wholesale_min_qty', Math.round(input.wholesaleMinQty));
   if (input.cost !== undefined) set('cost', input.cost);
   if (input.isActive !== undefined) set('is_active', input.isActive ? 1 : 0);
   set('updated_at', new Date().toISOString());

@@ -1,0 +1,43 @@
+<!-- BAB 19 -->
+<h1 class="section" id="bab19">Bab 19 — Kasir Profesional: Diskon, PPN, Grosir, Invoice &amp; Shift</h1>
+
+<h2>19.1 Diskon di Kasir</h2>
+<ol>
+<li>Saat checkout, panel transaksi menampilkan <strong>Diskon</strong> — klik salah satu preset <strong>0/5/10/15%</strong> atau isi nominal Rupiah langsung di kotak input.</li>
+<li>Diskon dihitung dari subtotal sebelum pajak. Baris <em>“Diskon diterapkan”</em> muncul berwarna hijau dengan nominal potongan.</li>
+<li>Transaksi tersimpan dengan diskon pada <code>discount_amount</code> — laporan laba rugi menghitung HPP dari nilai sebenarnya.</li>
+</ol>
+
+<h2>19.2 PPN (Pajak)</h2>
+<ol>
+<li>Menu <strong>Pengaturan</strong> → Pengaturan Aplikasi → tambahkan kunci <code>tax_rate_bps</code> (basis poin: 1100 = 11%).</li>
+<li>Setelah tersimpan, kasir otomatis menampilkan baris <em>“PPN xx%”</em> dan menjumlahkan ke Total. Pajak dihitung setelah diskon.</li>
+<li>Untuk menghapus PPN, set <code>tax_rate_bps</code> = 0.</li>
+</ol>
+
+<h2>19.3 Harga Grosir</h2>
+<ol>
+<li>Edit produk → kolom <strong>Harga Grosir (Rp)</strong> dan <strong>Min. Qty Grosir</strong> (default 10).</li>
+<li>Isi harga grosir lebih rendah dari harga eceran. Harga grosir hanya aktif bila pelanggan membeli <strong>≥ Min. Qty Grosir</strong> unit dalam satu transaksi.</li>
+<li>Harga otomatis turun di kasir (keranjang memakai harga grosir) dan di struk/invoice. Kolom harga produk menampilkan lencana hijau <em>Grosir ≥10</em>.</li>
+</ol>
+
+<h2>19.4 Mencetak Invoice (Nota Resmi)</h2>
+<ol>
+<li>Menu <strong>Laporan &amp; Analisis</strong> → tab <strong>Transaksi</strong>.</li>
+<li>Klik tombol <strong>Invoice</strong> pada baris transaksi manapun — dokumen A4 lengkap tercetak (kop, daftar item, total, tanda tangan).</li>
+<li>Dari kasir juga tersedia tombol <strong>Cetak Invoice</strong> di modal struk.</li>
+</ol>
+
+<h2>19.5 Label Barcode</h2>
+<ol>
+<li>Menu <strong>Produk</strong> → tombol <strong>Cetak Label</strong> (hijau) di kanan atas.</li>
+<li>Centang produk (hanya yang memiliki barcode), atur <em>Salinan per label</em>, klik <strong>Cetak Sekarang</strong> — label 38×29mm tercetak (nama + barcode Code128 + harga).</li>
+</ol>
+
+<h2>19.6 Rekap Shift (Dompet Kas)</h2>
+<ol>
+<li>Menu <strong>Laporan &amp; Analisis</strong> → tab <strong>Rekap Shift</strong>.</li>
+<li>Tiap shift dompet kas ditampilkan: kasir, jam buka/tutup, saldo awal, penjualan tunai, jumlah transaksi, perkiraan kas (saldo awal + tunai), saldo akhir aktual, dan <strong>selisih</strong> (hijau = lebih, merah = kurang).</li>
+<li>Gunakan untuk rekonsiliasi kas akhir shift — selisih negatif harus diinvestigasi.</li>
+</ol>

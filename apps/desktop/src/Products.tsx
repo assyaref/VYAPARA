@@ -1,9 +1,24 @@
 /* src/Products.tsx */
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import useAuth from './authStore';
+import JsBarcode from 'jsbarcode';
 
 const vyapara = (window as any).vyapara;
 const idr = (n: number) => `Rp ${Number(n || 0).toLocaleString('id-ID')}`;
+
+const BarcodeSvg: React.FC<{ value: string }> = ({ value }) => {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    if (ref.current && value) {
+      try {
+        JsBarcode(ref.current, value, { format: 'CODE128', width: 1.6, height: 34, fontSize: 9, margin: 1, displayValue: true });
+      } catch {
+        if (ref.current) ref.current.innerHTML = '';
+      }
+    }
+  }, [value]);
+  return <svg ref={ref} />;
+};
 
 type Product = {
   id: string;
@@ -18,6 +33,8 @@ type Product = {
   price: number;
   cost: number | null;
   stock: number;
+  wholesalePrice: number;
+  wholesaleMinQty: number;
 };
 
 const EMPTY_FORM = {
@@ -30,6 +47,8 @@ const EMPTY_FORM = {
   price: '',
   cost: '',
   stock: '',
+  wholesalePrice: '',
+  wholesaleMinQty: '',
 };
 
 const ProductsPage: React.FC = () => {
@@ -90,6 +109,8 @@ const ProductsPage: React.FC = () => {
       price: String(p.price),
       cost: p.cost != null ? String(p.cost) : '',
       stock: String(p.stock),
+      wholesalePrice: String(p.wholesalePrice ?? 0),
+      wholesaleMinQty: String(p.wholesaleMinQty ?? 10),
     });
     setFormOpen(true);
   };
@@ -108,6 +129,8 @@ const ProductsPage: React.FC = () => {
       price: Math.max(0, Math.round(Number(form.price) || 0)),
       cost: form.cost ? Math.max(0, Math.round(Number(form.cost))) : undefined,
       stock: Math.max(0, Math.round(Number(form.stock) || 0)),
+      wholesalePrice: Math.max(0, Math.round(Number(form.wholesalePrice) || 0)),
+      wholesaleMinQty: Math.max(1, Math.round(Number(form.wholesaleMinQty) || 10)),
     };
     try {
       if (editing) {
@@ -138,6 +161,23 @@ const ProductsPage: React.FC = () => {
   };
 
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [labelOpen, setLabelOpen] = useState(false);
+  const [labelSelected, setLabelSelected] = useState<Record<string, boolean>>({});
+  const [labelCopies, setLabelCopies] = useState('1');
+
+  const openLabelPrint = () => {
+    const init: Record<string, boolean> = {};
+    products.forEach((p) => { if (p.barcode) init[p.id] = true; });
+    setLabelSelected(init);
+    setLabelOpen(true);
+  };
+
+  const printLabels = () => {
+    window.setTimeout(() => window.print(), 150);
+  };
+
+  const selectedProducts = products.filter((p) => labelSelected[p.id] && p.barcode);
+  const labelCount = selectedProducts.length * (Math.max(1, parseInt(labelCopies, 10) || 1));
 
   const downloadTemplateCsv = async () => {
     const template = [
@@ -192,6 +232,14 @@ const ProductsPage: React.FC = () => {
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
             Template CSV
+          </button>
+          <button
+            onClick={openLabelPrint}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold border border-emerald-600 text-emerald-700 rounded-full px-4 py-2 hover:bg-emerald-50 transition-colors"
+            title="Cetak label barcode untuk produk terpilih"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="18" height="12" rx="1" /><path d="M7 10h1M10 10h1M13 10h1M16 10h1M7 14h8" /></svg>
+            Cetak Label
           </button>
           <button
             onClick={importCsv}
@@ -255,7 +303,7 @@ const ProductsPage: React.FC = () => {
                       <div>BC: {p.barcode ?? '—'}</div>
                     </td>
                     <td className="px-4 py-2 text-vyapara-secondary">{p.categoryName ?? '—'}</td>
-                    <td className="px-4 py-2 text-right font-semibold text-vyapara-navy">{idr(p.price)}</td>
+                    <td className="px-4 py-2 text-right font-semibold text-vyapara-navy">{idr(p.price)}{p.wholesalePrice > 0 && <div className="text-[10px] text-emerald-700 font-bold">Grosir ≥{p.wholesaleMinQty}: {idr(p.wholesalePrice)}</div>}</td>
                     <td className="px-4 py-2 text-right">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${p.stock <= 5 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
                         {p.stock} {p.unitName ?? 'pcs'}
@@ -272,6 +320,53 @@ const ProductsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {labelOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={() => setLabelOpen(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-auto p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-lg text-vyapara-navy">Cetak Label Barcode</h3>
+              <button onClick={() => setLabelOpen(false)} className="p-2 text-vyapara-secondary hover:text-vyapara-navy"><svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+            </div>
+            <p className="text-xs text-vyapara-secondary mb-3">Produk tanpa barcode tidak bisa dicetak. Atur jumlah salinan, lalu cetak ke printer (pilih langsung tipe "Label" atau gunakan kertas stiker).</p>
+            <div className="flex items-center gap-2 mb-3">
+              <label className="text-xs font-semibold text-vyapara-secondary" htmlFor="label-copies">Salinan per label</label>
+              <input id="label-copies" type="number" min={1} max={50} value={labelCopies} onChange={(e) => setLabelCopies(e.target.value)} onBlur={() => setLabelCopies(String(Math.max(1, parseInt(labelCopies, 10) || 1)))} className="w-20 px-3 py-1.5 text-sm border border-vyapara-border rounded outline-none" />
+              <span className="text-xs text-vyapara-secondary ml-auto">{labelCount} label akan dicetak</span>
+            </div>
+            <div className="border border-vyapara-border rounded-lg max-h-64 overflow-y-auto divide-y divide-vyapara-border">
+              {products.map((p) => {
+                const disabled = !p.barcode;
+                return (
+                  <label key={p.id} className={`flex items-center gap-3 px-3 py-2 text-sm ${disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-vyapara-surface cursor-pointer'}`}>
+                    <input type="checkbox" disabled={disabled} checked={!!labelSelected[p.id] && !disabled} onChange={(e) => setLabelSelected({ ...labelSelected, [p.id]: e.target.checked })} className="w-4 h-4 accent-vyapara-blue" />
+                    <span className="flex-1 truncate">{p.name}</span>
+                    <span className="font-mono text-[10px] text-vyapara-secondary">{p.barcode ?? 'NO BARCODE'}</span>
+                  </label>
+                );
+              })}
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={() => setLabelOpen(false)} className="px-4 py-2 text-sm border border-vyapara-border rounded-lg hover:bg-vyapara-surface font-medium">Batal</button>
+              <button onClick={printLabels} className="px-5 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Cetak Sekarang</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden label sheet — only visible when printing */}
+      {labelOpen && selectedProducts.length > 0 && (
+        <div id="label-print-root" className="hidden print:block">
+          {selectedProducts.flatMap((p) => Array.from({ length: Math.max(1, parseInt(labelCopies, 10) || 1) }).map((_, i) => (
+            <div key={`${p.id}-${i}`} className="label-cell">
+              <div className="label-name">{p.name}</div>
+              <BarcodeSvg value={String(p.barcode)} />
+              <div className="label-price">Rp {Number(p.price).toLocaleString('id-ID')}</div>
+            </div>
+          )))}
+        </div>
+      )}
 
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -324,6 +419,16 @@ const ProductsPage: React.FC = () => {
               <div>
                 <label className={labelCls} htmlFor="f-stock">Stok *</label>
                 <input id="f-stock" required type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className={inputCls} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 border-t border-vyapara-border pt-3">
+              <div>
+                <label className={labelCls} htmlFor="f-wholesale">Harga Grosir (Rp)</label>
+                <input id="f-wholesale" type="number" min="0" value={form.wholesalePrice} onChange={(e) => setForm({ ...form, wholesalePrice: e.target.value })} placeholder="0 = tidak aktif" className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="f-wholesale-min">Min. Qty Grosir</label>
+                <input id="f-wholesale-min" type="number" min="1" value={form.wholesaleMinQty} onChange={(e) => setForm({ ...form, wholesaleMinQty: e.target.value })} placeholder="10" className={inputCls} />
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">

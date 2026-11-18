@@ -38,6 +38,12 @@ function initials(name: string): string {
   return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
 }
 const idr = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
+const effectiveUnitPrice = (product: { price: number; wholesalePrice?: number; wholesaleMinQty?: number }, qty: number) => {
+  if (product.wholesalePrice && product.wholesalePrice > 0 && qty >= (product.wholesaleMinQty ?? 10)) {
+    return product.wholesalePrice;
+  }
+  return product.price;
+};
 
 const POS: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -111,7 +117,8 @@ const POS: React.FC = () => {
         ),
       );
     } else {
-      setCart([...cart, { productId: product.id, productName: product.name, quantity: 1, price: product.price, subtotal: product.price }]);
+      const eff = effectiveUnitPrice(product, 1);
+      setCart([...cart, { productId: product.id, productName: product.name, quantity: 1, price: eff, subtotal: eff }]);
     }
   };
 
@@ -124,7 +131,9 @@ const POS: React.FC = () => {
       if (item.productId !== productId) return item;
       const newQty = item.quantity + delta;
       if (newQty <= 0) return { ...item, quantity: 0, subtotal: 0 };
-      return { ...item, quantity: newQty, subtotal: newQty * item.price };
+      const product = products.find((p) => p.id === productId);
+      const eff = product ? effectiveUnitPrice(product, newQty) : item.price;
+      return { ...item, quantity: newQty, price: eff, subtotal: newQty * eff };
     });
     setCart(next.filter((item) => item.quantity > 0));
   };

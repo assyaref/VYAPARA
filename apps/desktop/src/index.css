@@ -44,3 +44,15 @@
   #do-print-root { position: absolute; top: 0; left: 0; width: 100%; padding: 12mm; }
   .do-doc { max-width: none; }
 }
+
+/* Barcode labels for printing */
+.label-cell { width: 38mm; height: 29mm; padding: 2mm; text-align: center; page-break-inside: avoid; overflow: hidden; }
+.label-name { font-size: 9px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1mm; }
+.label-cell svg { width: 100%; height: auto; }
+.label-price { font-size: 10px; font-weight: 800; }
+
+@media print {
+  body * { visibility: hidden; }
+  #label-print-root, #label-print-root * { visibility: visible; }
+  #label-print-root { position: absolute; top: 0; left: 0; display: flex; flex-wrap: wrap; gap: 2mm; padding: 6mm; }
+}

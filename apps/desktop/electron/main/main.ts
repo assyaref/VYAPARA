@@ -34,6 +34,7 @@ import {
   CashDrawerQuerySchema,
   CashMovementsQuerySchema,
   CashierPerformanceQuerySchema,
+  ShiftRecapQuerySchema,
   RoleCreateSchema,
   RoleIdSchema,
   RoleQuerySchema,
@@ -76,6 +77,15 @@ const VERSION = app.getVersion() || '1.0.0';
 let appDb: ReturnType<typeof openAppDatabase> | null = null;
 let activeToken: string | null = null;
 let tokenLoaded = false;
+
+function getSettingsRow(appDb: ReturnType<typeof openAppDatabase>, key: string, fallback: string): string {
+  try {
+    const row = appDb.sqlite.prepare('SELECT value FROM settings WHERE key = ?').get(key) as { value: string } | undefined;
+    return row?.value ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 function getDb(): ReturnType<typeof openAppDatabase> {
   if (!appDb) {
@@ -2293,6 +2303,77 @@ function createWindow() {
       return { ok: true, success: true };
     } catch (error: any) {
       return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('transaction:getInvoicePayload', async (_event: any, input: { token: string; transactionId: string }) => {
+    try {
+      const { requireUser, assertPermission, hashSession } = await import('./services/auth') as any;
+      const appDb = getDb();
+      const user = requireUser(appDb, input.token);
+      assertPermission(user, 'transaction:read');
+      const row = appDb.sqlite.prepare(
+        `SELECT t.id, t.transaction_number, t.created_at, t.subtotal, t.discount_amount, t.total_amount, t.payment_method, t.payments_json, c.name AS customer_name
+         FROM transactions t LEFT JOIN customers c ON c.id = t.customer_id WHERE t.id = ?`,
+      ).get(input.transactionId) as any;
+      if (!row) {
+        return { ok: false, success: false, error: { code: 'NOT_FOUND', message: 'Transaksi tidak ditemukan' } };
+      }
+      const items = appDb.sqlite.prepare(
+        'SELECT product_name, quantity, price, subtotal FROM transaction_items WHERE transaction_id = ?',
+      ).all(input.transactionId) as any[];
+      const itemsOut = items.map((i) => ({ productName: i.product_name, quantity: i.quantity, unitPrice: Math.round(i.price), subtotal: Math.round(i.subtotal) }));
+      let payments: { method: string; amount: number }[] = [];
+      try {
+        const parsed = row.payments_json ? JSON.parse(row.payments_json) : [];
+        if (Array.isArray(parsed)) {
+          payments = parsed.map((p: any) => ({ method: String(p.method ?? 'cash'), amount: Math.round(p.amount ?? 0) }));
+        }
+      } catch {
+        payments = [{ method: row.payment_method ?? 'cash', amount: Math.round(row.total_amount) }];
+      }
+      const subtotal = Math.round(row.subtotal ?? 0);
+      const discount = Math.round(row.discount_amount ?? 0);
+      const total = Math.round(row.total_amount ?? subtotal - discount);
+      const change = payments.length === 1 && payments[0] ? Math.max(0, Math.round(payments[0].amount - total)) : 0;
+      return {
+        ok: true,
+        success: true,
+        data: {
+          storeName: getSettingsRow(appDb, 'store_name', 'VYAPARA'),
+          tagline: 'SISTEM MANAJEMEN USAHA TERPADU',
+          footer: getSettingsRow(appDb, 'receipt_footer', 'Terima kasih atas kunjungan Anda'),
+          transactionNumber: row.transaction_number,
+          date: new Date(row.created_at).toLocaleString('id-ID'),
+          cashier: user.name,
+          customerName: row.customer_name || null,
+          items: itemsOut,
+          subtotal,
+          discount,
+          total,
+          payments,
+          change,
+        },
+      };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message } };
+    }
+  });
+
+  ipcMain.handle('report:shiftRecap', async (event: any, input: unknown) => {
+    try {
+      const { getShiftRecap } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const appDb = getDb();
+      const parsed = ShiftRecapQuerySchema.parse(input);
+      const user = requireUser(appDb, parsed.token);
+      assertPermission(user, 'reports:read');
+      return { ok: true, success: true, data: getShiftRecap(appDb, parsed.startDate, parsed.endDate) };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
     }
   });
 

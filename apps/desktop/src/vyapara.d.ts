@@ -40,6 +40,8 @@ interface Window {
     printReceipt: (input: unknown) => Promise<any>;
     printInvoice: (input: unknown) => Promise<any>;
     printDeliveryOrder: (input: unknown) => Promise<any>;
+    reportShiftRecap: (input: unknown) => Promise<any>;
+    getTransactionInvoicePayload: (input: unknown) => Promise<any>;
     setBranding: (input: unknown) => Promise<any>;
     pickLogo: (input: unknown) => Promise<any>;
     resetLogo: (input: unknown) => Promise<any>;

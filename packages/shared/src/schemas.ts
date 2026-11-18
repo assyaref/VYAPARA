@@ -190,6 +190,8 @@ export const ProductCreateSchema = z.object({
   price: moneySchema,
   cost: moneySchema,
   stock: z.number().nonnegative().max(1_000_000),
+  wholesalePrice: moneySchema.optional(),
+  wholesaleMinQty: z.number().nonnegative().max(1_000_000).optional(),
 });
 
 export const ProductUpdateSchema = z.object({
@@ -205,6 +207,8 @@ export const ProductUpdateSchema = z.object({
     message: 'Price must be non-negative',
     path: ['price'],
   }),
+  wholesalePrice: moneySchema.optional().nullable(),
+  wholesaleMinQty: z.number().nonnegative().max(1_000_000).optional().nullable(),
   cost: moneySchema.optional().refine((val) => val === undefined || val >= 0, {
     message: 'Cost must be non-negative',
     path: ['cost'],
@@ -564,6 +568,12 @@ export const BestSellingQuerySchema = z.object({
   startDate: z.number().int().optional(),
   endDate: z.number().int().optional(),
   limit: z.number().int().positive().max(100).optional(),
+});
+
+export const ShiftRecapQuerySchema = z.object({
+  token: tokenSchema,
+  startDate: z.union([z.number().int(), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
+  endDate: z.union([z.number().int(), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
 });
 
 export const CashierPerformanceQuerySchema = z.object({

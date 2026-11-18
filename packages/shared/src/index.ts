@@ -40,7 +40,7 @@ export {
   PurchaseReturnCreateSchema,
   PurchaseReturnQuerySchema,
   ReceiveGoodsSchema,
-  ReportQuerySchema,
+  ReportQuerySchema, ShiftRecapQuerySchema,
   RoleCreateSchema,
   RoleIdSchema,
   RolePermissionsSchema,

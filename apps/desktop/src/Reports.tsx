@@ -12,13 +12,14 @@ type PurchaseRow = { date: string; poNumber: string; supplierName: string; total
 type ExpenseRow = { date: string; category: string; amount: number };
 type CashierRow = { userId: string; userName: string; count: number; total: number };
 type TransactionRow = { id: string; transactionNumber: string; userName: string; totalAmount: number; paymentMethod: string; createdAt: string };
+type ShiftRecapRow = { id: string; userName: string; openedAt: number; closedAt: number | null; status: string; openingBalance: number; closingBalance: number | null; cashSales: number; transactionCount: number; expectedCash: number; variance: number | null };
 
 const Reports: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const userPermissions = user?.permissions ?? [];
   const canRead = userPermissions.includes('reports:read');
 
-  const [tab, setTab] = useState<'sales' | 'bestselling' | 'slowmoving' | 'grossprofit' | 'valuation' | 'purchase' | 'expense' | 'cashier' | 'transactions'>('sales');
+  const [tab, setTab] = useState<'sales' | 'bestselling' | 'slowmoving' | 'grossprofit' | 'valuation' | 'purchase' | 'expense' | 'cashier' | 'transactions' | 'shift'>('sales');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,7 @@ const Reports: React.FC = () => {
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
   const [cashiers, setCashiers] = useState<CashierRow[]>([]);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
+  const [shiftRecap, setShiftRecap] = useState<ShiftRecapRow[]>([]);
 
   const defaultStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
   const defaultEnd = new Date().toISOString().split('T')[0]!;
@@ -105,6 +107,12 @@ const Reports: React.FC = () => {
           else setError(result.error.message);
           break;
         }
+        case 'shift': {
+          const result = await vyapara.reportShiftRecap({ token: '', startDate: start, endDate: end });
+          if (result.ok) setShiftRecap(result.data);
+          else setError(result.error.message);
+          break;
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Gagal memuat laporan');
@@ -138,6 +146,25 @@ const Reports: React.FC = () => {
     expense: () => expenses.map((r) => ({ tanggal: r.date, kategori: r.category, jumlah: r.amount })),
     cashier: () => cashiers.map((r) => ({ kasir: r.userName, jumlah_transaksi: r.count, total: r.total })),
     transactions: () => transactions.map((r) => ({ no: r.transactionNumber, kasir: r.userName, total: r.totalAmount, metode: r.paymentMethod, tanggal: r.createdAt })),
+    shift: () => shiftRecap.map((r) => ({ kasir: r.userName, dibuka: new Date(r.openedAt).toLocaleString('id-ID'), ditutup: r.closedAt ? new Date(r.closedAt).toLocaleString('id-ID') : '', status: r.status, saldo_awal: r.openingBalance, saldo_akhir: r.closingBalance ?? '', penjualan_tunai: r.cashSales, jumlah_transaksi: r.transactionCount, perkiraan_kas: r.expectedCash, selisih: r.variance ?? '' })),
+  };
+
+  const printInvoiceForTransaction = async (transactionId: string) => {
+    setError(null);
+    try {
+      const res = await vyapara.getTransactionInvoicePayload({ token: '', transactionId });
+      if (!res?.ok || !res.data) {
+        setError(res?.error?.message ?? 'Gagal memuat data invoice');
+        return;
+      }
+      const payload = { ...res.data, dueDate: null };
+      const send = await vyapara.printInvoice({ token: '', payload });
+      if (!send?.ok) {
+        setError(send?.error?.message ?? 'Gagal mencetak invoice — periksa printer di Pengaturan');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Gagal mencetak invoice');
+    }
   };
 
   const exportCsv = async () => {
@@ -192,7 +219,7 @@ const Reports: React.FC = () => {
               Export CSV
             </button>
           </div>
-          {['sales', 'bestselling', 'slowmoving', 'grossprofit', 'valuation', 'purchase', 'expense', 'cashier', 'transactions'].map((key) => (
+          {['sales', 'bestselling', 'slowmoving', 'grossprofit', 'valuation', 'purchase', 'expense', 'cashier', 'transactions', 'shift'].map((key) => (
             <button
               key={key}
               onClick={() => setTab(key as typeof tab)}
@@ -202,7 +229,7 @@ const Reports: React.FC = () => {
                   : 'text-vyapara-text hover:bg-vyapara-surface'
               }`}
             >
-              {key === 'sales' ? 'Penjualan Harian' : key === 'bestselling' ? 'Produk Terlaris' : key === 'slowmoving' ? 'Produk Lambat Gerak' : key === 'grossprofit' ? 'Laba Kotor' : key === 'valuation' ? 'Nilai Inventaris' : key === 'purchase' ? 'Pembelian' : key === 'expense' ? 'Pengeluaran' : key === 'cashier' ? 'Kinerja Kasir' : 'Transaksi'}
+              {key === 'sales' ? 'Penjualan Harian' : key === 'bestselling' ? 'Produk Terlaris' : key === 'slowmoving' ? 'Produk Lambat Gerak' : key === 'grossprofit' ? 'Laba Kotor' : key === 'valuation' ? 'Nilai Inventaris' : key === 'purchase' ? 'Pembelian' : key === 'expense' ? 'Pengeluaran' : key === 'cashier' ? 'Kinerja Kasir' : key === 'transactions' ? 'Transaksi' : 'Rekap Shift'}
             </button>
           ))}
         </div>
@@ -443,7 +470,7 @@ const Reports: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          ) : (
+          ) : tab === 'transactions' ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead className="bg-vyapara-surface border-b border-vyapara-border">
@@ -453,6 +480,7 @@ const Reports: React.FC = () => {
                     <th className="px-6 py-3 text-sm font-medium text-vyapara-secondary text-right">Total</th>
                     <th className="px-6 py-3 text-sm font-medium text-vyapara-secondary">Metode</th>
                     <th className="px-6 py-3 text-sm font-medium text-vyapara-secondary">Tanggal</th>
+                    <th className="px-6 py-3 text-sm font-medium text-vyapara-secondary text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-vyapara-border">
@@ -463,13 +491,61 @@ const Reports: React.FC = () => {
                       <td className="px-6 py-4 text-sm text-right font-medium">{row.totalAmount.toLocaleString('id-ID')}</td>
                       <td className="px-6 py-4 text-sm">{row.paymentMethod}</td>
                       <td className="px-6 py-4 text-sm">{new Date(row.createdAt).toLocaleString('id-ID')}</td>
+                      <td className="px-6 py-4 text-sm text-right">
+                        <button
+                          onClick={() => printInvoiceForTransaction(row.id)}
+                          className="text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md"
+                        >
+                          Invoice
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {transactions.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-vyapara-secondary">
+                      <td colSpan={6} className="px-6 py-8 text-center text-vyapara-secondary">
                         Tidak ada data transaksi
                       </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-vyapara-surface border-b border-vyapara-border text-[10px] uppercase tracking-wider text-vyapara-secondary">
+                  <tr>
+                    <th className="px-4 py-3">Kasir</th>
+                    <th className="px-4 py-3">Dibuka</th>
+                    <th className="px-4 py-3">Ditutup</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3 text-right">Saldo Awal</th>
+                    <th className="px-4 py-3 text-right">Jual Tunai</th>
+                    <th className="px-4 py-3 text-right">Tx</th>
+                    <th className="px-4 py-3 text-right">Perkiraan Kas</th>
+                    <th className="px-4 py-3 text-right">Saldo Akhir</th>
+                    <th className="px-4 py-3 text-right">Selisih</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-vyapara-border text-xs">
+                  {shiftRecap.map((row) => (
+                    <tr key={row.id} className="hover:bg-vyapara-surface/50">
+                      <td className="px-4 py-3 font-medium">{row.userName}</td>
+                      <td className="px-4 py-3 text-vyapara-secondary">{new Date(row.openedAt).toLocaleString('id-ID')}</td>
+                      <td className="px-4 py-3 text-vyapara-secondary">{row.closedAt ? new Date(row.closedAt).toLocaleString('id-ID') : '—'}</td>
+                      <td className="px-4 py-3"><span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${row.status === 'open' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{row.status}</span></td>
+                      <td className="px-4 py-3 text-right">{row.openingBalance.toLocaleString('id-ID')}</td>
+                      <td className="px-4 py-3 text-right">{row.cashSales.toLocaleString('id-ID')}</td>
+                      <td className="px-4 py-3 text-right">{row.transactionCount}</td>
+                      <td className="px-4 py-3 text-right font-semibold">{row.expectedCash.toLocaleString('id-ID')}</td>
+                      <td className="px-4 py-3 text-right">{row.closingBalance === null ? '—' : row.closingBalance.toLocaleString('id-ID')}</td>
+                      <td className={`px-4 py-3 text-right font-bold ${row.variance === null ? '' : row.variance < 0 ? 'text-red-600' : 'text-emerald-700'}`}>{row.variance === null ? '—' : (row.variance >= 0 ? '+' : '') + row.variance.toLocaleString('id-ID')}</td>
+                    </tr>
+                  ))}
+                  {shiftRecap.length === 0 && (
+                    <tr>
+                      <td colSpan={10} className="px-6 py-8 text-center text-vyapara-secondary">Belum ada data shift dompet kas</td>
                     </tr>
                   )}
                 </tbody>

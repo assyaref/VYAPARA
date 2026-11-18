@@ -196,17 +196,18 @@ export function createTransaction(
     }
 
 const productStmt = db.sqlite.prepare(
-      'SELECT id, name, price, cost, is_active FROM products WHERE id = ?',
+      'SELECT id, name, price, cost, is_active, wholesale_price, wholesale_min_qty FROM products WHERE id = ?',
     );
     const priced: { productId: string; name: string; quantity: number; unitPrice: number; unitCost: number; subtotal: number }[] = [];
     for (const item of input.items) {
       const product = productStmt.get(item.productId) as
-        | { id: string; name: string; price: number; cost: number; is_active: number }
+        | { id: string; name: string; price: number; cost: number; is_active: number; wholesale_price: number; wholesale_min_qty: number }
         | undefined;
       if (!product || product.is_active !== 1) {
         throw new AppError('VALIDATION', 'Produk tidak tersedia');
       }
-      const unitPrice = Math.round(product.price);
+      const wholesaleEligible = Number(product.wholesale_price) > 0 && item.quantity >= Number(product.wholesale_min_qty ?? 10);
+      const unitPrice = Math.round(wholesaleEligible ? product.wholesale_price : product.price);
       const unitCost = Math.round(product.cost);
       priced.push({
         productId: product.id,

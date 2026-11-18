@@ -80,18 +80,18 @@ function toMillis(value: string, endOfDay = false): number {
   return dateOnly && endOfDay ? ms + DAY_MS - 1 : ms;
 }
 
-function parseStart(value: string | undefined): number | undefined {
-  if (!value) {
+function parseStart(value: string | number | undefined): number | undefined {
+  if (value === undefined || value === '') {
     return undefined;
   }
-  return toMillis(value);
+  return toMillis(String(value));
 }
 
-function parseEnd(value: string | undefined): number | undefined {
-  if (!value) {
+function parseEnd(value: string | number | undefined): number | undefined {
+  if (value === undefined || value === '') {
     return undefined;
   }
-  return toMillis(value, true);
+  return toMillis(String(value), true);
 }
 
 function msExpression(column: string): string {
@@ -481,4 +481,71 @@ export function getTransactionReport(
     }[];
 
   return rows;
+}
+
+export type ShiftRecapRow = {
+  id: string;
+  userName: string;
+  openedAt: number;
+  closedAt: number | null;
+  status: string;
+  openingBalance: number;
+  closingBalance: number | null;
+  cashSales: number;
+  transactionCount: number;
+  expectedCash: number;
+  variance: number | null;
+};
+
+export function getShiftRecap(db: AppDatabase, startDate?: string | number, endDate?: string | number): ShiftRecapRow[] {
+  const start = parseStart(startDate);
+  const end = parseEnd(endDate);
+  const clauses: string[] = [];
+  const params: (string | number)[] = [];
+  if (start !== undefined) {
+    clauses.push('cd.opened_at >= ?');
+    params.push(start);
+  }
+  if (end !== undefined) {
+    clauses.push('cd.opened_at <= ?');
+    params.push(end);
+  }
+  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+  const rows = db.sqlite
+    .prepare(
+      `SELECT cd.id, u.name AS user_name, cd.opened_at, cd.closed_at, cd.status,
+              cd.opening_balance, cd.closing_balance,
+              (SELECT COALESCE(SUM(t.total_amount), 0) FROM transactions t
+                WHERE t.status = 'completed' AND t.payment_method = 'cash'
+                  AND ${msExpression('t.created_at')} >= cd.opened_at
+                  AND (cd.closed_at IS NULL OR ${msExpression('t.created_at')} <= cd.closed_at)) AS cash_sales,
+              (SELECT COUNT(*) FROM transactions t
+                WHERE t.status = 'completed' AND t.payment_method = 'cash'
+                  AND ${msExpression('t.created_at')} >= cd.opened_at
+                  AND (cd.closed_at IS NULL OR ${msExpression('t.created_at')} <= cd.closed_at)) AS tx_count
+       FROM cash_drawers cd
+       JOIN users u ON u.id = cd.user_id
+       ${where}
+       ORDER BY cd.opened_at DESC`,
+    )
+    .all(...params) as any[];
+  return rows.map((r) => {
+    const opening = Math.round(r.opening_balance ?? 0);
+    const cashSales = Math.round(r.cash_sales ?? 0);
+    const expected = opening + cashSales;
+    const closing = r.closing_balance === null ? null : Math.round(r.closing_balance);
+    return {
+      id: r.id,
+      userName: r.user_name,
+      openedAt: r.opened_at,
+      closedAt: r.closed_at,
+      status: r.status,
+      openingBalance: opening,
+      closingBalance: closing,
+      cashSales,
+      transactionCount: Number(r.tx_count ?? 0),
+      expectedCash: expected,
+      variance: closing === null ? null : closing - expected,
+    };
+  });
 }

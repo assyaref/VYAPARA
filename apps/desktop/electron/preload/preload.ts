@@ -36,6 +36,7 @@ const api = {
   printReceipt: (input: unknown) => send('printer:printReceipt', input),
   printInvoice: (input: unknown) => send('printer:printInvoice', input),
   printDeliveryOrder: (input: unknown) => send('printer:printDeliveryOrder', input),
+  getTransactionInvoicePayload: (input: unknown) => send('transaction:getInvoicePayload', input),
   setBranding: (input: unknown) => send('branding:set', input),
   pickLogo: (input: unknown) => send('branding:pickLogo', input),
   resetLogo: (input: unknown) => send('branding:resetLogo', input),
@@ -148,6 +149,7 @@ const api = {
   getCustomerStats: (input: unknown) => send('customer:getStats', input),
 
   reportSales: (input?: unknown) => send('report:sales', input ?? {}),
+  reportShiftRecap: (input?: unknown) => send('report:shiftRecap', input ?? {}),
   reportBestSelling: (input?: unknown) => send('report:bestSelling', input ?? {}),
   reportSlowMoving: (input?: unknown) => send('report:slowMoving', input ?? {}),
   reportGrossProfit: (input?: unknown) => send('report:grossProfit', input ?? {}),
