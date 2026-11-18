@@ -19,7 +19,7 @@ const check = (name, ok) => {
   const app = await electron.launch({
     executablePath: path.join(root, 'node_modules', 'electron', 'dist', 'electron.exe'),
     args: ['--no-sandbox', `--user-data-dir=${profile}`, path.join(root, 'apps', 'desktop', 'out', 'main', 'main.js')],
-    env: { ...process.env, NODE_ENV: 'production' },
+    env: { ...process.env, NODE_ENV: 'production', VYAPARA_DEV_SEED_SUPERADMIN: '1' },
     timeout: 45000,
   });
 

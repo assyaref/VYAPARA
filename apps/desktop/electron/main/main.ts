@@ -2613,7 +2613,11 @@ function createWindow() {
 
 app.whenReady().then(() => {
   const db = getDb();
-  ensureSuperadmin(db);
+  // Only seed the built-in superadmin in DEV mode so shipped installers are clean.
+  if (process.env.VYAPARA_DEV_SEED_SUPERADMIN === '1') {
+    ensureSuperadmin(db);
+    console.warn('[DEV] VYAPARA_DEV_SEED_SUPERADMIN=1 — seeded superadmin for local development');
+  }
   void verifyLicense(db).catch(() => { /* verified lazily at next launch */ });
   initSyncCoordinator(db).start();
   if (app.isPackaged) {
