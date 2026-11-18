@@ -23,6 +23,7 @@ const PAYMENT_METHODS = [
   { value: 'qris', label: 'QRIS', hint: 'QR' },
   { value: 'transfer', label: 'Transfer', hint: 'Bank' },
   { value: 'debit', label: 'Debit', hint: 'Kartu' },
+  { value: 'credit', label: 'Kredit', hint: 'Piutang' },
 ];
 
 // deterministic hue from product id/name for image placeholder
@@ -60,6 +61,28 @@ const POS: React.FC = () => {
   const [doDoc, setDoDoc] = useState<any | null>(null);
   const [doLoading, setDoLoading] = useState(false);
   const [invLoading, setInvLoading] = useState(false);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [customerQuery, setCustomerQuery] = useState('');
+  const [customerMenuOpen, setCustomerMenuOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
+  const [useLoyalty, setUseLoyalty] = useState(false);
+  const [loyaltyRedeemAmount, setLoyaltyRedeemAmount] = useState(100);
+  const [loyaltyEarnAmount, setLoyaltyEarnAmount] = useState(10000);
+
+  useEffect(() => {
+    vyapara?.getCustomers?.({ token: '', includeInactive: false, limit: 500 }).then((res: any) => {
+      if (res?.ok) setCustomers(Array.isArray(res.data) ? res.data : []);
+    }).catch(() => {});
+    vyapara?.settingsList?.().then((res: any) => {
+      const list = res?.data ?? [];
+      const find = (k: string) => Number(list.find((x: any) => x.key === k)?.value);
+      const redeem = find('loyalty_redeem_amount');
+      const earn = find('loyalty_earn_amount');
+      if (Number.isFinite(redeem) && redeem > 0) setLoyaltyRedeemAmount(redeem);
+      if (Number.isFinite(earn) && earn > 0) setLoyaltyEarnAmount(earn);
+    }).catch(() => {});
+  }, []);
+
   const [doDmLoading, setDoDmLoading] = useState(false);
   const [discountPct, setDiscountPct] = useState(0);
   const [discountManual, setDiscountManual] = useState('');
@@ -68,11 +91,17 @@ const POS: React.FC = () => {
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
   const discountFromPct = Math.round((subtotal * discountPct) / 100);
   const discountFromManual = parseInt(discountManual, 10) || 0;
-  const discountAmount = Math.min(subtotal, discountPct > 0 ? discountFromPct : discountFromManual);
+  const manualDiscount = Math.min(subtotal, discountPct > 0 ? discountFromPct : discountFromManual);
+  const loyaltyPoints = selectedCustomer?.loyaltyPoints ?? 0;
+  const loyaltyRedeemValue = useLoyalty ? Math.min(loyaltyPoints * loyaltyRedeemAmount, Math.max(0, subtotal - manualDiscount)) : 0;
+  const discountAmount = manualDiscount + loyaltyRedeemValue;
   const taxAmount = Math.round(((subtotal - discountAmount) * taxRateBps) / 10_000);
   const total = subtotal - discountAmount + taxAmount;
   const paid = paymentMethod === 'cash' ? (parseInt(paymentAmount, 10) || 0) : total;
   const change = Math.max(0, paid - total);
+  const filteredCustomers = customers
+    .filter((c) => !customerQuery || `${c.name} ${c.code ?? ''} ${c.phone ?? ''}`.toLowerCase().includes(customerQuery.toLowerCase()))
+    .slice(0, 8);
   const cartQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const loadProducts = useCallback(async () => {
@@ -152,6 +181,8 @@ const POS: React.FC = () => {
         discountAmount,
         payments,
         notes: '',
+        customerId: selectedCustomer?.id || undefined,
+        loyaltyPointsRedeemed: useLoyalty && selectedCustomer ? selectedCustomer.loyaltyPoints : undefined,
       });
       if (result.ok) {
         setReceipt(result.data);
@@ -442,8 +473,11 @@ const POS: React.FC = () => {
                   />
                 </div>
               </div>
-              {discountAmount > 0 && (
-                <div className="flex justify-between text-emerald-700"><span>Diskon diterapkan</span><span className="font-semibold">− {idr(discountAmount)}</span></div>
+              {manualDiscount > 0 && (
+                <div className="flex justify-between text-emerald-700"><span>Diskon diterapkan</span><span className="font-semibold">− {idr(manualDiscount)}</span></div>
+              )}
+              {loyaltyRedeemValue > 0 && (
+                <div className="flex justify-between text-emerald-700"><span>Diskon poin loyalti</span><span className="font-semibold">− {idr(loyaltyRedeemValue)}</span></div>
               )}
               {taxRateBps > 0 && (
                 <div className="flex justify-between"><span className="text-vyapara-secondary">PPN {taxRateBps / 100}%</span><span className="font-medium">+ {idr(taxAmount)}</span></div>
@@ -451,11 +485,52 @@ const POS: React.FC = () => {
               <div className="flex justify-between pt-1 border-t border-vyapara-border"><span className="font-extrabold text-vyapara-navy">Total</span><span className="font-extrabold text-2xl text-vyapara-navy">{idr(total)}</span></div>
             </div>
 
+            {/* customer picker + loyalty */}
+            <div className="px-4 py-2 border-t border-vyapara-border relative">
+              <label className="block text-[10px] uppercase tracking-wider font-semibold text-vyapara-secondary mb-1">Pelanggan (opsional)</label>
+              {selectedCustomer ? (
+                <div className="flex items-center gap-2 bg-vyapara-light-blue border border-vyapara-navy/20 rounded-lg px-3 py-1.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-vyapara-navy truncate">{selectedCustomer.name}</p>
+                    <p className="text-[10px] text-vyapara-secondary">{selectedCustomer.code ?? ''} • Piutang {Math.round(selectedCustomer.balance ?? 0).toLocaleString('id-ID')} • Poin {selectedCustomer.loyaltyPoints ?? 0}</p>
+                  </div>
+                  <button onClick={() => { setSelectedCustomer(null); setUseLoyalty(false); }} className="text-[10px] font-bold text-vyapara-red border border-vyapara-red/30 rounded px-2 py-1 hover:bg-red-50">Hapus</button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={customerQuery}
+                    onChange={(e) => { setCustomerQuery(e.target.value); setCustomerMenuOpen(true); }}
+                    onFocus={() => setCustomerMenuOpen(true)}
+                    placeholder="Ketik nama / kode / telepon…"
+                    className="w-full px-3 py-1.5 text-xs border border-vyapara-border rounded-lg outline-none focus:ring-2 focus:ring-vyapara-blue"
+                  />
+                  {customerMenuOpen && filteredCustomers.length > 0 && (
+                    <div className="absolute z-20 bg-white border border-vyapara-border rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto w-full">
+                      {filteredCustomers.map((c) => (
+                        <button key={c.id} onClick={() => { setSelectedCustomer(c); setCustomerQuery(''); setCustomerMenuOpen(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-vyapara-surface border-b border-vyapara-border last:border-0">
+                          <span className="font-semibold">{c.name}</span>
+                          <span className="text-vyapara-secondary ml-2">{c.code ?? ''}{c.phone ? ` • ${c.phone}` : ''}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              {selectedCustomer && loyaltyPoints > 0 && (
+                <label className="mt-1.5 flex items-center gap-2 text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 cursor-pointer">
+                  <input type="checkbox" checked={useLoyalty} onChange={(e) => setUseLoyalty(e.target.checked)} className="w-3.5 h-3.5 accent-emerald-600" />
+                  Pakai {loyaltyPoints} poin (− {loyaltyPoints * loyaltyRedeemAmount}) &nbsp;|&nbsp; 1 poin = Rp {loyaltyRedeemAmount.toLocaleString('id-ID')} • earn 1 poin / Rp {loyaltyEarnAmount.toLocaleString('id-ID')}
+                </label>
+              )}
+            </div>
+
             {/* payment */}
             <div className="px-4 py-3 border-t border-vyapara-border">
               <label className="block text-[10px] uppercase tracking-wider font-semibold text-vyapara-secondary mb-1.5">Metode Pembayaran</label>
               <div className="flex gap-2 flex-wrap mb-2">
-                {PAYMENT_METHODS.map((pm) => (
+                {PAYMENT_METHODS.filter((pm) => pm.value !== 'credit' || selectedCustomer).map((pm) => (
                   <button
                     key={pm.value}
                     onClick={() => setPaymentMethod(pm.value)}

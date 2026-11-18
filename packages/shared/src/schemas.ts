@@ -242,6 +242,7 @@ export const TransactionCreateSchema = z.object({
   discountAmount: moneySchema,
   payments: z.array(PaymentLineSchema).min(1).max(8),
   notes: z.string().trim().max(300).optional(),
+  loyaltyPointsRedeemed: z.number().int().min(0).max(1_000_000).optional(),
 });
 
 export const SettingsUpdateSchema = z.object({

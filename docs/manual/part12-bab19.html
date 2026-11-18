@@ -41,3 +41,15 @@
 <li>Tiap shift dompet kas ditampilkan: kasir, jam buka/tutup, saldo awal, penjualan tunai, jumlah transaksi, perkiraan kas (saldo awal + tunai), saldo akhir aktual, dan <strong>selisih</strong> (hijau = lebih, merah = kurang).</li>
 <li>Gunakan untuk rekonsiliasi kas akhir shift — selisih negatif harus diinvestigasi.</li>
 </ol>
+
+<h2>19.7 Loyalty Points &amp; Kredit (Piutang) Pelanggan</h2>
+<p>Migrasi 016 menambahkan loyalty points ke setiap pelanggan. Cara kerja:</p>
+<ol>
+<li>Di layar kasir, bagian <strong>Pelanggan (opsional)</strong> — ketik nama/kode/telepon dan pilih.</li>
+<li>Pelanggan terpilih menampilkan nama, saldo piutang, dan <strong>poin</strong> kanan bawah picker.</li>
+<li>Poin diperoleh otomatis setiap transaksi selesai: <strong>Rp 10.000 = 1 poin</strong> (dapat diubah di Pengaturan dengan kunci <code>loyalty_earn_amount</code>).</li>
+<li>Poin bisa dipakai sebagai diskon: centang <em>“Pakai N poin”</em> — setiap poin bernilai <strong>Rp 100</strong> (kunci <code>loyalty_redeem_amount</code>). Diskon diterapkan sebelum PPN.</li>
+<li>Pelanggan terpilih membuka tombol pembayaran <strong>Kredit</strong> — penjualan dicatat sebagai piutang (saldo pelanggan bertambah; lihat menu Pelanggan → terima pembayaran).</li>
+<li>Harga grosir tetap otomatis (lihat 19.3) saat qty ≥ min — pelanggan mendapat manfaat grosir + loyalti sekaligus.</li>
+</ol>
+<p class="small">Catatan: poin tidak hangus; tidak ada kebijakan kedaluwarsa saat ini. Penghapusan data pelanggan menghapus poinnya juga.</p>

@@ -7,6 +7,7 @@ export type CustomerRecord = {
   id: string;
   code: string;
   name: string;
+  loyaltyPoints: number;
   contactPerson: string | null;
   phone: string | null;
   email: string | null;
@@ -51,6 +52,7 @@ type CustomerRow = {
   country: string | null;
   tax_id: string | null;
   balance: number;
+  loyalty_points: number;
   status: string;
   notes: string | null;
   created_at: number;
@@ -106,8 +108,8 @@ export function createCustomer(
     .prepare(
       `INSERT INTO customers (
         id, code, name, contact_person, phone, email, address, city,
-        postal_code, country, tax_id, balance, status, notes, created_at, updated_at, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'active', ?, ?, ?, ?)`,
+        postal_code, country, tax_id, balance, loyalty_points, status, notes, created_at, updated_at, created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 'active', ?, ?, ?, ?)`,
     )
     .run(
       id,
@@ -134,7 +136,7 @@ export function getCustomer(db: AppDatabase, id: string): CustomerRecord | undef
   const row = db.sqlite
     .prepare(
       `SELECT id, code, name, contact_person, phone, email, address, city,
-              postal_code, country, tax_id, balance, status, notes,
+              postal_code, country, tax_id, balance, loyalty_points, status, notes,
               created_at, updated_at, created_by
        FROM customers WHERE id = ?`,
     )
@@ -155,6 +157,7 @@ export function getCustomer(db: AppDatabase, id: string): CustomerRecord | undef
     country: row.country,
     taxId: row.tax_id,
     balance: row.balance,
+    loyaltyPoints: row.loyalty_points ?? 0,
     status: row.status,
     notes: row.notes,
     createdAt: row.created_at,
@@ -183,7 +186,7 @@ export function listCustomers(
   const rows = db.sqlite
     .prepare(
       `SELECT id, code, name, contact_person, phone, email, address, city,
-              postal_code, country, tax_id, balance, status, notes,
+              postal_code, country, tax_id, balance, loyalty_points, status, notes,
               created_at, updated_at, created_by
        FROM customers ${where} ORDER BY name COLLATE NOCASE ${limit}`,
     )
@@ -202,6 +205,7 @@ export function listCustomers(
     country: row.country,
     taxId: row.tax_id,
     balance: row.balance,
+    loyaltyPoints: row.loyalty_points ?? 0,
     status: row.status,
     notes: row.notes,
     createdAt: row.created_at,
@@ -504,3 +508,22 @@ export function getCustomerStats(
     lastTransactionAt: Number.isFinite(lastAt) ? lastAt : null,
   };
 }
+
+export function getLoyaltyConfig(db: AppDatabase): { earnAmount: number; redeemAmount: number } {
+  const read = (key: string, fallback: number): number => {
+    const row = db.sqlite.prepare('SELECT value FROM settings WHERE key = ?').get(key) as { value: string } | undefined;
+    const n = Number(row?.value);
+    return Number.isFinite(n) && n >= 0 ? n : fallback;
+  };
+  return {
+    earnAmount: read('loyalty_earn_amount', 10_000),
+    redeemAmount: read('loyalty_redeem_amount', 100),
+  };
+}
+
+export function getCustomerLoyalty(db: AppDatabase, id: string): { loyaltyPoints: number } | undefined {
+  const row = db.sqlite.prepare('SELECT loyalty_points FROM customers WHERE id = ?').get(id) as { loyalty_points: number } | undefined;
+  if (!row) return undefined;
+  return { loyaltyPoints: Math.max(0, Math.round(row.loyalty_points ?? 0)) };
+}
+

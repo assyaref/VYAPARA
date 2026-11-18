@@ -141,6 +141,7 @@ export type TransactionInput = {
   payments: PaymentLine[];
   customerId?: string;
   notes?: string;
+  loyaltyPointsRedeemed?: number;
 };
 
 export function createTransaction(
@@ -275,6 +276,20 @@ const insertItem = db.sqlite.prepare(
         notes: `Penjualan ${transactionNumber}`,
         userId,
       });
+    }
+
+    if (customer) {
+      const redeemed = Math.max(0, Math.round(input.loyaltyPointsRedeemed ?? 0));
+      const earnRow = db.sqlite.prepare('SELECT value FROM settings WHERE key = ?').get('loyalty_earn_amount') as { value: string } | undefined;
+      const earnAmount = Math.max(1, Math.round(Number(earnRow?.value) || 10_000));
+      const earned = Math.floor(settlement.total / earnAmount);
+      const cur = db.sqlite.prepare('SELECT loyalty_points FROM customers WHERE id = ?').get(customer.id) as { loyalty_points: number } | undefined;
+      const current = Math.max(0, Math.round(cur?.loyalty_points ?? 0));
+      const appliedRedeem = Math.min(current, redeemed);
+      const nextPoints = Math.max(0, current - appliedRedeem + earned);
+      if (nextPoints !== current) {
+        db.sqlite.prepare('UPDATE customers SET loyalty_points = ?, updated_at = ? WHERE id = ?').run(nextPoints, Date.now(), customer.id);
+      }
     }
 
     if (customer && creditAmount > 0) {

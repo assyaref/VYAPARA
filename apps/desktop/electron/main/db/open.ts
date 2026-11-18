@@ -18,6 +18,7 @@ import syncEngineSql from '../../../drizzle/012-sync-engine.sql?raw';
 import conflictResolutionSql from '../../../drizzle/013-conflict-resolution-engine.sql?raw';
 import auditLogSql from '../../../drizzle/014-audit-log.sql?raw';
 import wholesalePricingSql from '../../../drizzle/015-wholesale-pricing.sql?raw';
+import loyaltyPointsSql from '../../../drizzle/016-loyalty-points.sql?raw';
 import { ROLE_PERMISSIONS } from 'vyapara-shared';
 import { remediateKnownPassword } from '../services/passwords';
 
@@ -40,6 +41,7 @@ const MIGRATIONS: { name: string; sql: string }[] = [
   { name: '013-conflict-resolution-engine', sql: conflictResolutionSql },
   { name: '014-audit-log', sql: auditLogSql },
   { name: '015-wholesale-pricing', sql: wholesalePricingSql },
+  { name: '016-loyalty-points', sql: loyaltyPointsSql },
 ];
 
 export function splitSql(source: string): string[] {
