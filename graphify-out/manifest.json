@@ -85,9 +85,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/vyapara.d.ts": {
-    "mtime": 1794991935.5647848,
-    "seen": 1794992311.8657384,
-    "ast_hash": "ef325a028c1e9efe8a3a79314403e764",
+    "mtime": 1794993984.7298217,
+    "seen": 1794994296.3028858,
+    "ast_hash": "fbcf84fd2aabb025f0d15e8cbe224841",
     "semantic_hash": ""
   },
   "apps/desktop/tailwind.config.ts": {
@@ -145,15 +145,15 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/main.ts": {
-    "mtime": 1794991712.2424679,
-    "seen": 1794992311.8533435,
-    "ast_hash": "2d7fac0b60ac92efbf1cad5382a55119",
+    "mtime": 1794993984.6603181,
+    "seen": 1794994296.2790694,
+    "ast_hash": "b587dcaf4e6a251bd4f93fa70fa74604",
     "semantic_hash": ""
   },
   "apps/desktop/electron/preload/preload.ts": {
-    "mtime": 1794991976.4710684,
-    "seen": 1794992311.8625007,
-    "ast_hash": "1fb48bf65faf9c8acd092d3d1298983a",
+    "mtime": 1794993984.7298217,
+    "seen": 1794994296.2973402,
+    "ast_hash": "1a2a439a0dce659374f1e64ab845b0f5",
     "semantic_hash": ""
   },
   "apps/desktop/drizzle/schema.ts": {
@@ -265,9 +265,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/reports.ts": {
-    "mtime": 1794991803.5688963,
-    "seen": 1794992311.856254,
-    "ast_hash": "acfc9f03e06cc0dd21ec19d2a08a0f40",
+    "mtime": 1794993984.5828066,
+    "seen": 1794994296.286053,
+    "ast_hash": "e6785e6bb7165940ecae792c2c032ec0",
     "semantic_hash": ""
   },
   "apps/desktop/electron/main/services/settings.ts": {
@@ -313,9 +313,9 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/Reports.tsx": {
-    "mtime": 1794991907.137365,
-    "seen": 1794992311.8641741,
-    "ast_hash": "0f953db321d4ea42761e483595ce72a3",
+    "mtime": 1794994114.420178,
+    "seen": 1794994296.3005366,
+    "ast_hash": "55962f29fed8973bb59e5b5389757a1f",
     "semantic_hash": ""
   },
   "apps/desktop/src/Settings.tsx": {
@@ -1387,15 +1387,15 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-dashboard.png": {
-    "mtime": 1794993727.5757947,
-    "seen": 1794993791.799937,
-    "ast_hash": "de5fdce34ec3434ad6feb5e009d5cd04",
+    "mtime": 1794994181.759774,
+    "seen": 1794994296.354755,
+    "ast_hash": "0d0f585651d4694cd19f409c8bab917c",
     "semantic_hash": ""
   },
   "evidence/acceptance-pos.png": {
-    "mtime": 1794993728.6247473,
-    "seen": 1794993791.7999418,
-    "ast_hash": "68c20a6f4717cedaf0b8c992b27fc7ed",
+    "mtime": 1794994182.8264458,
+    "seen": 1794994296.3547637,
+    "ast_hash": "0fdd9ae48ca53b1aa8c80118ab8690bb",
     "semantic_hash": ""
   },
   "PHASE_6_DATABASE_BACKUP_RECOVERY.md": {
@@ -1411,8 +1411,8 @@
     "semantic_hash": ""
   },
   "evidence/acceptance-offline.png": {
-    "mtime": 1794993726.5171385,
-    "seen": 1794993791.7999396,
+    "mtime": 1794994180.7293262,
+    "seen": 1794994296.3547602,
     "ast_hash": "37ec0840f1f1166732b46bae962cb51b",
     "semantic_hash": ""
   },
@@ -1972,6 +1972,12 @@
     "mtime": 1794993499.6433039,
     "seen": 1794993791.7819338,
     "ast_hash": "572b1587a706cd1b1796668a6bb3c729",
+    "semantic_hash": ""
+  },
+  "evidence/e2e-piutang.cjs": {
+    "mtime": 1794994199.94602,
+    "seen": 1794994296.3123417,
+    "ast_hash": "d53f4fc86676d8497b5866da445d14e9",
     "semantic_hash": ""
   },
   "apps/desktop/package-lock.json": {

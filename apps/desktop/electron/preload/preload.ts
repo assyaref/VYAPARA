@@ -150,6 +150,7 @@ const api = {
 
   reportSales: (input?: unknown) => send('report:sales', input ?? {}),
   reportShiftRecap: (input?: unknown) => send('report:shiftRecap', input ?? {}),
+  reportReceivables: (input?: unknown) => send('report:receivables', input ?? {}),
   reportBestSelling: (input?: unknown) => send('report:bestSelling', input ?? {}),
   reportSlowMoving: (input?: unknown) => send('report:slowMoving', input ?? {}),
   reportGrossProfit: (input?: unknown) => send('report:grossProfit', input ?? {}),

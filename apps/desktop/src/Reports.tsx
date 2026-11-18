@@ -13,13 +13,14 @@ type ExpenseRow = { date: string; category: string; amount: number };
 type CashierRow = { userId: string; userName: string; count: number; total: number };
 type TransactionRow = { id: string; transactionNumber: string; userName: string; totalAmount: number; paymentMethod: string; createdAt: string };
 type ShiftRecapRow = { id: string; userName: string; openedAt: number; closedAt: number | null; status: string; openingBalance: number; closingBalance: number | null; cashSales: number; transactionCount: number; expectedCash: number; variance: number | null };
+type ReceivablesRow = { id: string; code: string; name: string; balance: number; oldestSaleDate: number | null; daysOutstanding: number; bucket: '0-30' | '31-60' | '61-90' | '>90'; lastActivity: number | null };
 
 const Reports: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const userPermissions = user?.permissions ?? [];
   const canRead = userPermissions.includes('reports:read');
 
-  const [tab, setTab] = useState<'sales' | 'bestselling' | 'slowmoving' | 'grossprofit' | 'valuation' | 'purchase' | 'expense' | 'cashier' | 'transactions' | 'shift'>('sales');
+  const [tab, setTab] = useState<'sales' | 'bestselling' | 'slowmoving' | 'grossprofit' | 'valuation' | 'purchase' | 'expense' | 'cashier' | 'transactions' | 'shift' | 'piutang'>('sales');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ const Reports: React.FC = () => {
   const [cashiers, setCashiers] = useState<CashierRow[]>([]);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
   const [shiftRecap, setShiftRecap] = useState<ShiftRecapRow[]>([]);
+  const [receivables, setReceivables] = useState<ReceivablesRow[]>([]);
 
   const defaultStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
   const defaultEnd = new Date().toISOString().split('T')[0]!;
@@ -113,6 +115,12 @@ const Reports: React.FC = () => {
           else setError(result.error.message);
           break;
         }
+        case 'piutang': {
+          const result = await vyapara.reportReceivables({ token: '' });
+          if (result.ok) setReceivables(result.data);
+          else setError(result.error.message);
+          break;
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Gagal memuat laporan');
@@ -146,6 +154,7 @@ const Reports: React.FC = () => {
     expense: () => expenses.map((r) => ({ tanggal: r.date, kategori: r.category, jumlah: r.amount })),
     cashier: () => cashiers.map((r) => ({ kasir: r.userName, jumlah_transaksi: r.count, total: r.total })),
     transactions: () => transactions.map((r) => ({ no: r.transactionNumber, kasir: r.userName, total: r.totalAmount, metode: r.paymentMethod, tanggal: r.createdAt })),
+    piutang: () => receivables.map((r) => ({ kode: r.code, nama: r.name, total_piutang: r.balance, hari_belum_bayar: r.daysOutstanding, bucket: r.bucket, terakhir_aktiv: r.lastActivity ? new Date(r.lastActivity).toLocaleString('id-ID') : '' })),
     shift: () => shiftRecap.map((r) => ({ kasir: r.userName, dibuka: new Date(r.openedAt).toLocaleString('id-ID'), ditutup: r.closedAt ? new Date(r.closedAt).toLocaleString('id-ID') : '', status: r.status, saldo_awal: r.openingBalance, saldo_akhir: r.closingBalance ?? '', penjualan_tunai: r.cashSales, jumlah_transaksi: r.transactionCount, perkiraan_kas: r.expectedCash, selisih: r.variance ?? '' })),
   };
 
@@ -219,7 +228,7 @@ const Reports: React.FC = () => {
               Export CSV
             </button>
           </div>
-          {['sales', 'bestselling', 'slowmoving', 'grossprofit', 'valuation', 'purchase', 'expense', 'cashier', 'transactions', 'shift'].map((key) => (
+          {['sales', 'bestselling', 'slowmoving', 'grossprofit', 'valuation', 'purchase', 'expense', 'cashier', 'transactions', 'shift', 'piutang'].map((key) => (
             <button
               key={key}
               onClick={() => setTab(key as typeof tab)}
@@ -229,7 +238,7 @@ const Reports: React.FC = () => {
                   : 'text-vyapara-text hover:bg-vyapara-surface'
               }`}
             >
-              {key === 'sales' ? 'Penjualan Harian' : key === 'bestselling' ? 'Produk Terlaris' : key === 'slowmoving' ? 'Produk Lambat Gerak' : key === 'grossprofit' ? 'Laba Kotor' : key === 'valuation' ? 'Nilai Inventaris' : key === 'purchase' ? 'Pembelian' : key === 'expense' ? 'Pengeluaran' : key === 'cashier' ? 'Kinerja Kasir' : key === 'transactions' ? 'Transaksi' : 'Rekap Shift'}
+              {key === 'sales' ? 'Penjualan Harian' : key === 'bestselling' ? 'Produk Terlaris' : key === 'slowmoving' ? 'Produk Lambat Gerak' : key === 'grossprofit' ? 'Laba Kotor' : key === 'valuation' ? 'Nilai Inventaris' : key === 'purchase' ? 'Pembelian' : key === 'expense' ? 'Pengeluaran' : key === 'cashier' ? 'Kinerja Kasir' : key === 'transactions' ? 'Transaksi' : key === 'shift' ? 'Rekap Shift' : 'Piutang'}
             </button>
           ))}
         </div>
@@ -511,7 +520,7 @@ const Reports: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          ) : (
+          ) : tab === 'shift' ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead className="bg-vyapara-surface border-b border-vyapara-border text-[10px] uppercase tracking-wider text-vyapara-secondary">
@@ -549,6 +558,47 @@ const Reports: React.FC = () => {
                     </tr>
                   )}
                 </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-vyapara-surface border-b border-vyapara-border text-[10px] uppercase tracking-wider text-vyapara-secondary">
+                  <tr>
+                    <th className="px-4 py-3">Kode</th>
+                    <th className="px-4 py-3">Nama</th>
+                    <th className="px-4 py-3 text-right">Total Piutang</th>
+                    <th className="px-4 py-3 text-right">Hari Belum Bayar</th>
+                    <th className="px-4 py-3">Aging</th>
+                    <th className="px-4 py-3">Aktivitas Terakhir</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-vyapara-border text-xs">
+                  {receivables.map((row) => (
+                    <tr key={row.id} className="hover:bg-vyapara-surface/50">
+                      <td className="px-4 py-3 font-mono">{row.code}</td>
+                      <td className="px-4 py-3 font-medium">{row.name}</td>
+                      <td className="px-4 py-3 text-right font-bold text-vyapara-red">{row.balance.toLocaleString('id-ID')}</td>
+                      <td className="px-4 py-3 text-right">{row.daysOutstanding} hari</td>
+                      <td className="px-4 py-3"><span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${row.bucket === '0-30' ? 'bg-emerald-100 text-emerald-800' : row.bucket === '31-60' ? 'bg-amber-100 text-amber-800' : row.bucket === '61-90' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'}`}>{row.bucket}</span></td>
+                      <td className="px-4 py-3 text-vyapara-secondary">{row.lastActivity ? new Date(row.lastActivity).toLocaleDateString('id-ID') : '—'}</td>
+                    </tr>
+                  ))}
+                  {receivables.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-vyapara-secondary">Tidak ada piutang pelanggan</td>
+                    </tr>
+                  )}
+                </tbody>
+                {receivables.length > 0 && (
+                  <tfoot className="bg-vyapara-surface border-t-2 border-vyapara-border">
+                    <tr>
+                      <td colSpan={2} className="px-4 py-3 text-xs font-extrabold text-vyapara-navy">TOTAL ({receivables.length} pelanggan)</td>
+                      <td className="px-4 py-3 text-right text-xs font-extrabold text-vyapara-red">{receivables.reduce((sum, r) => sum + r.balance, 0).toLocaleString('id-ID')}</td>
+                      <td colSpan={3}></td>
+                    </tr>
+                  </tfoot>
+                )}
               </table>
             </div>
           )}

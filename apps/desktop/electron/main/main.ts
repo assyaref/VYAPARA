@@ -2377,6 +2377,21 @@ function createWindow() {
     }
   });
 
+  ipcMain.handle('report:receivables', async (_event: any, input: unknown) => {
+    try {
+      const { getReceivablesAging } = await import('./services/reports');
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const AppDb = getDb();
+      const appDb = AppDb;
+      const token = (input as any)?.token ?? '';
+      const user = requireUser(appDb, token);
+      assertPermission(user, 'reports:read');
+      return { ok: true, success: true, data: getReceivablesAging(appDb) };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
   // ===== Delivery Orders =====
 
   ipcMain.handle('deliveryOrder:get', async (_event: any, input: { token: string; transactionId: string }) => {

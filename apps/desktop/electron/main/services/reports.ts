@@ -549,3 +549,43 @@ export function getShiftRecap(db: AppDatabase, startDate?: string | number, endD
     };
   });
 }
+
+export type ReceivablesRow = {
+  id: string;
+  code: string;
+  name: string;
+  balance: number;
+  oldestSaleDate: number | null;
+  daysOutstanding: number;
+  bucket: '0-30' | '31-60' | '61-90' | '>90';
+  lastActivity: number | null;
+};
+
+export function getReceivablesAging(db: AppDatabase): ReceivablesRow[] {
+  const now = Date.now();
+  const rows = db.sqlite
+    .prepare(
+      `SELECT c.id, c.code, c.name, c.balance,
+              (SELECT MIN(transaction_date) FROM customer_transactions ct WHERE ct.customer_id = c.id AND ct.transaction_type = 'sale') AS oldest_sale,
+              (SELECT MAX(transaction_date) FROM customer_transactions ct WHERE ct.customer_id = c.id) AS last_activity
+       FROM customers c
+       WHERE c.balance > 0
+       ORDER BY c.balance DESC`,
+    )
+    .all() as any[];
+  return rows.map((r) => {
+    const oldestSale = r.oldest_sale ? Number(r.oldest_sale) : null;
+    const daysOutstanding = oldestSale ? Math.floor((now - oldestSale) / 86_400_000) : 0;
+    const bucket: ReceivablesRow['bucket'] = daysOutstanding <= 30 ? '0-30' : daysOutstanding <= 60 ? '31-60' : daysOutstanding <= 90 ? '61-90' : '>90';
+    return {
+      id: r.id,
+      code: r.code,
+      name: r.name,
+      balance: Math.round(r.balance),
+      oldestSaleDate: oldestSale,
+      daysOutstanding,
+      bucket,
+      lastActivity: r.last_activity ? Number(r.last_activity) : null,
+    };
+  });
+}
