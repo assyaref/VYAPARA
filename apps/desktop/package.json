@@ -71,7 +71,9 @@
     "nsis": {
       "oneClick": false,
       "perMachine": true,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true,
+      "include": "installer/uninstall-cleanup.nsh"
     },
     "publish": [
       {
