@@ -55,6 +55,7 @@ interface Window {
     dangerWipeSessions: (input: unknown) => Promise<any>;
     dangerWipeAdminUsers: (input: unknown) => Promise<any>;
     dangerFactoryReset: (input: unknown) => Promise<any>;
+    superadminCrud: (input: unknown) => Promise<any>;
     auditList: (input: unknown) => Promise<any>;
     onUpdateStatus: (callback: (status: any) => void) => (() => void);
     authNeedsSetup: () => Promise<any>;

@@ -49,6 +49,7 @@ const api = {
   dangerWipeSessions: (input: unknown) => send('danger:wipeSessions', input),
   dangerWipeAdminUsers: (input: unknown) => send('danger:wipeAdminUsers', input),
   dangerFactoryReset: (input: unknown) => send('danger:factoryReset', input),
+  superadminCrud: (input: unknown) => send('superadmin:crud', input),
 
   auditList: (input: unknown) => send('audit:list', input),
   onUpdateStatus: (callback: (status: unknown) => void) => {

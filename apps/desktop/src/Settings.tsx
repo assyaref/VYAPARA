@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import useAuth from './authStore';
+import SuperadminDataManager from './SuperadminDataManager';
 
 const vyapara = (window as any).vyapara;
 
@@ -13,8 +14,9 @@ const Settings: React.FC = () => {
   const userPermissions = user?.permissions ?? [];
   const canWrite = userPermissions.includes('settings:write');
   const canRead = userPermissions.includes('settings:read');
+  const isSuperadmin = (user as any)?.role === 'superadmin';
 
-  const [tab, setTab] = useState<'settings' | 'users' | 'roles' | 'permissions' | 'backup' | 'printer' | 'audit'>('settings');
+  const [tab, setTab] = useState<'settings' | 'users' | 'roles' | 'permissions' | 'backup' | 'printer' | 'audit' | 'superadmin'>('settings');
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [auditFilter, setAuditFilter] = useState('');
   const [auditLoading, setAuditLoading] = useState(false);
@@ -376,9 +378,21 @@ const Settings: React.FC = () => {
               Izin Akses
             </button>
           )}
+          {isSuperadmin && (
+            <button
+              onClick={() => setTab('superadmin')}
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+                tab === 'superadmin' ? 'bg-amber-500 text-white' : 'text-amber-700 hover:bg-amber-50'
+              }`}
+            >
+              Superadmin · Full CRUD
+            </button>
+          )}
         </div>
 
         <div className="p-6">
+          {tab === 'superadmin' && isSuperadmin && <SuperadminDataManager />}
+
           {tab === 'settings' && (
             <div className="max-w-lg">
               <div className="mb-6 p-4 rounded-xl border border-vyapara-border bg-vyapara-light-blue/40">

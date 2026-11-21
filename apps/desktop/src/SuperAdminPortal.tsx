@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import useAuth from './authStore';
 import { loadBranding, getBranding, logoSrc, FONT_OPTIONS } from './branding';
+import SuperadminDataManager from './SuperadminDataManager';
 
 const vyapara = (window as any).vyapara;
 const inputCls = 'w-full px-3 py-2 text-sm border border-vyapara-border rounded-lg outline-none focus:ring-2 focus:ring-vyapara-blue';
@@ -18,7 +19,7 @@ const SuperAdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const [tab, setTab] = useState<'branding' | 'danger'>('branding');
+  const [tab, setTab] = useState<'branding' | 'data' | 'danger'>('branding');
   const [branding, setBrandingState] = useState(getBranding());
   const [status, setStatus] = useState<{ type: 'ok' | 'err'; message: string } | null>(null);
 
@@ -222,7 +223,7 @@ const SuperAdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[100]" style={{ background: portalBg }}>
-      <div className="max-w-5xl mx-auto h-full flex flex-col p-6 text-white">
+      <div className={`${tab === 'data' ? 'max-w-[1400px]' : 'max-w-5xl'} mx-auto h-full flex flex-col p-6 text-white`}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF8F00] to-[#E65100] grid place-items-center font-black text-lg">S</div>
@@ -240,6 +241,7 @@ const SuperAdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         <div className="flex gap-2 mb-5">
           <button onClick={() => setTab('branding')} className={`px-5 py-2.5 text-xs font-extrabold uppercase tracking-widest rounded-full ${tab === 'branding' ? 'bg-[#FF8F00] text-[#1B1000]' : 'bg-white/10 text-white/70 hover:bg-white/15'}`}>Branding</button>
+          <button onClick={() => setTab('data')} className={`px-5 py-2.5 text-xs font-extrabold uppercase tracking-widest rounded-full ${tab === 'data' ? 'bg-[#FF8F00] text-[#1B1000]' : 'bg-white/10 text-white/70 hover:bg-white/15'}`}>Data Manager (CRUD)</button>
           <button onClick={() => setTab('danger')} className={`px-5 py-2.5 text-xs font-extrabold uppercase tracking-widest rounded-full ${tab === 'danger' ? 'bg-red-600 text-white' : 'bg-white/10 text-white/70 hover:bg-white/15'}`}>Danger Zone</button>
         </div>
 
@@ -381,6 +383,12 @@ const SuperAdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {tab === 'data' && (
+            <div className="rounded-2xl bg-[#F5F7FA] p-3">
+              <SuperadminDataManager />
             </div>
           )}
 

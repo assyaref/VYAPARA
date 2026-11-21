@@ -2202,6 +2202,60 @@ function createWindow() {
     }
   });
 
+  // ===== Superadmin full CRUD (Data Manager) =====
+  const SuperadminCrudSchema = z.discriminatedUnion('action', [
+    z.object({ action: z.literal('tables'), token: z.string() }),
+    z.object({
+      action: z.literal('list'), token: z.string(), table: z.string().min(1),
+      search: z.string().max(200).optional(), limit: z.number().int().optional(), offset: z.number().int().optional(),
+      orderBy: z.string().optional(), orderDir: z.enum(['asc', 'desc']).optional(),
+    }),
+    z.object({ action: z.literal('create'), token: z.string(), table: z.string().min(1), values: z.record(z.string(), z.unknown()) }),
+    z.object({ action: z.literal('update'), token: z.string(), table: z.string().min(1), rowid: z.number().int(), values: z.record(z.string(), z.unknown()) }),
+    z.object({ action: z.literal('delete'), token: z.string(), table: z.string().min(1), rowids: z.array(z.number().int()).min(1).max(500) }),
+  ]);
+
+  ipcMain.handle('superadmin:crud', async (_event: any, input: unknown) => {
+    try {
+      const parsed = SuperadminCrudSchema.parse(input);
+      const { requireUser } = await import('./services/auth');
+      const crud = await import('./services/superadmin-crud');
+      const appDb = getDb();
+      const user = requireUser(appDb, parsed.token);
+      if (user.role !== 'superadmin') {
+        return { ok: false, success: false, error: { code: 'FORBIDDEN', message: 'Hanya superadmin yang boleh mengakses Data Manager' } };
+      }
+      const audit = (action: string, table: string, detail: string) =>
+        logAudit(appDb, { userId: user.id, userName: user.name, action: `superadmin.crud.${action}`, entity: table, detail });
+      switch (parsed.action) {
+        case 'tables':
+          return { ok: true, success: true, data: crud.listCrudTables(appDb) };
+        case 'list':
+          return { ok: true, success: true, data: crud.listRows(appDb, parsed) };
+        case 'create': {
+          const row = crud.createRow(appDb, parsed);
+          audit('create', parsed.table, `rowid=${row.__rowid}`);
+          return { ok: true, success: true, data: row };
+        }
+        case 'update': {
+          const row = crud.updateRow(appDb, parsed, user.id);
+          audit('update', parsed.table, `rowid=${parsed.rowid} kolom=${Object.keys(parsed.values).join(',')}`);
+          return { ok: true, success: true, data: row };
+        }
+        case 'delete': {
+          const deleted = crud.deleteRows(appDb, parsed, user.id);
+          audit('delete', parsed.table, `${deleted} baris (rowid=${parsed.rowids.join(',')})`);
+          return { ok: true, success: true, data: { deleted } };
+        }
+      }
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Invalid input' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Terjadi kesalahan' } };
+    }
+  });
+
   // ===== Printer (thermal ESC/POS) =====
 
   ipcMain.handle('printer:getConfig', async (_event: any, input: { token: string }) => {
