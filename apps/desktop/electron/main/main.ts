@@ -1700,7 +1700,7 @@ function createWindow() {
       const appDb = getDb();
       const user = requireUser(appDb, parsed.token);
       assertPermission(user, 'settings:write');
-      const result = createUser(appDb, parsed);
+      const result = createUser(appDb, parsed, user.role);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -1720,7 +1720,7 @@ function createWindow() {
       const appDb = getDb();
       const user = requireUser(appDb, parsed.token);
       assertPermission(user, 'settings:write');
-      const result = updateUser(appDb, parsed);
+      const result = updateUser(appDb, parsed, user.role);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -1857,7 +1857,7 @@ function createWindow() {
       const appDb = getDb();
       const user = requireUser(appDb, parsed.token);
       assertPermission(user, 'settings:write');
-      const result = setRolePermissions(appDb, { roleId: parsed.roleId, permissions: parsed.permissions });
+      const result = setRolePermissions(appDb, { roleId: parsed.roleId, permissions: parsed.permissions }, user.role);
       return { ok: true, success: true, data: result };
     } catch (error: any) {
       if (error instanceof z.ZodError) {

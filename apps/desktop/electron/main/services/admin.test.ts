@@ -10,6 +10,7 @@ import {
   listRoles,
   listSettings,
   listUsers,
+  setRolePermissions,
   updateRole,
   updateUser,
   upsertSetting,
@@ -67,6 +68,27 @@ describe('admin - user management', () => {
         roleId: 'role-tidak-ada',
       }),
     ).toThrow(AppError);
+  });
+
+  it('reserves the superadmin role for superadmin account management', () => {
+    const db = createDb();
+    const superadminRole = createRole(db, { name: 'superadmin' });
+    const input = {
+      name: 'Superadmin Kedua',
+      email: 'superadmin2@vyapara.com',
+      password: 'rahasia123456',
+      roleId: superadminRole.id,
+    };
+
+    expect(() => createUser(db, input, 'admin')).toThrow(AppError);
+    expect(createUser(db, input, 'superadmin').roleName).toBe('superadmin');
+    const cashier = createUser(db, {
+      name: 'Kasir',
+      email: 'kasir@vyapara.com',
+      password: 'rahasia123456',
+      roleId: 'role-cashier',
+    });
+    expect(() => updateUser(db, { id: cashier.id, roleId: superadminRole.id }, 'admin')).toThrow(AppError);
   });
 
   it('lists users with filters', () => {
@@ -153,6 +175,23 @@ describe('admin - role management', () => {
     expect(() => deactivateRole(db, role.id)).not.toThrow();
     const stillThere = listRoles(db).find((r) => r.id === role.id);
     expect(stillThere).toBeDefined();
+  });
+
+  it('allows superadmin to customize admin permissions but protects superadmin permissions', () => {
+    const db = createDb();
+    const adminRole = listRoles(db).find((role) => role.name === 'admin')!;
+    const superadminRole = createRole(db, { name: 'superadmin' });
+
+    expect(() => setRolePermissions(db, { roleId: adminRole.id, permissions: ['product:read'] }, 'admin')).toThrow(AppError);
+    expect(setRolePermissions(db, { roleId: adminRole.id, permissions: ['product:read'] }, 'superadmin')).toEqual(['product:read']);
+    expect(() => setRolePermissions(db, { roleId: superadminRole.id, permissions: [] }, 'superadmin')).toThrow(AppError);
+  });
+
+  it('prevents renaming system roles', () => {
+    const db = createDb();
+    const adminRole = listRoles(db).find((role) => role.name === 'admin')!;
+
+    expect(() => updateRole(db, { id: adminRole.id, name: 'owner' })).toThrow(AppError);
   });
 });
 

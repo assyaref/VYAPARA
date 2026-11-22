@@ -1,3 +1,6 @@
+> **ADDENDUM 2026-11-22 — Role permissions and shared interaction polish.**
+> Settings now exposes a permission editor for each role, including administrator access (editable by superadmin only) and a read-only full-access superadmin role. Superadmin role assignment is restricted to superadmin accounts at the IPC service boundary. Shared keyboard focus and disabled-button affordances are applied across desktop screens. This change is covered by targeted service tests and local build checks.
+>
 > **ADDENDUM 2026-11-16 — Produk / Catalog / Retur Penjualan / Penyesuaian Stok: all E2E-verified.**
 > `evidence/e2e-mgmt-acceptance.cjs` exercises the full management journey on a fresh production-profile:
 > create product via form → create category & unit via UI → POS sale (stock 30→29) → Retur UI (stock restored 30)

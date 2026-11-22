@@ -147,7 +147,7 @@ interface Window {
     rolesDeactivate: (input: unknown) => Promise<any>;
     rolesGetPermissions: (input: unknown) => Promise<any>;
     rolesSetPermissions: (input: unknown) => Promise<any>;
-    permissionsGetAll: () => Promise<any>;
+    permissionsGetAll: (input?: unknown) => Promise<any>;
     getDeliveryOrder: (input: unknown) => Promise<any>;
     pickBackupSavePath: (input?: unknown) => Promise<any>;
     pickRestoreFile: (input?: unknown) => Promise<any>;

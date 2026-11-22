@@ -177,7 +177,7 @@ const api = {
   rolesDeactivate: (input: unknown) => send('roles:deactivate', input),
   rolesGetPermissions: (input: unknown) => send('roles:getPermissions', input),
   rolesSetPermissions: (input: unknown) => send('roles:setPermissions', input),
-  permissionsGetAll: () => send('permissions:getAll', {}),
+  permissionsGetAll: (input?: unknown) => send('permissions:getAll', input ?? {}),
 
   getDeliveryOrder: (input: unknown) => send('deliveryOrder:get', input),
   pickBackupSavePath: (input?: unknown) => send('dialog:pickSavePath', input ?? {}),

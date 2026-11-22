@@ -8,9 +8,21 @@ type Setting = { key: string; value: string; updatedAt: string };
 type AdminUser = { id: string; name: string; email: string; roleId: string | null; roleName: string | null; mustChangePassword: boolean; isActive: boolean; createdAt: string; updatedAt: string };
 type Role = { id: string; name: string; description: string | null; createdAt: string };
 type Permission = { id: string; name: string; description: string | null };
+const permissionGroupLabels: Record<string, string> = {
+  database: 'Database',
+  customer: 'Pelanggan',
+  finance: 'Keuangan',
+  inventory: 'Persediaan',
+  product: 'Produk',
+  procurement: 'Pembelian',
+  reports: 'Laporan',
+  settings: 'Pengaturan',
+  supplier: 'Pemasok',
+  transaction: 'Transaksi',
+};
 
 const Settings: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, checkSession } = useAuth();
   const userPermissions = user?.permissions ?? [];
   const canWrite = userPermissions.includes('settings:write');
   const canRead = userPermissions.includes('settings:read');
@@ -39,6 +51,11 @@ const Settings: React.FC = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
+  const [selectedRoleId, setSelectedRoleId] = useState('');
+  const [rolePermissions, setRolePermissions] = useState<string[]>([]);
+  const [rolePermissionsLoading, setRolePermissionsLoading] = useState(false);
+  const [rolePermissionsSaving, setRolePermissionsSaving] = useState(false);
+  const [roleStatus, setRoleStatus] = useState<{ type: 'ok' | 'err'; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [settingKey, setSettingKey] = useState('');
@@ -65,16 +82,18 @@ const Settings: React.FC = () => {
   }, [isAuthenticated]);
 
   const loadUsers = useCallback(async () => {
+    if (!canWrite) return;
     const result = await vyapara.usersGetAll({ token: '', limit: 500 });
     if (result.ok) setUsers(result.data);
     else setError(result.error.message);
-  }, []);
+  }, [canWrite]);
 
   const loadRoles = useCallback(async () => {
+    if (!canWrite) return;
     const result = await vyapara.rolesGetAll({ token: '', limit: 500 });
     if (result.ok) setRoles(result.data);
     else setError(result.error.message);
-  }, []);
+  }, [canWrite]);
 
   const loadAuditLogs = useCallback(async () => {
     setAuditLoading(true);
@@ -87,10 +106,11 @@ const Settings: React.FC = () => {
   }, []);
 
   const loadPermissions = useCallback(async () => {
+    if (!canWrite) return;
     const result = await vyapara.permissionsGetAll({ token: '' });
     if (result.ok) setPermissions(result.data);
     else setError(result.error.message);
-  }, []);
+  }, [canWrite]);
 
   useEffect(() => {
     loadSettings();
@@ -105,6 +125,42 @@ const Settings: React.FC = () => {
       if (res?.ok && res.data) setUpdateStatus(res.data);
     });
   }, [loadSettings, loadUsers, loadRoles, loadPermissions, loadAuditLogs]);
+
+  useEffect(() => {
+    if (roles.length === 0) {
+      setSelectedRoleId('');
+      return;
+    }
+    if (!roles.some((role) => role.id === selectedRoleId)) {
+      setSelectedRoleId(roles.find((role) => role.name !== 'superadmin')?.id ?? roles[0]!.id);
+    }
+  }, [roles, selectedRoleId]);
+
+  useEffect(() => {
+    if (!selectedRoleId) {
+      setRolePermissions([]);
+      return;
+    }
+    let active = true;
+    setRolePermissionsLoading(true);
+    setRoleStatus(null);
+    void vyapara.rolesGetPermissions({ token: '', id: selectedRoleId })
+      .then((result: any) => {
+        if (!active) return;
+        if (result?.ok && Array.isArray(result.data)) {
+          setRolePermissions(result.data);
+        } else {
+          setRoleStatus({ type: 'err', message: result?.error?.message ?? 'Gagal memuat izin peran' });
+        }
+      })
+      .catch((err: unknown) => {
+        if (active) setRoleStatus({ type: 'err', message: err instanceof Error ? err.message : 'Gagal memuat izin peran' });
+      })
+      .finally(() => {
+        if (active) setRolePermissionsLoading(false);
+      });
+    return () => { active = false; };
+  }, [selectedRoleId]);
 
   useEffect(() => {
     vyapara?.getPrinterConfig?.({ token: '' }).then((res: any) => {
@@ -170,12 +226,39 @@ const Settings: React.FC = () => {
       });
       if (result.ok) {
         setRoleForm({ name: '', description: '' });
+        if (result.data?.id) setSelectedRoleId(result.data.id);
         await loadRoles();
       } else {
         setError(result.error.message);
       }
     } catch (err: any) {
       setError(err.message || 'Gagal membuat peran');
+    }
+  };
+
+  const handleSaveRolePermissions = async () => {
+    if (!selectedRoleId) return;
+    setRolePermissionsSaving(true);
+    setRoleStatus(null);
+    try {
+      const result = await vyapara.rolesSetPermissions({
+        token: '',
+        roleId: selectedRoleId,
+        permissions: rolePermissions,
+      });
+      if (!result?.ok) {
+        setRoleStatus({ type: 'err', message: result?.error?.message ?? 'Gagal menyimpan izin peran' });
+        return;
+      }
+      setRolePermissions(Array.isArray(result.data) ? result.data : rolePermissions);
+      setRoleStatus({ type: 'ok', message: 'Izin peran berhasil disimpan.' });
+      if (roles.find((role) => role.id === selectedRoleId)?.name === user?.role) {
+        await checkSession();
+      }
+    } catch (err: unknown) {
+      setRoleStatus({ type: 'err', message: err instanceof Error ? err.message : 'Gagal menyimpan izin peran' });
+    } finally {
+      setRolePermissionsSaving(false);
     }
   };
 
@@ -294,6 +377,18 @@ const Settings: React.FC = () => {
       setRestoreBusy(false);
     }
   };
+
+  const selectedRole = roles.find((role) => role.id === selectedRoleId);
+  const canEditSelectedRole = Boolean(
+    selectedRole &&
+    selectedRole.name !== 'superadmin' &&
+    (selectedRole.name !== 'admin' || isSuperadmin),
+  );
+  const groupedPermissions = permissions.reduce<Record<string, Permission[]>>((groups, permission) => {
+    const group = permission.name.split(':')[0] ?? 'other';
+    (groups[group] ??= []).push(permission);
+    return groups;
+  }, {});
 
   return (
     <div className="min-h-screen bg-vyapara-surface text-vyapara-text font-inter">
@@ -691,7 +786,7 @@ const Settings: React.FC = () => {
                       className="w-full px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none"
                     >
                       <option value="">Pilih peran</option>
-                      {roles.map((r) => (
+                      {roles.filter((r) => isSuperadmin || r.name !== 'superadmin').map((r) => (
                         <option key={r.id} value={r.id}>{r.name}</option>
                       ))}
                     </select>
@@ -722,8 +817,10 @@ const Settings: React.FC = () => {
                         <td className="px-6 py-4 text-sm font-mono">{u.email}</td>
                         <td className="px-6 py-4 text-sm">{u.roleName || '-'}</td>
                         <td className="px-6 py-4 text-sm">
-                          <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                            Aktif
+                          <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                            u.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {u.isActive ? 'Aktif' : 'Nonaktif'}
                           </span>
                         </td>
                       </tr>
@@ -742,60 +839,160 @@ const Settings: React.FC = () => {
           )}
 
           {tab === 'roles' && canWrite && (
-            <div className="max-w-lg">
-              <h3 className="text-lg font-bold text-vyapara-navy mb-4">Manajemen Peran</h3>
-              <form onSubmit={handleCreateRole} className="space-y-4 mb-8">
+            <div className="space-y-6">
+              <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-vyapara-secondary mb-1">Nama Peran *</label>
+                  <h3 className="text-lg font-bold text-vyapara-navy">Role &amp; akses</h3>
+                  <p className="text-sm text-vyapara-secondary mt-1">Pilih role untuk mengatur izin tiap modul. Perubahan akses administrator berlaku pada login berikutnya.</p>
+                </div>
+                <form onSubmit={handleCreateRole} className="grid sm:grid-cols-[1fr_1.5fr_auto] gap-2 w-full xl:max-w-3xl">
                   <input
                     type="text"
                     value={roleForm.name}
                     onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
                     required
-                    className="w-full px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none"
+                    maxLength={50}
+                    aria-label="Nama role baru"
+                    placeholder="Nama role baru"
+                    className="w-full px-3 py-2 text-sm border border-vyapara-border rounded-lg bg-white focus:ring-2 focus:ring-vyapara-blue outline-none"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-vyapara-secondary mb-1">Deskripsi</label>
                   <input
                     type="text"
                     value={roleForm.description}
                     onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
-                    className="w-full px-4 py-2 border border-vyapara-border rounded-lg focus:ring-2 focus:ring-vyapara-blue outline-none"
+                    maxLength={200}
+                    aria-label="Deskripsi role baru"
+                    placeholder="Deskripsi (opsional)"
+                    className="w-full px-3 py-2 text-sm border border-vyapara-border rounded-lg bg-white focus:ring-2 focus:ring-vyapara-blue outline-none"
                   />
-                </div>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-vyapara-navy hover:bg-vyapara-blue text-white rounded-lg font-medium transition-colors"
-                >
-                  Buat Peran
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-vyapara-navy hover:bg-vyapara-blue text-white rounded-lg text-sm font-semibold transition-colors"
+                  >
+                    Tambah role
+                  </button>
+                </form>
+              </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-vyapara-surface border-b border-vyapara-border">
-                    <tr>
-                      <th className="px-6 py-3 text-sm font-medium text-vyapara-secondary">Nama</th>
-                      <th className="px-6 py-3 text-sm font-medium text-vyapara-secondary">Deskripsi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-vyapara-border">
-                    {roles.map((r) => (
-                      <tr key={r.id}>
-                        <td className="px-6 py-4 text-sm">{r.name}</td>
-                        <td className="px-6 py-4 text-sm">{r.description || '-'}</td>
-                      </tr>
-                    ))}
-                    {roles.length === 0 && (
-                      <tr>
-                        <td colSpan={2} className="px-6 py-8 text-center text-vyapara-secondary">
-                          Belum ada peran
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              {roleStatus && (
+                <div role="status" className={`rounded-lg border px-4 py-3 text-sm ${
+                  roleStatus.type === 'ok'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                    : 'bg-red-50 border-red-200 text-red-800'
+                }`}>
+                  {roleStatus.message}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 xl:grid-cols-[260px_minmax(0,1fr)] gap-5">
+                <section aria-label="Daftar role" className="space-y-2">
+                  {roles.map((role) => {
+                    const selected = role.id === selectedRoleId;
+                    const systemRole = role.name === 'admin' || role.name === 'superadmin';
+                    const label = role.name === 'admin' ? 'Administrator' : role.name === 'superadmin' ? 'Superadmin' : role.name;
+                    return (
+                      <button
+                        key={role.id}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setSelectedRoleId(role.id)}
+                        className={`w-full rounded-xl border p-4 text-left transition-colors ${
+                          selected
+                            ? 'border-vyapara-blue bg-vyapara-light-blue/50 ring-1 ring-vyapara-blue/20'
+                            : 'border-vyapara-border bg-white hover:bg-vyapara-surface'
+                        }`}
+                      >
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-vyapara-navy truncate">{label}</span>
+                          {systemRole && <span className="text-[10px] rounded-full bg-slate-100 text-slate-600 px-2 py-1">Sistem</span>}
+                        </span>
+                        <span className="mt-1 block text-xs text-vyapara-secondary line-clamp-2">{role.description || 'Role khusus'}</span>
+                        <span className="mt-3 block text-[11px] text-vyapara-secondary">
+                          {users.filter((userRow) => userRow.roleId === role.id).length} pengguna
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {roles.length === 0 && <p className="rounded-xl border border-dashed border-vyapara-border p-5 text-sm text-vyapara-secondary">Belum ada role.</p>}
+                </section>
+
+                <section className="min-w-0 rounded-xl border border-vyapara-border bg-white p-4 sm:p-5">
+                  {selectedRole ? (
+                    <>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 border-b border-vyapara-border pb-4">
+                        <div>
+                          <h4 className="font-bold text-vyapara-navy">
+                            Izin {selectedRole.name === 'admin' ? 'Administrator' : selectedRole.name === 'superadmin' ? 'Superadmin' : selectedRole.name}
+                          </h4>
+                          <p className="mt-1 text-xs text-vyapara-secondary">
+                            {selectedRole.name === 'superadmin'
+                              ? 'Role sistem ini selalu memiliki akses penuh dan tidak dapat diubah.'
+                              : selectedRole.name === 'admin' && !isSuperadmin
+                                ? 'Hanya superadmin yang dapat mengubah izin administrator.'
+                                : selectedRole.name === 'admin'
+                                  ? 'Atur akses administrator; perubahan akan digunakan pada sesi berikutnya.'
+                                  : 'Pilih tindakan yang dapat dilakukan oleh pengguna dengan role ini.'}
+                          </p>
+                        </div>
+                        {canEditSelectedRole && (
+                          <button
+                            type="button"
+                            onClick={() => void handleSaveRolePermissions()}
+                            disabled={rolePermissionsLoading || rolePermissionsSaving}
+                            className="shrink-0 rounded-lg bg-vyapara-navy px-4 py-2 text-sm font-semibold text-white hover:bg-vyapara-blue disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {rolePermissionsSaving ? 'Menyimpan…' : 'Simpan izin'}
+                          </button>
+                        )}
+                      </div>
+
+                      {rolePermissionsLoading ? (
+                        <p className="py-8 text-center text-sm text-vyapara-secondary">Memuat izin role…</p>
+                      ) : (
+                        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
+                          {Object.entries(groupedPermissions).map(([group, groupPermissions]) => (
+                            <fieldset key={group} className="rounded-lg border border-vyapara-border p-3">
+                              <legend className="px-1 text-sm font-semibold text-vyapara-navy">
+                                {permissionGroupLabels[group] ?? group}
+                              </legend>
+                              <div className="mt-1 space-y-1">
+                                {groupPermissions.map((permission) => {
+                                  const checked = rolePermissions.includes(permission.name);
+                                  return (
+                                    <label key={permission.name} className={`flex items-start gap-3 rounded-md px-2 py-2 text-sm ${
+                                      canEditSelectedRole ? 'cursor-pointer hover:bg-vyapara-surface' : 'cursor-not-allowed opacity-70'
+                                    }`}>
+                                      <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        disabled={!canEditSelectedRole}
+                                        onChange={() => setRolePermissions((current) =>
+                                          checked
+                                            ? current.filter((name) => name !== permission.name)
+                                            : [...current, permission.name],
+                                        )}
+                                        className="mt-0.5 h-4 w-4 accent-vyapara-blue"
+                                      />
+                                      <span className="min-w-0">
+                                        <span className="block font-medium text-vyapara-text">{permission.name}</span>
+                                        {permission.description && permission.description !== permission.name && (
+                                          <span className="block text-xs text-vyapara-secondary">{permission.description}</span>
+                                        )}
+                                      </span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </fieldset>
+                          ))}
+                          {permissions.length === 0 && <p className="text-sm text-vyapara-secondary">Daftar izin tidak tersedia.</p>}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="py-8 text-center text-sm text-vyapara-secondary">Pilih role untuk melihat izinnya.</p>
+                  )}
+                </section>
               </div>
             </div>
           )}

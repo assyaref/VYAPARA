@@ -103,6 +103,7 @@ export function listUsers(
 export function createUser(
   db: AppDatabase,
   input: { name: string; email: string; password: string; roleId: string },
+  actorRole?: string,
 ): AdminUserRecord {
   const existing = db.sqlite.prepare('SELECT id FROM users WHERE lower(email) = lower(?)').get(input.email.trim()) as { id: string } | undefined;
   if (existing) {
@@ -112,6 +113,9 @@ export function createUser(
   const role = db.sqlite.prepare('SELECT id, name FROM roles WHERE id = ?').get(input.roleId) as { id: string; name: string } | undefined;
   if (!role) {
     throw new AppError('NOT_FOUND', 'Peran tidak ditemukan');
+  }
+  if (role.name === 'superadmin' && actorRole !== 'superadmin') {
+    throw new AppError('FORBIDDEN', 'Hanya superadmin yang dapat menetapkan peran superadmin');
   }
 
   const now = new Date().toISOString();
@@ -139,6 +143,7 @@ export function createUser(
 export function updateUser(
   db: AppDatabase,
   input: { id: string; name?: string; email?: string; roleId?: string; isActive?: boolean },
+  actorRole?: string,
 ): AdminUserRecord {
   const existing = db.sqlite.prepare('SELECT id, name, email, role_id, must_change_password, is_active, created_at, updated_at FROM users WHERE id = ?').get(input.id) as UserRow | undefined;
   if (!existing) {
@@ -153,9 +158,12 @@ export function updateUser(
   }
 
   if (input.roleId !== undefined) {
-    const role = db.sqlite.prepare('SELECT id FROM roles WHERE id = ?').get(input.roleId) as { id: string } | undefined;
+    const role = db.sqlite.prepare('SELECT id, name FROM roles WHERE id = ?').get(input.roleId) as { id: string; name: string } | undefined;
     if (!role) {
       throw new AppError('NOT_FOUND', 'Peran tidak ditemukan');
+    }
+    if (role.name === 'superadmin' && actorRole !== 'superadmin') {
+      throw new AppError('FORBIDDEN', 'Hanya superadmin yang dapat menetapkan peran superadmin');
     }
   }
 
@@ -229,6 +237,13 @@ export function updateRole(db: AppDatabase, input: { id: string; name?: string; 
     throw new AppError('NOT_FOUND', 'Peran tidak ditemukan');
   }
   const name = input.name?.trim();
+  if (
+    name !== undefined &&
+    name.toLowerCase() !== existing.name.toLowerCase() &&
+    (existing.name === 'admin' || existing.name === 'superadmin')
+  ) {
+    throw new AppError('FORBIDDEN', 'Nama peran sistem tidak dapat diubah');
+  }
   if (name !== undefined && name.toLowerCase() !== existing.name.toLowerCase()) {
     const dup = db.sqlite.prepare('SELECT id FROM roles WHERE lower(name) = lower(?) AND id <> ?').get(name, existing.id) as { id: string } | undefined;
     if (dup) {
@@ -300,6 +315,7 @@ export function listRolePermissions(db: AppDatabase, roleId: string): string[] {
 export function setRolePermissions(
   db: AppDatabase,
   input: { roleId: string; permissions: string[] },
+  actorRole?: string,
 ): string[] {
   const role = db.sqlite.prepare('SELECT id, name FROM roles WHERE id = ?').get(input.roleId) as
     | { id: string; name: string }
@@ -307,8 +323,11 @@ export function setRolePermissions(
   if (!role) {
     throw new AppError('NOT_FOUND', 'Peran tidak ditemukan');
   }
-  if (role.name === 'admin') {
-    throw new AppError('VALIDATION', 'Izin peran admin tidak dapat diubah');
+  if (role.name === 'superadmin') {
+    throw new AppError('FORBIDDEN', 'Izin peran superadmin selalu penuh dan tidak dapat diubah');
+  }
+  if (role.name === 'admin' && actorRole !== 'superadmin') {
+    throw new AppError('FORBIDDEN', 'Hanya superadmin yang dapat mengubah izin peran administrator');
   }
   const unique = [...new Set(input.permissions)];
   const rows = db.sqlite
