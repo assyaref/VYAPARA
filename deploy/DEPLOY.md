@@ -126,3 +126,42 @@ Only then declare staging acceptance. Record results in `PHASE_12_STAGING_ACCEPT
 - Do **not** expose port 8787 publicly; nginx/TLS is the only intended entrypoint.
 - Auto-updates for the desktop POS are configured via GitHub releases (see RUNBOOK below) —
   the sync server does not deploy itself.
+
+## Automatic off-site backups (S3-compatible bucket)
+
+The sync server backs up its own SQLite database when these variables are set
+(on Railway, reference the Storage Bucket's variables):
+
+```
+BACKUP_S3_ENDPOINT=...            # e.g. https://t3.storageapi.dev
+BACKUP_S3_BUCKET=...
+BACKUP_S3_ACCESS_KEY_ID=...
+BACKUP_S3_SECRET_ACCESS_KEY=...
+BACKUP_S3_REGION=auto             # optional
+BACKUP_S3_URL_STYLE=virtual       # optional: virtual (default) or path
+BACKUP_INTERVAL_HOURS=24          # optional
+BACKUP_RETENTION_DAYS=14          # optional; the newest 3 are always kept
+BACKUP_PREFIX=vyapara-sync/       # optional
+```
+
+Each backup is an online SQLite snapshot, checked with `PRAGMA integrity_check`,
+gzipped and uploaded as `<prefix>sync-server-<timestamp>.db.gz`. The server checks
+every hour (and one minute after start) and backs up only when the newest object is
+older than the interval, so a host that sleeps still catches up on wake.
+
+Admin API (Bearer `SYNC_ADMIN_TOKEN`):
+
+- `GET  /admin/backups` — list backups, last success, last error
+- `POST /admin/backups/run` — run a backup now
+
+### Restore
+
+1. Download the chosen `.db.gz` from the bucket and unzip it: `gunzip sync-server-<ts>.db.gz`.
+2. Stop the sync server (or scale it to 0).
+3. Replace `/data/sync-server.db` with the restored file and delete any `sync-server.db-wal` / `-shm` next to it.
+4. Start the server and check `/v1/sync/health` and the `/admin` dashboard.
+
+Note: events that devices uploaded *after* the backup was taken are not on the
+restored server. Devices mark events as synced once acknowledged and do not re-send
+them, so those events stay only in each outlet's local SQLite. Keep the interval
+short enough for the data you can afford to re-enter or re-import.

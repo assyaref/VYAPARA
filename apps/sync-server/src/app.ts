@@ -19,6 +19,7 @@ import { adminOverview } from './services/admin.js';
 import { ADMIN_DASHBOARD_HTML } from './admin-dashboard.js';
 import { sha256Hex, safeEqualHex } from './services/crypto.js';
 import { createLicense, listLicenses, revokeLicense, activateLicense, verifyLicense } from './services/licenses.js';
+import type { BackupService } from './services/backup.js';
 
 function requireAdminToken(req: { headers: Record<string, unknown> }, cfg: SyncServerConfig): void {
   if (!cfg.adminToken) {
@@ -47,6 +48,7 @@ export type SyncServerConfig = {
   enrollmentSecret: string;
   tokenTtlHours?: number;
   adminToken?: string;
+  backup?: BackupService | null;
 };
 
 export async function handleRequest(
@@ -182,6 +184,24 @@ export async function handleRequest(
     if (method === 'POST' && url.pathname === '/v1/licenses/verify') {
       const body = (await readJsonBody(req)) as any;
       sendOk(res, verifyLicense(db, { licenseKey: body.licenseKey, deviceId: body.deviceId }));
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/admin/backups') {
+      requireAdminToken(req as any, cfg);
+      if (!cfg.backup) {
+        sendOk(res, { enabled: false, backups: [] });
+        return;
+      }
+      const backups = (await cfg.backup.list()).sort((a, b) => Date.parse(b.lastModified) - Date.parse(a.lastModified));
+      sendOk(res, { enabled: true, prefix: cfg.backup.prefix, ...cfg.backup.status(), backups });
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/admin/backups/run') {
+      requireAdminToken(req as any, cfg);
+      if (!cfg.backup) throw new HttpError(409, 'BACKUP_DISABLED', 'Backup belum dikonfigurasi (BACKUP_S3_* kosong)');
+      sendOk(res, await cfg.backup.runNow(), 201);
       return;
     }
 
