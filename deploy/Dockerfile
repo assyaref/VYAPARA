@@ -58,7 +58,8 @@ RUN apt-get update \
 COPY --from=build --chown=vyapara:vyapara /build/apps/sync-server/dist/server.mjs /opt/vyapara/server.mjs
 COPY --chown=vyapara:vyapara apps/sync-server/migrations /opt/vyapara/migrations
 
-VOLUME /data
+# /data is a mount point: docker-compose declares a named volume; on Railway attach a volume at /data.
+# (No VOLUME instruction: Railway rejects it in Dockerfiles.)
 EXPOSE 8787
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \

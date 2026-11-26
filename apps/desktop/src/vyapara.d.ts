@@ -19,6 +19,16 @@ export type SyncStatusSnapshot = {
   inProgress: boolean;
 };
 
+export type SyncConnection = {
+  enrolled: boolean;
+  apiBaseUrl: string | null;
+  organizationId: string | null;
+  tokenExpiresAt: string | null;
+  licenseServerUrl?: string | null;
+  licenseOrganizationId?: string | null;
+  licenseOrganizationName?: string | null;
+};
+
 // IPC global API declarations
 interface Window {
   vyapara: {
@@ -26,6 +36,8 @@ interface Window {
     getEnvironmentStatus: () => Promise<{ online: boolean }>;
     syncGetStatus: () => Promise<VyaparaIpcResult<SyncStatusSnapshot>>;
     syncTrigger: () => Promise<VyaparaIpcResult<SyncStatusSnapshot>>;
+    syncGetConnection: () => Promise<VyaparaIpcResult<SyncConnection>>;
+    syncEnroll: (input: { apiBaseUrl: string; enrollmentSecret: string; deviceName?: string }) => Promise<VyaparaIpcResult<SyncConnection>>;
     updateCheck: () => Promise<any>;
     updateDownload: () => Promise<any>;
     updateInstall: () => Promise<any>;

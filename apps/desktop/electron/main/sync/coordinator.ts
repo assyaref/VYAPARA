@@ -1,11 +1,11 @@
-﻿import type { AppDatabase } from '../db/open';
+import type { AppDatabase } from '../db/open';
 import { getOrCreateDeviceIdentity } from '../services/device-identity';
 import { DEFAULT_SYNC_CONFIG, computeBackoffMs, nowIso, safeErrorSummary, type SyncConfig, type SyncStatusSnapshot } from './types';
 import { loadSyncCredentials, saveSyncCredentials, isOnline, type SyncCredentials } from './credentials';
 import { recoverStaleSyncingOutbox, countOutbox, getSyncState, setSyncState } from './store';
 import { runUploadOnce } from './upload';
 import { runDownloadOnce } from './download';
-import { renewDeviceTokenTransport, SyncTransportError } from './transport';
+import { registerDeviceTransport, renewDeviceTokenTransport, SyncTransportError } from './transport';
 
 export type SyncCoordinator = {
   start: () => void;
@@ -13,7 +13,31 @@ export type SyncCoordinator = {
   trigger: (reason?: string) => Promise<SyncStatusSnapshot>;
   getStatus: () => SyncStatusSnapshot;
   setConfigOverride: (partial: Partial<Pick<SyncConfig, 'apiBaseUrl' | 'periodicIntervalMs'>>) => void;
+  /** Register this device on a sync server and store its token. The server may differ from the license server. */
+  enroll: (input: SyncEnrollInput) => Promise<SyncConnectionInfo>;
+  getConnection: () => SyncConnectionInfo;
 };
+
+export type SyncEnrollInput = {
+  apiBaseUrl: string;
+  enrollmentSecret: string;
+  organizationId: string;
+  deviceName?: string;
+};
+
+export type SyncConnectionInfo = {
+  enrolled: boolean;
+  apiBaseUrl: string | null;
+  organizationId: string | null;
+  tokenExpiresAt: string | null;
+};
+
+export function normalizeSyncBaseUrl(url: string): string {
+  let u = url.trim();
+  if (!u) return u;
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  return u.replace(/\/+$/, '');
+}
 
 export function createSyncCoordinator(args: { db: AppDatabase; cfg?: Partial<SyncConfig> }): SyncCoordinator {
   let cfg: SyncConfig = { ...DEFAULT_SYNC_CONFIG, ...(args.cfg ?? {}) };
@@ -196,6 +220,57 @@ export function createSyncCoordinator(args: { db: AppDatabase; cfg?: Partial<Syn
     setConfigOverride(partial) {
       cfg = { ...cfg, ...partial };
       if (!stopped) startPeriodic();
+    },
+    async enroll(input) {
+      const apiBaseUrl = normalizeSyncBaseUrl(input.apiBaseUrl);
+      if (!apiBaseUrl) throw Object.assign(new Error('URL server sync wajib diisi'), { code: 'VALIDATION' });
+      const identity = getOrCreateDeviceIdentity(args.db);
+      let res;
+      try {
+        res = await registerDeviceTransport({
+          baseUrl: apiBaseUrl,
+          timeoutMs: cfg.requestTimeoutMs,
+          request: {
+            deviceId: identity.deviceId,
+            organizationId: input.organizationId,
+            enrollmentSecret: input.enrollmentSecret,
+            deviceName: input.deviceName?.trim() || undefined,
+          },
+        });
+      } catch (e) {
+        if (e instanceof SyncTransportError) {
+          const msg = e.kind === 'unauthorized' ? 'Kode pendaftaran salah'
+            : e.kind === 'revoked' ? 'Perangkat ini sudah dicabut di server sync'
+            : e.kind === 'timeout' || e.kind === 'network' ? 'Server sync tidak bisa dihubungi'
+            : e.safeMessage;
+          throw Object.assign(new Error(msg), { code: e.code ?? 'SYNC_ENROLL_FAILED' });
+        }
+        throw e;
+      }
+      const saved = saveSyncCredentials({
+        apiBaseUrl,
+        deviceId: res.deviceId,
+        organizationId: res.organizationId,
+        deviceToken: res.deviceToken,
+        tokenExpiresAt: res.tokenExpiresAt,
+      });
+      if (!saved.ok) throw Object.assign(new Error('Penyimpanan aman tidak tersedia: ' + saved.reason), { code: 'SECURE_STORAGE' });
+      creds = loadSyncCredentials();
+      cfg = { ...cfg, apiBaseUrl };
+      backoffAttempt = 0;
+      retryAt = null;
+      snapshot = { ...snapshot, lastError: null };
+      if (!stopped) schedule(500);
+      return this.getConnection();
+    },
+    getConnection() {
+      const c = loadSyncCredentials();
+      return {
+        enrolled: !!c,
+        apiBaseUrl: c?.apiBaseUrl ?? null,
+        organizationId: c?.organizationId ?? null,
+        tokenExpiresAt: c?.tokenExpiresAt ?? null,
+      };
     },
   };
 }
