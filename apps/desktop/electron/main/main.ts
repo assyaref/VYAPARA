@@ -1912,6 +1912,56 @@ function createWindow() {
     }
   });
 
+  // Sync connection: the sync server may be a different host than the license server.
+  // The organization always comes from the activated license, so data stays bound to the licensed tenant.
+  ipcMain.handle('sync:getConnection', async (_event: any, input: { token: string }) => {
+    try {
+      const { requireUser } = await import('./services/auth');
+      const db = getDb();
+      requireUser(db, input?.token);
+      const coord = getSyncCoordinator() ?? initSyncCoordinator(db);
+      const license = getLicenseStatus(db);
+      return {
+        ok: true,
+        success: true,
+        data: {
+          ...coord.getConnection(),
+          licenseServerUrl: license.state === 'licensed' ? license.serverUrl || null : null,
+          licenseOrganizationId: license.state === 'licensed' ? license.organizationId : null,
+          licenseOrganizationName: license.state === 'licensed' ? license.organizationName : null,
+        },
+      };
+    } catch (error: any) {
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: 'Gagal membaca koneksi sinkronisasi' } };
+    }
+  });
+
+  ipcMain.handle('sync:enroll', async (_event: any, input: unknown) => {
+    try {
+      const { requireUser, assertPermission } = await import('./services/auth');
+      const db = getDb();
+      const user = requireUser(db, (input as any)?.token);
+      assertPermission(user, 'settings:write');
+      const parsed = z.object({
+        apiBaseUrl: z.string().trim().min(1, 'URL server sync wajib diisi').max(300),
+        enrollmentSecret: z.string().trim().min(16, 'Kode pendaftaran minimal 16 karakter').max(256),
+        deviceName: z.string().trim().max(120).optional(),
+      }).parse(input);
+      const license = getLicenseStatus(db);
+      if (license.state !== 'licensed' || !z.string().uuid().safeParse(license.organizationId).success) {
+        return { ok: false, success: false, error: { code: 'LICENSE_REQUIRED', message: 'Aktifkan lisensi terlebih dahulu sebelum menyambungkan sinkronisasi' } };
+      }
+      const coord = getSyncCoordinator() ?? initSyncCoordinator(db);
+      const data = await coord.enroll({ ...parsed, organizationId: license.organizationId });
+      return { ok: true, success: true, data };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return { ok: false, success: false, error: { code: 'VALIDATION', message: error.issues[0]?.message || 'Input tidak valid' } };
+      }
+      return { ok: false, success: false, error: { code: error.code || 'INTERNAL', message: error.message || 'Gagal menyambungkan sinkronisasi' } };
+    }
+  });
+
   // ===== Catalog (categories & units) =====
 
   ipcMain.handle('category:create', async (_event: any, input: { token: string; name: string; description?: string | null }) => {
